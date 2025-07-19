@@ -1026,10 +1026,9 @@ def analyze_sentiment(calls):
 @api_router.get("/health")
 async def health_check():
     """Health check endpoint - public access"""
-    """Health check endpoint"""
     try:
-        # Test database connection
-        await db.command("ping")
+        # Test database connection using synchronous client
+        client.admin.command("ping")
         return {
             "status": "healthy",
             "timestamp": datetime.utcnow(),
