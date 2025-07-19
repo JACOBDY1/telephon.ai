@@ -137,6 +137,8 @@ const App = () => {
       automations: 'Automations',
       callFlows: 'Call Flows',
       documents: 'Documents',
+      aiAnalytics: 'AI Analytics',
+      messaging: 'Messaging',
       search: 'Search...',
       activeCalls: 'Active Calls',
       recentCalls: 'Recent Calls',
