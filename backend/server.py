@@ -1592,7 +1592,7 @@ async def get_call_flows(current_user: User = Depends(get_current_active_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/callflows")
-async def save_call_flow(flow_data: Dict[str, Any]):
+async def save_call_flow(flow_data: Dict[str, Any], current_user: User = Depends(get_current_active_user)):
     """Save a call flow"""
     try:
         new_flow = {
