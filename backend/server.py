@@ -113,6 +113,60 @@ class SalesPlaybook(BaseModel):
     language: str = "he"
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+# Advanced AI Analytics Models
+class RealTimeAnalysis(BaseModel):
+    sentiment: str
+    confidence: float
+    keywords: List[str]
+    emotions: Dict[str, float]
+    suggestions: List[str]
+    risk_level: str
+
+class TranscriptionEntry(BaseModel):
+    speaker: str
+    text: str
+    timestamp: str
+    sentiment: str
+
+class MessageTemplate(BaseModel):
+    name: str
+    platform: str
+    category: str
+    content: str
+    variables: List[str]
+
+class Campaign(BaseModel):
+    name: str
+    platform: str
+    status: str
+    template: str
+    schedule: str
+    target_audience: List[str]
+
+class DocumentTemplate(BaseModel):
+    name: str
+    type: str
+    fields: List[Dict[str, Any]]
+    template: str
+
+class AutomationRule(BaseModel):
+    name: str
+    type: str
+    active: bool
+    conditions: List[str]
+    actions: List[str]
+    template: str
+
+# Existing models
+class CallData(BaseModel):
+    caller_name: str
+    caller_number: str
+    duration: str
+    status: str
+    sentiment: str = "neutral"
+    transcription: str = ""
+    ai_insights: List[str] = []
+
 # Mock Checkcall API integration functions
 async def get_checkcall_calls(user_id: str, from_date: str = None, to_date: str = None):
     """
