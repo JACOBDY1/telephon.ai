@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import axios from 'axios';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginPage from './components/LoginPage';
+import UserProfile from './components/UserProfile';
+import CRMManager from './components/CRMManager';
 
 // Import components
 import Sidebar from './components/Sidebar';
