@@ -572,14 +572,17 @@ async def get_status_checks():
 
 # Calls Management
 @api_router.post("/calls", response_model=CallRecord)
-async def create_call(call_data: CallRecordCreate):
+async def create_call(
+    call_data: CallRecordCreate,
+    current_user: User = Depends(get_current_active_user)
+):
     """Create a new call record"""
     call_dict = call_data.dict()
     call_dict["start_time"] = datetime.utcnow()
     call_obj = CallRecord(**call_dict)
     
     # Insert into database
-    await db.calls.insert_one(call_obj.dict())
+    await async_db.calls.insert_one(call_obj.dict())
     
     # Update contact statistics
     await update_contact_call_stats(call_obj.caller_number)
@@ -591,7 +594,8 @@ async def get_calls(
     limit: int = Query(50, ge=1, le=1000),
     skip: int = Query(0, ge=0),
     status: Optional[str] = Query(None),
-    language: Optional[str] = Query(None)
+    language: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_active_user)
 ):
     """Get calls with optional filtering"""
     query = {}
@@ -600,21 +604,27 @@ async def get_calls(
     if language:
         query["language"] = language
     
-    calls = await db.calls.find(query).skip(skip).limit(limit).sort("created_at", -1).to_list(limit)
+    calls = await async_db.calls.find(query).skip(skip).limit(limit).sort("created_at", -1).to_list(limit)
     return [CallRecord(**call) for call in calls]
 
 @api_router.get("/calls/{call_id}", response_model=CallRecord)
-async def get_call(call_id: str):
+async def get_call(
+    call_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
     """Get a specific call by ID"""
-    call = await db.calls.find_one({"id": call_id})
+    call = await async_db.calls.find_one({"id": call_id})
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
     return CallRecord(**call)
 
 @api_router.put("/calls/{call_id}/end")
-async def end_call(call_id: str):
+async def end_call(
+    call_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
     """End an active call"""
-    call = await db.calls.find_one({"id": call_id})
+    call = await async_db.calls.find_one({"id": call_id})
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
     
