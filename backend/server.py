@@ -273,6 +273,154 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="משתמש לא פעיל")
     return current_user
 
+# ===== CRM MODELS =====
+
+class Lead(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    phone: str
+    email: Optional[str] = None
+    company: Optional[str] = None
+    status: str = "new"  # new, contacted, qualified, lost, converted
+    source: str = "website"  # website, call, referral, marketing
+    assigned_to: Optional[str] = None  # user ID
+    notes: Optional[str] = None
+    tags: List[str] = []
+    estimated_value: Optional[float] = None
+    priority: str = "medium"  # low, medium, high
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: Optional[str] = None  # user ID
+
+class LeadCreate(BaseModel):
+    name: str
+    phone: str
+    email: Optional[str] = None
+    company: Optional[str] = None
+    source: str = "website"
+    notes: Optional[str] = None
+    tags: List[str] = []
+    estimated_value: Optional[float] = None
+    priority: str = "medium"
+
+class LeadUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    company: Optional[str] = None
+    status: Optional[str] = None
+    source: Optional[str] = None
+    assigned_to: Optional[str] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
+    estimated_value: Optional[float] = None
+    priority: Optional[str] = None
+
+class Deal(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    contact_id: Optional[str] = None
+    lead_id: Optional[str] = None
+    amount: float
+    currency: str = "ILS"
+    stage: str = "proposal"  # proposal, negotiation, closed_won, closed_lost
+    probability: int = 50  # 0-100
+    assigned_to: Optional[str] = None  # user ID
+    expected_close_date: Optional[datetime] = None
+    actual_close_date: Optional[datetime] = None
+    notes: Optional[str] = None
+    tags: List[str] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: Optional[str] = None  # user ID
+
+class DealCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    contact_id: Optional[str] = None
+    lead_id: Optional[str] = None
+    amount: float
+    currency: str = "ILS"
+    probability: int = 50
+    expected_close_date: Optional[datetime] = None
+    notes: Optional[str] = None
+    tags: List[str] = []
+
+class DealUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    contact_id: Optional[str] = None
+    amount: Optional[float] = None
+    currency: Optional[str] = None
+    stage: Optional[str] = None
+    probability: Optional[int] = None
+    assigned_to: Optional[str] = None
+    expected_close_date: Optional[datetime] = None
+    actual_close_date: Optional[datetime] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+class Task(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    type: str = "call"  # call, email, meeting, follow_up
+    status: str = "pending"  # pending, completed, cancelled
+    priority: str = "medium"  # low, medium, high
+    assigned_to: Optional[str] = None  # user ID
+    related_contact_id: Optional[str] = None
+    related_lead_id: Optional[str] = None
+    related_deal_id: Optional[str] = None
+    due_date: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: Optional[str] = None  # user ID
+
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    type: str = "call"
+    priority: str = "medium"
+    assigned_to: Optional[str] = None
+    related_contact_id: Optional[str] = None
+    related_lead_id: Optional[str] = None
+    related_deal_id: Optional[str] = None
+    due_date: Optional[datetime] = None
+    notes: Optional[str] = None
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    type: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    assigned_to: Optional[str] = None
+    related_contact_id: Optional[str] = None
+    related_lead_id: Optional[str] = None
+    related_deal_id: Optional[str] = None
+    due_date: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    notes: Optional[str] = None
+
+# Enhanced Contact and Call models
+class ContactUpdate(BaseModel):
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[str] = None
+    company: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+class CallRecordUpdate(BaseModel):
+    end_time: Optional[datetime] = None
+    duration: Optional[int] = None
+    status: Optional[str] = None
+    transcription: Optional[str] = None
+    sentiment: Optional[str] = None
+    recording_url: Optional[str] = None
+
 # Advanced AI Analytics Models
 class RealTimeAnalysis(BaseModel):
     sentiment: str
