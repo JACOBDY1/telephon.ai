@@ -718,7 +718,7 @@ async def get_contact(
 
 async def update_contact_call_stats(phone_number: str):
     """Update contact call statistics"""
-    await db.contacts.update_one(
+    await async_db.contacts.update_one(
         {"phone_number": phone_number},
         {
             "$set": {"last_call_date": datetime.utcnow()},
