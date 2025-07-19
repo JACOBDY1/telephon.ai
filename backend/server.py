@@ -1408,7 +1408,7 @@ async def get_campaigns(current_user: User = Depends(get_current_active_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/messaging/templates")
-async def get_message_templates():
+async def get_message_templates(current_user: User = Depends(get_current_active_user)):
     """Get all message templates"""
     try:
         templates = [
