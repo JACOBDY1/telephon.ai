@@ -1295,7 +1295,7 @@ async def get_realtime_analysis(current_user: User = Depends(get_current_active_
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/ai/transcription")
-async def get_transcription():
+async def get_transcription(current_user: User = Depends(get_current_active_user)):
     """Get real-time transcription entries"""
     try:
         # Simulate transcription entries
