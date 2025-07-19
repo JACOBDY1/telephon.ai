@@ -15,7 +15,12 @@ import AnalyticsView from './components/AnalyticsView';
 import SettingsView from './components/SettingsView';
 
 // Import additional components for advanced features
-import { Plus, Edit, Trash2, Play, BookOpen, FileText, CheckCircle, Clock, Zap, Target, Activity, Workflow } from 'lucide-react';
+import { 
+  Plus, Edit, Trash2, Play, BookOpen, FileText, CheckCircle, Clock, Zap, Target, Activity, Workflow,
+  Phone, PhoneCall, Search, RefreshCw, Bell, User, ChevronDown, Menu, X, BarChart3, Users2, 
+  UserCheck, TrendingUp, ShoppingCart, Settings, Mic, Volume2, Filter, BarChart, CheckSquare, 
+  DollarSign, UserX, MoreVertical, Bot, Star, Link, Wifi, WifiOff, AlertCircle
+} from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
