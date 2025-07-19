@@ -1654,6 +1654,8 @@ const App = () => {
       case 'automations': return <AutomationCenter darkMode={darkMode} t={t} />;
       case 'callFlows': return <CallFlowCanvas darkMode={darkMode} t={t} />;
       case 'documents': return <DocumentGenerator darkMode={darkMode} t={t} />;
+      case 'aiAnalytics': return <AIAnalytics darkMode={darkMode} t={t} currentCall={currentCall} isCallActive={isCallActive} />;
+      case 'messaging': return <MessagingCenter darkMode={darkMode} t={t} />;
       case 'settings': return <SettingsView />;
       default: return <Dashboard />;
     }
