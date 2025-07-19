@@ -243,6 +243,7 @@ const MainApp = () => {
       case 'messaging': return <MessagingCenter darkMode={darkMode} t={t} />;
       case 'webDialer': return <WebDialer darkMode={darkMode} t={t} />;
       case 'modules': return <ModuleManager darkMode={darkMode} t={t} />;
+      case 'subscription': return <SubscriptionManager />;
       case 'profile': return <UserProfile />;
       case 'settings': return <SettingsView />;
       default: return <Dashboard />;
