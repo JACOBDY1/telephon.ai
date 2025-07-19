@@ -1499,7 +1499,7 @@ async def generate_document(template_id: str, data: Dict[str, Any], current_user
 # ===== AUTOMATION CENTER ENDPOINTS =====
 
 @api_router.get("/automations/rules")
-async def get_automation_rules():
+async def get_automation_rules(current_user: User = Depends(get_current_active_user)):
     """Get all automation rules"""
     try:
         rules = [
