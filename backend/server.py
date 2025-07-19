@@ -20,6 +20,9 @@ from cryptography.fernet import Fernet
 from pymongo import MongoClient
 from bson import ObjectId
 import random
+import jwt
+from passlib.context import CryptContext
+from passlib.hash import bcrypt
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
