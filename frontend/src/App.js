@@ -146,6 +146,54 @@ const App = () => {
 
   const t = translations[language] || translations.en;
 
+  // Load mock data for advanced features
+  const loadAdvancedData = async () => {
+    // Mock CRM data
+    setCrmData({
+      leads: [
+        { id: 1, name: 'יוסי כהן', company: 'חברת טכנולוגיה', status: 'חם', value: 50000, source: 'אתר' },
+        { id: 2, name: 'Sarah Miller', company: 'Tech Corp', status: 'קר', value: 25000, source: 'Google Ads' },
+        { id: 3, name: 'Ahmed Hassan', company: 'Digital Solutions', status: 'חם', value: 75000, source: 'המלצה' }
+      ],
+      deals: [
+        { id: 1, name: 'עסקת תוכנה', client: 'יוסי כהן', value: 50000, stage: 'משא ומתן', probability: 75 },
+        { id: 2, name: 'Software License', client: 'Sarah Miller', value: 25000, stage: 'proposal', probability: 50 }
+      ],
+      tasks: [
+        { id: 1, title: 'התקשר ליוסי', due: '2024-01-20', priority: 'גבוה', status: 'pending' },
+        { id: 2, title: 'שלח הצעת מחיר', due: '2024-01-21', priority: 'בינוני', status: 'completed' }
+      ]
+    });
+
+    // Mock attendance data
+    setAttendanceData([
+      { id: 1, name: 'דנה לוי', status: 'present', checkIn: '08:30', department: 'מכירות' },
+      { id: 2, name: 'מיכל שמש', status: 'present', checkIn: '09:00', department: 'תמיכה' },
+      { id: 3, name: 'רון כהן', status: 'absent', checkIn: null, department: 'פיתוח' }
+    ]);
+
+    // Mock marketplace items
+    setMarketplaceItems([
+      { id: 1, name: 'CRM Integration Plugin', price: 299, category: 'plugins', rating: 4.8, installs: 1250 },
+      { id: 2, name: 'Advanced Analytics', price: 199, category: 'analytics', rating: 4.6, installs: 890 },
+      { id: 3, name: 'WhatsApp Automation', price: 149, category: 'automation', rating: 4.9, installs: 2100 }
+    ]);
+
+    // Mock learning modules
+    setLearningModules([
+      { id: 1, title: 'מדריך למתחילים', duration: '45 דקות', progress: 100, type: 'tutorial' },
+      { id: 2, title: 'שילוב APIs מתקדם', duration: '2 שעות', progress: 60, type: 'course' },
+      { id: 3, title: 'תיעוד מלא', duration: 'קריאה', progress: 0, type: 'documentation' }
+    ]);
+
+    // Mock automation rules
+    setAutomationRules([
+      { id: 1, name: 'SMS אוטומטי ללידים חדשים', active: true, triggers: 3 },
+      { id: 2, name: 'העברת שיחות לפי שעות', active: true, triggers: 15 },
+      { id: 3, name: 'דוח יומי למנהל', active: false, triggers: 0 }
+    ]);
+  };
+
   // Load real data from APIs
   const loadRealData = async () => {
     setLoading(true);
@@ -194,6 +242,9 @@ const App = () => {
       const callsResponse = await axios.get(`${API}/calls`);
       setRealCallData(callsResponse.data || []);
 
+      // Load advanced data
+      await loadAdvancedData();
+
     } catch (error) {
       console.error('Error loading data:', error);
       setConnectionStatus(prev => ({ ...prev, backend: 'disconnected' }));
@@ -239,6 +290,14 @@ const App = () => {
     }
   };
 
+  const openModal = (modalType, data = null) => {
+    setActiveModal({ type: modalType, data });
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+  };
+
   const Sidebar = () => (
     <div className={`${sidebarOpen ? 'w-64' : 'w-16'} ${darkMode ? 'bg-gray-900' : 'bg-white'} border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col`}>
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -267,21 +326,37 @@ const App = () => {
           {[
             { id: 'dashboard', icon: BarChart3, label: t.dashboard },
             { id: 'calls', icon: Phone, label: t.calls },
-            { id: 'contacts', icon: Users, label: t.contacts },
+            { id: 'crm', icon: Users2, label: t.crm, badge: crmData.leads.length },
+            { id: 'attendance', icon: UserCheck, label: t.attendance, badge: attendanceData.filter(a => a.status === 'present').length },
             { id: 'analytics', icon: TrendingUp, label: t.analytics },
+            { id: 'automations', icon: Workflow, label: t.automations, badge: automationRules.filter(r => r.active).length },
+            { id: 'marketplace', icon: ShoppingCart, label: t.marketplace, badge: 'NEW' },
+            { id: 'learning', icon: BookOpen, label: t.learning, badge: learningModules.length },
             { id: 'settings', icon: Settings, label: t.settings }
-          ].map(({ id, icon: Icon, label }) => (
+          ].map(({ id, icon: Icon, label, badge }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors relative ${
                 activeTab === id 
                   ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400' 
                   : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
               } ${!sidebarOpen && 'justify-center'}`}
             >
               <Icon className="w-5 h-5" />
-              {sidebarOpen && <span>{label}</span>}
+              {sidebarOpen && (
+                <>
+                  <span>{label}</span>
+                  {badge && (
+                    <span className={`ml-auto text-xs px-2 py-1 rounded-full ${
+                      badge === 'NEW' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                      'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                    }`}>
+                      {badge}
+                    </span>
+                  )}
+                </>
+              )}
             </button>
           ))}
         </div>
