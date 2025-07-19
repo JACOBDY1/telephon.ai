@@ -1643,7 +1643,6 @@ const App = () => {
       case 'crm': return <CRMView />;
       case 'attendance': return <AttendanceView />;
       case 'analytics': return <AnalyticsView />;
-      case 'automations': return <AutomationsView />;
       case 'marketplace': return <MarketplaceView />;
       case 'learning': return <LearningView />;
       case 'automations': return <AutomationCenter darkMode={darkMode} t={t} />;
