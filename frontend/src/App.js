@@ -242,6 +242,7 @@ const MainApp = () => {
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             notifications={notifications}
+            setNotifications={setNotifications}
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
           />
