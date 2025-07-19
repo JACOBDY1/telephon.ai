@@ -435,16 +435,194 @@ async def get_default_playbook():
     }
     return default_playbook
 
-# Mock external API integration endpoints
-@api_router.get("/integrations/checkcall/calls")
-async def get_checkcall_integration_calls(
-    user_id: str = Query(...),
-    from_date: Optional[str] = Query(None),
-    to_date: Optional[str] = Query(None)
-):
-    """Get calls from Checkcall API integration"""
-    calls = await get_checkcall_calls(user_id, from_date, to_date)
-    return {"status": "success", "data": calls}
+# Real API Integration Classes
+class CheckcallAPI:
+    """Real Checkcall API integration"""
+    
+    def __init__(self):
+        self.base_url = CHECKCALL_API_BASE
+        self.username = CHECKCALL_USERNAME
+        self.password = CHECKCALL_PASSWORD
+        self.user_id = CHECKCALL_USER_ID
+        
+    async def get_calls(self, from_date: str = None, to_date: str = None):
+        """Get calls from Checkcall API"""
+        try:
+            post_data = {
+                'uId': self.user_id,
+                'action': 'getCalls',
+                'fromDate': from_date or (datetime.now() - timedelta(days=30)).strftime('%d-%m-%Y'),
+                'toDate': to_date or datetime.now().strftime('%d-%m-%Y')
+            }
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    self.base_url,
+                    data=post_data,
+                    auth=(self.username, self.password),
+                    timeout=30.0
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    logger.info(f"Retrieved {len(data)} calls from Checkcall")
+                    return data
+                else:
+                    logger.error(f"Checkcall API error: {response.status_code}")
+                    return []
+                    
+        except Exception as e:
+            logger.error(f"Error getting calls from Checkcall: {e}")
+            return []
+    
+    async def download_record(self, call_id: str):
+        """Download call recording from Checkcall"""
+        try:
+            post_data = {
+                'uId': self.user_id,
+                'action': 'downloadRecord',
+                'callId': call_id
+            }
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    self.base_url,
+                    data=post_data,
+                    auth=(self.username, self.password),
+                    timeout=60.0
+                )
+                
+                if response.status_code == 200:
+                    return response.content
+                else:
+                    logger.error(f"Failed to download recording: {response.status_code}")
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"Error downloading recording: {e}")
+            return None
+    
+    async def get_transcription(self, call_id: str):
+        """Get transcription for a call"""
+        try:
+            post_data = {
+                'uId': self.user_id,
+                'action': 'getTranscription',
+                'callId': call_id
+            }
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    self.base_url,
+                    data=post_data,
+                    auth=(self.username, self.password),
+                    timeout=30.0
+                )
+                
+                if response.status_code == 200:
+                    return response.json()
+                else:
+                    logger.error(f"Failed to get transcription: {response.status_code}")
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"Error getting transcription: {e}")
+            return None
+
+class MasterPBXAPI:
+    """Real MasterPBX API integration"""
+    
+    def __init__(self):
+        self.base_url = MASTERPBX_URL
+        self.username = MASTERPBX_USERNAME
+        self.password = MASTERPBX_PASSWORD
+        self.session = None
+        self.token = None
+    
+    async def authenticate(self):
+        """Authenticate with MasterPBX"""
+        try:
+            async with httpx.AsyncClient() as client:
+                login_data = {
+                    'username': self.username,
+                    'password': self.password
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/index.php/site/login",
+                    data=login_data,
+                    timeout=30.0
+                )
+                
+                if response.status_code == 200:
+                    # Extract session cookies or token from response
+                    self.session = response.cookies
+                    logger.info("Successfully authenticated with MasterPBX")
+                    return True
+                else:
+                    logger.error(f"MasterPBX auth failed: {response.status_code}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"Error authenticating with MasterPBX: {e}")
+            return False
+    
+    async def get_call_log(self, start_date: str = None, end_date: str = None):
+        """Get call logs from MasterPBX"""
+        if not self.session:
+            await self.authenticate()
+        
+        try:
+            params = {}
+            if start_date:
+                params['startDate'] = start_date
+            if end_date:
+                params['endDate'] = end_date
+                
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    f"{self.base_url}/api/call-logs",
+                    params=params,
+                    cookies=self.session,
+                    timeout=30.0
+                )
+                
+                if response.status_code == 200:
+                    return response.json()
+                else:
+                    logger.error(f"MasterPBX call log error: {response.status_code}")
+                    return []
+                    
+        except Exception as e:
+            logger.error(f"Error getting call logs from MasterPBX: {e}")
+            return []
+    
+    async def get_active_calls(self):
+        """Get active calls from MasterPBX"""
+        if not self.session:
+            await self.authenticate()
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    f"{self.base_url}/api/active-calls",
+                    cookies=self.session,
+                    timeout=10.0
+                )
+                
+                if response.status_code == 200:
+                    return response.json()
+                else:
+                    logger.error(f"MasterPBX active calls error: {response.status_code}")
+                    return []
+                    
+        except Exception as e:
+            logger.error(f"Error getting active calls: {e}")
+            return []
+
+# Initialize API clients
+checkcall_api = CheckcallAPI()
+masterpbx_api = MasterPBXAPI()
 
 @api_router.get("/integrations/masterpbx/calllog")
 async def get_masterpbx_integration_calllog(
