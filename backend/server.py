@@ -47,13 +47,17 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
-# MongoDB connection for users
+# MongoDB connection for users (sync for authentication)
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME = os.getenv("DB_NAME", "test_database")
 client = MongoClient(MONGO_URL)
 db = client[DB_NAME]
 users_collection = db.users
 sessions_collection = db.sessions
+
+# MongoDB async client for API operations
+async_client = AsyncIOMotorClient(MONGO_URL)
+async_db = async_client[DB_NAME]
 
 # Create the main app without a prefix
 app = FastAPI(title="AI Telephony Platform", version="1.0.0")
