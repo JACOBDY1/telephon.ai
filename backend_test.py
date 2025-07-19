@@ -697,38 +697,53 @@ class APITester:
     
     def run_all_tests(self):
         """Run all tests"""
-        print("=" * 60)
-        print("BACKEND API INTEGRATION TESTS")
-        print("=" * 60)
+        print("=" * 80)
+        print("BACKEND API COMPREHENSIVE TESTS")
+        print("Authentication System + API Integrations")
+        print("=" * 80)
         print(f"Testing backend at: {BACKEND_URL}")
         print(f"Test started at: {datetime.now().isoformat()}")
         print()
         
         # Run tests in order of importance
-        tests = [
-            self.test_health_check,
-            self.test_basic_api_endpoints,
-            self.test_checkcall_integration,
-            self.test_checkcall_with_date_params,
-            self.test_masterpbx_calllog,
-            self.test_masterpbx_active_calls,
-            self.test_webhook_endpoint,
-            self.test_webhook_call_ended,
-            self.test_realtime_analytics,
-            self.test_error_handling
+        # Authentication tests first (high priority)
+        auth_tests = [
+            ("AUTHENTICATION SYSTEM TESTS", [
+                self.test_demo_data_creation,
+                self.test_user_registration,
+                self.test_user_login,
+                self.test_jwt_token_validation,
+                self.test_protected_endpoints,
+                self.test_profile_update,
+                self.test_password_change
+            ]),
+            ("API INTEGRATION TESTS", [
+                self.test_health_check,
+                self.test_basic_api_endpoints,
+                self.test_checkcall_integration,
+                self.test_checkcall_with_date_params,
+                self.test_masterpbx_calllog,
+                self.test_masterpbx_active_calls,
+                self.test_webhook_endpoint,
+                self.test_webhook_call_ended,
+                self.test_realtime_analytics,
+                self.test_error_handling
+            ])
         ]
         
-        for test in tests:
-            try:
-                test()
-            except Exception as e:
-                self.log_result(test.__name__, False, f"Test execution failed: {str(e)}")
-            print()  # Add spacing between tests
+        for section_name, tests in auth_tests:
+            print(f"\n{'='*20} {section_name} {'='*20}")
+            for test in tests:
+                try:
+                    test()
+                except Exception as e:
+                    self.log_result(test.__name__, False, f"Test execution failed: {str(e)}")
+                print()  # Add spacing between tests
         
         # Summary
-        print("=" * 60)
-        print("TEST SUMMARY")
-        print("=" * 60)
+        print("=" * 80)
+        print("COMPREHENSIVE TEST SUMMARY")
+        print("=" * 80)
         
         passed = sum(1 for r in self.results if r["success"])
         total = len(self.results)
@@ -738,12 +753,32 @@ class APITester:
         print(f"Failed: {total - passed}")
         print(f"Success Rate: {(passed/total)*100:.1f}%")
         
-        print("\nFailed Tests:")
-        for result in self.results:
-            if not result["success"]:
-                print(f"  ❌ {result['test']}: {result['message']}")
+        # Categorize results
+        auth_results = [r for r in self.results if any(keyword in r["test"].lower() 
+                       for keyword in ["auth", "login", "register", "jwt", "protected", "profile", "password", "demo"])]
+        api_results = [r for r in self.results if r not in auth_results]
         
-        print("\nPassed Tests:")
+        print(f"\nAuthentication Tests: {len(auth_results)} total")
+        auth_passed = sum(1 for r in auth_results if r["success"])
+        print(f"  Passed: {auth_passed}, Failed: {len(auth_results) - auth_passed}")
+        
+        print(f"\nAPI Integration Tests: {len(api_results)} total")
+        api_passed = sum(1 for r in api_results if r["success"])
+        print(f"  Passed: {api_passed}, Failed: {len(api_results) - api_passed}")
+        
+        print("\n" + "="*40)
+        print("FAILED TESTS:")
+        print("="*40)
+        failed_tests = [r for r in self.results if not r["success"]]
+        if failed_tests:
+            for result in failed_tests:
+                print(f"  ❌ {result['test']}: {result['message']}")
+        else:
+            print("  🎉 No failed tests!")
+        
+        print("\n" + "="*40)
+        print("PASSED TESTS:")
+        print("="*40)
         for result in self.results:
             if result["success"]:
                 print(f"  ✅ {result['test']}: {result['message']}")
