@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import axios from 'axios';
-import { Phone, Video, MessageSquare, Users, BarChart3, Settings, Search, Bell, User, ChevronDown, Play, Pause, Volume2, VolumeX, Menu, X, Calendar, Mail, PhoneCall, TrendingUp, Clock, Globe, Mic, MicOff, Camera, CameraOff, Share, Download, RefreshCw, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { 
+  Phone, Video, MessageSquare, Users, BarChart3, Settings, Search, Bell, User, ChevronDown, 
+  Play, Pause, Volume2, VolumeX, Menu, X, Calendar, Mail, PhoneCall, TrendingUp, Clock, 
+  Globe, Mic, MicOff, Camera, CameraOff, Share, Download, RefreshCw, CheckCircle, XCircle, 
+  AlertCircle, Plus, Edit, Trash2, Filter, Star, BookOpen, ShoppingCart, Headphones,
+  Users2, UserCheck, UserX, MapPin, Building, DollarSign, Target, Tag, FileText, 
+  Activity, Workflow, PieChart, LineChart, BarChart, Zap, Bot, Brain, Lightbulb,
+  MousePointer2, Eye, EyeOff, Lock, Unlock, Shield, Key, Database, Cloud, Server,
+  Smartphone, Tablet, Monitor, Laptop, Watch, Headset, Printer, Router, Wifi,
+  MessageCircle, Send, Paperclip, Image, Video as VideoIcon, Music, File, Archive,
+  Copy, Move, Link, Share2, Export, Import, Save, FolderOpen, Folder, Home, ArrowRight,
+  ChevronLeft, ChevronRight, ChevronUp, MoreHorizontal, MoreVertical, Info, Help,
+  AlertTriangle, CheckSquare, Square, Circle, Diamond, Heart, Bookmark, Flag
+} from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -25,6 +38,21 @@ const App = () => {
     backend: 'checking'
   });
 
+  // Advanced State Management
+  const [crmData, setCrmData] = useState({
+    leads: [],
+    contacts: [],
+    deals: [],
+    tasks: []
+  });
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [marketplaceItems, setMarketplaceItems] = useState([]);
+  const [automationRules, setAutomationRules] = useState([]);
+  const [learningModules, setLearningModules] = useState([]);
+  const [activeModal, setActiveModal] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [notifications, setNotifications] = useState([]);
+
   const languages = {
     he: { name: 'עברית', flag: '🇮🇱' },
     en: { name: 'English', flag: '🇺🇸' },
@@ -42,6 +70,11 @@ const App = () => {
       contacts: 'אנשי קשר',
       analytics: 'אנליטיקס',
       settings: 'הגדרות',
+      crm: 'CRM',
+      attendance: 'נוכחות עובדים',
+      marketplace: 'מרקטפלייס',
+      learning: 'למידה',
+      automations: 'אוטומציות',
       search: 'חיפוש...',
       activeCalls: 'שיחות פעילות',
       recentCalls: 'שיחות אחרונות',
@@ -55,14 +88,32 @@ const App = () => {
       loading: 'טוען...',
       connected: 'מחובר',
       disconnected: 'מנותק',
-      checking: 'בודק...'
+      checking: 'בודק...',
+      leads: 'לידים',
+      deals: 'עסקאות',
+      tasks: 'משימות',
+      newLead: 'ליד חדש',
+      newDeal: 'עסקה חדשה',
+      clockIn: 'כניסה',
+      clockOut: 'יציאה',
+      present: 'נוכח',
+      absent: 'נעדר',
+      plugins: 'פלאגינים',
+      courses: 'קורסים',
+      documentation: 'תיעוד',
+      tutorials: 'מדריכים'
     },
     en: {
       dashboard: 'Dashboard',
       calls: 'Calls',
       contacts: 'Contacts',
-      analytics: 'Analytics',
+      analytics: 'Analytics', 
       settings: 'Settings',
+      crm: 'CRM',
+      attendance: 'Attendance',
+      marketplace: 'Marketplace',
+      learning: 'Learning',
+      automations: 'Automations',
       search: 'Search...',
       activeCalls: 'Active Calls',
       recentCalls: 'Recent Calls',
@@ -76,7 +127,20 @@ const App = () => {
       loading: 'Loading...',
       connected: 'Connected',
       disconnected: 'Disconnected',
-      checking: 'Checking...'
+      checking: 'Checking...',
+      leads: 'Leads',
+      deals: 'Deals',
+      tasks: 'Tasks',
+      newLead: 'New Lead',
+      newDeal: 'New Deal',
+      clockIn: 'Clock In',
+      clockOut: 'Clock Out',
+      present: 'Present',
+      absent: 'Absent',
+      plugins: 'Plugins',
+      courses: 'Courses',
+      documentation: 'Documentation',
+      tutorials: 'Tutorials'
     }
   };
 
