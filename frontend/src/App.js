@@ -98,6 +98,8 @@ const App = () => {
       documents: 'מחולל מסמכים',
       aiAnalytics: 'ניתוח AI',
       messaging: 'מרכז הודעות',
+      webDialer: 'חייגן Web',
+      modules: 'מנהל מודולים',
       search: 'חיפוש...',
       activeCalls: 'שיחות פעילות',
       recentCalls: 'שיחות אחרונות',
