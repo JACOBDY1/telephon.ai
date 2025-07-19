@@ -659,19 +659,19 @@ class APITester:
             else:
                 self.log_result("Basic API Root", False, f"API root failed with status {response.status_code}")
             
-            # Test calls endpoint
+            # Test calls endpoint (should require auth - 401 is correct)
             response = self.session.get(f"{BACKEND_URL}/calls")
-            if response.status_code == 200:
-                self.log_result("Calls Endpoint", True, "Calls endpoint accessible")
+            if response.status_code == 401:
+                self.log_result("Calls Endpoint", True, "Calls endpoint properly requires authentication")
             else:
-                self.log_result("Calls Endpoint", False, f"Calls endpoint failed with status {response.status_code}")
+                self.log_result("Calls Endpoint", False, f"Calls endpoint should require auth, got {response.status_code}")
             
-            # Test contacts endpoint
+            # Test contacts endpoint (should require auth - 401 is correct)
             response = self.session.get(f"{BACKEND_URL}/contacts")
-            if response.status_code == 200:
-                self.log_result("Contacts Endpoint", True, "Contacts endpoint accessible")
+            if response.status_code == 401:
+                self.log_result("Contacts Endpoint", True, "Contacts endpoint properly requires authentication")
             else:
-                self.log_result("Contacts Endpoint", False, f"Contacts endpoint failed with status {response.status_code}")
+                self.log_result("Contacts Endpoint", False, f"Contacts endpoint should require auth, got {response.status_code}")
                 
         except Exception as e:
             self.log_result("Basic API Endpoints", False, f"Basic API test failed: {str(e)}")
