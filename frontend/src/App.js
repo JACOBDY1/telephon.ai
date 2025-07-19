@@ -772,21 +772,42 @@ const App = () => {
                 <span className="text-sm text-gray-700 dark:text-gray-300">מצב לילה</span>
               </label>
             </div>
+
+            <div className="mt-4">
+              <button 
+                onClick={loadRealData}
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg disabled:opacity-50"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    {t.loading}
+                  </div>
+                ) : (
+                  'רענן את כל הנתונים'
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
         <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">הגדרות AI</h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">הגדרות API</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">רגישות ניתוח רגשות</label>
-              <input 
-                type="range" 
-                min="1" 
-                max="10" 
-                defaultValue="7"
-                className="w-full"
-              />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">מצב עדכון אוטומטי</label>
+              <div className="flex items-center">
+                <input type="checkbox" defaultChecked className="mr-2" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">עדכון כל 30 שניות</span>
+              </div>
+            </div>
+            
+            <div>
+              <label className="flex items-center">
+                <input type="checkbox" defaultChecked className="mr-2" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">התראות על שיחות חדשות</span>
+              </label>
             </div>
             
             <div>
@@ -795,41 +816,99 @@ const App = () => {
                 <span className="text-sm text-gray-700 dark:text-gray-300">תמלול אוטומטי</span>
               </label>
             </div>
-            
-            <div>
-              <label className="flex items-center">
-                <input type="checkbox" defaultChecked className="mr-2" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">הצעות בזמן אמת</span>
-              </label>
-            </div>
           </div>
         </div>
 
         <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">חיבורים</h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">מצב חיבורים</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <span className="text-sm text-gray-700 dark:text-gray-300">Checkcall API</span>
-              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">מחובר</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Checkcall API</span>
+                <span className="text-xs text-gray-500">office@day-1.co.il</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                {getStatusIcon(connectionStatus.checkcall)}
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  connectionStatus.checkcall === 'connected' 
+                    ? 'bg-green-100 text-green-800' 
+                    : connectionStatus.checkcall === 'disconnected'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {connectionStatus.checkcall === 'connected' ? t.connected : 
+                   connectionStatus.checkcall === 'disconnected' ? t.disconnected : t.checking}
+                </span>
+              </div>
             </div>
             
             <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <span className="text-sm text-gray-700 dark:text-gray-300">MasterPBX</span>
-              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">מחובר</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700 dark:text-gray-300">MasterPBX</span>
+                <span className="text-xs text-gray-500">day1@woopress.ippbx</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                {getStatusIcon(connectionStatus.masterpbx)}
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  connectionStatus.masterpbx === 'connected' 
+                    ? 'bg-green-100 text-green-800' 
+                    : connectionStatus.masterpbx === 'disconnected'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {connectionStatus.masterpbx === 'connected' ? t.connected : 
+                   connectionStatus.masterpbx === 'disconnected' ? t.disconnected : t.checking}
+                </span>
+              </div>
             </div>
             
             <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <span className="text-sm text-gray-700 dark:text-gray-300">WhatsApp Business</span>
-              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">בהמתנה</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <span className="text-sm text-gray-700 dark:text-gray-300">Google Workspace</span>
-              <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">לא מחובר</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Backend Server</span>
+                <span className="text-xs text-gray-500">FastAPI</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                {getStatusIcon(connectionStatus.backend)}
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  connectionStatus.backend === 'connected' 
+                    ? 'bg-green-100 text-green-800' 
+                    : connectionStatus.backend === 'disconnected'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {connectionStatus.backend === 'connected' ? t.connected : 
+                   connectionStatus.backend === 'disconnected' ? t.disconnected : t.checking}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Real-time Analytics Summary */}
+      {realtimeAnalytics && (
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 mt-8`}>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">סיכום נתונים בזמן אמת</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <p className="text-2xl font-bold text-blue-600">{realtimeAnalytics.total_calls_today}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">שיחות היום</p>
+            </div>
+            <div className="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <p className="text-2xl font-bold text-green-600">{realtimeAnalytics.active_calls}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">שיחות פעילות</p>
+            </div>
+            <div className="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <p className="text-2xl font-bold text-purple-600">{realtimeAnalytics.checkcall_data.total_calls}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">סה״כ Checkcall</p>
+            </div>
+            <div className="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <p className="text-2xl font-bold text-orange-600">{new Date(realtimeAnalytics.timestamp).toLocaleTimeString('he-IL')}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">עדכון אחרון</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
