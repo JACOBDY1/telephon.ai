@@ -20,6 +20,8 @@ import CallFlowCanvas from './components/CallFlowCanvas';
 import DocumentGenerator from './components/DocumentGenerator';
 import AIAnalytics from './components/AIAnalytics';
 import MessagingCenter from './components/MessagingCenter';
+import WebDialer from './components/WebDialer';
+import ModuleManager from './components/ModuleManager';
 
 // Import additional components for advanced features
 import { 
