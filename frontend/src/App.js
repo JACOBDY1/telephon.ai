@@ -159,10 +159,71 @@ const MainApp = () => {
   const setupNotifications = () => {
     // Mock notifications - in real app this would come from WebSocket or API
     setNotifications([
-      { id: 1, title: 'ליד חדש התקבל', message: 'יואב כהן מעוניין במערכת', time: '5 דקות', read: false },
-      { id: 2, title: 'עסקה נסגרה', message: 'עסקה עם דוד אברמוביץ הושלמה', time: '1 שעה', read: true },
-      { id: 3, title: 'משימה דחופה', message: 'התקשרות לרחל מזרחי עד 17:00', time: '2 שעות', read: false }
+      { 
+        id: 1, 
+        title: 'ליד חדש התקבל', 
+        message: 'יואב כהן מעוניין במערכת טלפוניה מתקדמת לחברתו', 
+        time: '5 דקות', 
+        read: false,
+        type: 'info'
+      },
+      { 
+        id: 2, 
+        title: 'עסקה נסגרה בהצלחה', 
+        message: 'עסקה עם דוד אברמוביץ הושלמה בסכום של ₪18,000', 
+        time: '1 שעה', 
+        read: true,
+        type: 'success'
+      },
+      { 
+        id: 3, 
+        title: 'משימה דחופה', 
+        message: 'התקשרות לרחל מזרחי עד 17:00 - עדיפות גבוהה', 
+        time: '2 שעות', 
+        read: false,
+        type: 'warning'
+      },
+      { 
+        id: 4, 
+        title: 'שיחה החמיצה', 
+        message: 'שיחה לא נענתה מ+972-50-123-4567 - יש לחזור', 
+        time: '30 דקות', 
+        read: false,
+        type: 'warning'
+      },
+      { 
+        id: 5, 
+        title: 'דוח חודשי מוכן', 
+        message: 'דוח הפעילות החודשי זמין לצפייה והורדה', 
+        time: '3 שעות', 
+        read: true,
+        type: 'info'
+      }
     ]);
+
+    // Simulate real-time notifications
+    const interval = setInterval(() => {
+      const randomNotifications = [
+        { title: 'ליד חדש', message: 'לקוח פוטנציאלי נרשם לניוזלטר', type: 'info' },
+        { title: 'שיחה הסתיימה', message: 'שיחה בת 12 דקות הסתיימה', type: 'success' },
+        { title: 'מערכת מעודכנת', message: 'עדכון אבטחה הותקן בהצלחה', type: 'success' },
+        { title: 'תזכורת', message: 'פגישה מתקרבת עם צוות המכירות', type: 'warning' }
+      ];
+
+      const randomNotification = randomNotifications[Math.floor(Math.random() * randomNotifications.length)];
+      
+      setNotifications(prev => [{
+        id: Date.now(),
+        title: randomNotification.title,
+        message: randomNotification.message,
+        time: 'כעת',
+        read: false,
+        type: randomNotification.type
+      }, ...prev.slice(0, 9)]); // Keep only last 10 notifications
+
+    }, 30000); // New notification every 30 seconds
+
+    return () => clearInterval(interval);
   };
 
   const renderActiveTab = () => {
