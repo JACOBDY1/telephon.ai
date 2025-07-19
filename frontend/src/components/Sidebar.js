@@ -63,6 +63,7 @@ const Sidebar = ({
             { id: 'modules', icon: Puzzle, label: t.modules, badge: 'חדש' },
             { id: 'marketplace', icon: ShoppingCart, label: t.marketplace, badge: 'NEW' },
             { id: 'learning', icon: BookOpen, label: t.learning, badge: learningModules.length },
+            { id: 'profile', icon: User2, label: t.profile, badge: '🔑' },
             { id: 'settings', icon: Settings, label: t.settings }
           ].map(({ id, icon: Icon, label, badge }) => (
             <button
