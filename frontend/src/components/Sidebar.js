@@ -24,7 +24,7 @@ const Sidebar = ({
   };
 
   return (
-    <div className={`${sidebarOpen ? 'w-64' : 'w-16'} ${darkMode ? 'bg-gray-900' : 'bg-white'} border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col`}>
+    <div className={`${darkMode ? 'bg-gray-900' : 'bg-white'} border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col h-full w-full`}>
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div className={`flex items-center space-x-2 ${!sidebarOpen && 'justify-center'}`}>
@@ -32,22 +32,22 @@ const Sidebar = ({
               <Phone className="w-4 h-4 text-white" />
             </div>
             {sidebarOpen && (
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span className="text-lg lg:text-xl font-bold text-gray-900 dark:text-white">
                 TelephonyAI
               </span>
             )}
           </div>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded lg:hidden"
           >
             {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      <nav className="flex-1 p-4">
-        <div className="space-y-2">
+      <nav className="flex-1 p-4 overflow-y-auto">
+        <div className="space-y-1 lg:space-y-2">
           {[
             { id: 'dashboard', icon: BarChart3, label: t.dashboard },
             { id: 'calls', icon: Phone, label: t.calls },
