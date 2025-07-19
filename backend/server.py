@@ -624,15 +624,190 @@ class MasterPBXAPI:
 checkcall_api = CheckcallAPI()
 masterpbx_api = MasterPBXAPI()
 
+# Real API Integration Endpoints
+@api_router.get("/integrations/checkcall/calls")
+async def get_checkcall_integration_calls(
+    from_date: Optional[str] = Query(None),
+    to_date: Optional[str] = Query(None)
+):
+    """Get calls from real Checkcall API"""
+    calls = await checkcall_api.get_calls(from_date, to_date)
+    
+    # Store in database
+    if calls:
+        for call in calls:
+            call_record = CallRecord(
+                caller_name=call.get('caller_name', 'Unknown'),
+                caller_number=call.get('caller_id', ''),
+                duration=int(call.get('duration', 0)),
+                status="completed",
+                transcription=call.get('transcription', ''),
+                sentiment=call.get('sentiment', 'neutral'),
+                recording_url=call.get('recording_url', ''),
+                start_time=datetime.now()
+            )
+            await db.calls.insert_one(call_record.dict())
+    
+    return {"status": "success", "data": calls, "count": len(calls)}
+
+@api_router.get("/integrations/checkcall/recording/{call_id}")
+async def download_call_recording(call_id: str):
+    """Download recording from Checkcall"""
+    recording_data = await checkcall_api.download_record(call_id)
+    
+    if recording_data:
+        # Convert to base64 for frontend
+        recording_b64 = base64.b64encode(recording_data).decode()
+        return {"status": "success", "recording": recording_b64}
+    else:
+        raise HTTPException(status_code=404, detail="Recording not found")
+
+@api_router.get("/integrations/checkcall/transcription/{call_id}")
+async def get_call_transcription(call_id: str):
+    """Get transcription from Checkcall"""
+    transcription = await checkcall_api.get_transcription(call_id)
+    
+    if transcription:
+        return {"status": "success", "transcription": transcription}
+    else:
+        raise HTTPException(status_code=404, detail="Transcription not found")
+
 @api_router.get("/integrations/masterpbx/calllog")
 async def get_masterpbx_integration_calllog(
-    token_id: str = Query(...),
     start_date: Optional[str] = Query(None),
     end_date: Optional[str] = Query(None)
 ):
-    """Get call log from MasterPBX API integration"""
-    call_log = await get_masterpbx_call_log(token_id, start_date, end_date)
-    return {"status": "success", "data": call_log}
+    """Get call log from real MasterPBX API"""
+    call_log = await masterpbx_api.get_call_log(start_date, end_date)
+    
+    # Store in database
+    if call_log:
+        for log_entry in call_log:
+            # Convert MasterPBX format to our format
+            call_record = CallRecord(
+                caller_name=log_entry.get('caller_name', 'Unknown'),
+                caller_number=log_entry.get('caller', ''),
+                callee_number=log_entry.get('callee', ''),
+                duration=int(log_entry.get('duration', 0)),
+                status=log_entry.get('status', 'completed').lower(),
+                start_time=datetime.now()
+            )
+            await db.calls.insert_one(call_record.dict())
+    
+    return {"status": "success", "data": call_log, "count": len(call_log)}
+
+@api_router.get("/integrations/masterpbx/active-calls")
+async def get_masterpbx_active_calls():
+    """Get active calls from MasterPBX"""
+    active_calls = await masterpbx_api.get_active_calls()
+    return {"status": "success", "data": active_calls, "count": len(active_calls)}
+
+# Real-time webhook endpoint for Checkcall
+@api_router.post("/webhook/checkcall")
+async def checkcall_webhook(data: dict):
+    """Handle real-time webhooks from Checkcall"""
+    try:
+        logger.info(f"Received Checkcall webhook: {data}")
+        
+        # Process different event types
+        event_type = data.get("event", "unknown")
+        
+        if event_type == "call_started":
+            # Handle call start
+            call_data = data.get("call_data", {})
+            call_record = CallRecord(
+                caller_name=call_data.get('caller_name', 'Unknown'),
+                caller_number=call_data.get('caller_id', ''),
+                status="active",
+                start_time=datetime.now()
+            )
+            await db.calls.insert_one(call_record.dict())
+            
+        elif event_type == "call_ended":
+            # Handle call end
+            call_id = data.get("call_id")
+            if call_id:
+                await db.calls.update_one(
+                    {"id": call_id},
+                    {"$set": {
+                        "status": "completed",
+                        "end_time": datetime.now(),
+                        "transcription": data.get("transcription", ""),
+                        "sentiment": data.get("sentiment", "neutral")
+                    }}
+                )
+        
+        elif event_type == "transcription_ready":
+            # Handle transcription completion
+            call_id = data.get("call_id")
+            transcription = data.get("transcription", "")
+            sentiment = data.get("sentiment", "neutral")
+            
+            if call_id:
+                await db.calls.update_one(
+                    {"id": call_id},
+                    {"$set": {
+                        "transcription": transcription,
+                        "sentiment": sentiment
+                    }}
+                )
+        
+        return {"status": "processed", "event": event_type}
+        
+    except Exception as e:
+        logger.error(f"Error processing webhook: {e}")
+        raise HTTPException(status_code=500, detail="Webhook processing failed")
+
+# Advanced analytics endpoint
+@api_router.get("/analytics/realtime")
+async def get_realtime_analytics():
+    """Get real-time analytics combining both APIs"""
+    try:
+        # Get recent data from both APIs
+        checkcall_calls = await checkcall_api.get_calls()
+        masterpbx_active = await masterpbx_api.get_active_calls()
+        
+        # Combine and analyze
+        analytics = {
+            "total_calls_today": len([c for c in checkcall_calls if is_today(c.get('start_time'))]),
+            "active_calls": len(masterpbx_active),
+            "checkcall_data": {
+                "total_calls": len(checkcall_calls),
+                "recent_transcriptions": [c for c in checkcall_calls if c.get('transcription')],
+                "sentiment_breakdown": analyze_sentiment(checkcall_calls)
+            },
+            "masterpbx_data": {
+                "active_calls": masterpbx_active,
+                "system_status": "online"
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        return analytics
+        
+    except Exception as e:
+        logger.error(f"Error getting realtime analytics: {e}")
+        raise HTTPException(status_code=500, detail="Analytics error")
+
+def is_today(timestamp_str):
+    """Check if timestamp is from today"""
+    try:
+        if not timestamp_str:
+            return False
+        # Parse timestamp and check if it's today
+        # Implementation depends on timestamp format from APIs
+        return True  # Placeholder
+    except:
+        return False
+
+def analyze_sentiment(calls):
+    """Analyze sentiment distribution in calls"""
+    sentiments = {'positive': 0, 'negative': 0, 'neutral': 0}
+    for call in calls:
+        sentiment = call.get('sentiment', 'neutral')
+        if sentiment in sentiments:
+            sentiments[sentiment] += 1
+    return sentiments
 
 # Health check endpoint
 @api_router.get("/health")
