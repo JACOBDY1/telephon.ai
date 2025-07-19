@@ -656,7 +656,7 @@ async def process_call_ai(call_id: str):
     sentiment = await mock_analyze_sentiment(transcription, call.get("language", "he"))
     
     # Update call with AI results
-    await db.calls.update_one(
+    await async_db.calls.update_one(
         {"id": call_id},
         {"$set": {
             "transcription": transcription,
@@ -672,7 +672,7 @@ async def process_call_ai(call_id: str):
         confidence=0.85,
         language=call.get("language", "he")
     )
-    await db.ai_insights.insert_one(insight.dict())
+    await async_db.ai_insights.insert_one(insight.dict())
 
 # Contacts Management
 @api_router.post("/contacts", response_model=Contact)
