@@ -1613,7 +1613,12 @@ const App = () => {
       case 'dashboard': return <Dashboard />;
       case 'calls': return <CallsView />;
       case 'contacts': return <ContactsView />;
+      case 'crm': return <CRMView />;
+      case 'attendance': return <AttendanceView />;
       case 'analytics': return <AnalyticsView />;
+      case 'automations': return <AutomationsView />;
+      case 'marketplace': return <MarketplaceView />;
+      case 'learning': return <LearningView />;
       case 'settings': return <SettingsView />;
       default: return <Dashboard />;
     }
