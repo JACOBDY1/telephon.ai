@@ -695,6 +695,533 @@ class APITester:
         except Exception as e:
             self.log_result("Error Handling", False, f"Error handling test failed: {str(e)}")
     
+    # ===== CRM SYSTEM TESTS =====
+    
+    def test_crm_demo_data_population(self):
+        """Test CRM demo data population"""
+        try:
+            # First populate demo data
+            response = self.session.post(f"{BACKEND_URL}/setup/demo-data")
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.log_result("CRM Demo Data Population", True, 
+                              f"Demo data populated successfully: {data.get('demo_data', {})}")
+                return True
+            else:
+                self.log_result("CRM Demo Data Population", False, 
+                              f"Demo data population failed with status {response.status_code}", response.text)
+                return False
+                
+        except Exception as e:
+            self.log_result("CRM Demo Data Population", False, f"Demo data population failed: {str(e)}")
+            return False
+    
+    def test_crm_leads_crud(self):
+        """Test CRM Leads CRUD operations"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("CRM Leads CRUD", False, "No auth tokens available")
+                return False
+            
+            admin_token = self.auth_tokens.get("admin")
+            if not admin_token:
+                self.log_result("CRM Leads CRUD", False, "No admin token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {admin_token}"}
+            
+            # Test GET /api/crm/leads
+            response = self.session.get(f"{BACKEND_URL}/crm/leads", headers=headers)
+            if response.status_code == 200:
+                leads = response.json()
+                self.log_result("CRM Leads - GET", True, f"Retrieved {len(leads)} leads")
+                
+                # Test with filtering
+                response = self.session.get(f"{BACKEND_URL}/crm/leads?status=new&limit=2", headers=headers)
+                if response.status_code == 200:
+                    filtered_leads = response.json()
+                    self.log_result("CRM Leads - GET Filtered", True, f"Retrieved {len(filtered_leads)} filtered leads")
+                else:
+                    self.log_result("CRM Leads - GET Filtered", False, f"Filtering failed: {response.status_code}")
+            else:
+                self.log_result("CRM Leads - GET", False, f"GET leads failed: {response.status_code}")
+                return False
+            
+            # Test POST /api/crm/leads
+            new_lead = {
+                "name": "בדיקה אוטומטית",
+                "phone": "+972-50-999-0001",
+                "email": "test@automated.test",
+                "company": "חברת בדיקות",
+                "source": "website",
+                "notes": "ליד שנוצר בבדיקה אוטומטית",
+                "tags": ["בדיקה", "אוטומטי"],
+                "estimated_value": 10000.0,
+                "priority": "medium"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/crm/leads", json=new_lead, headers=headers)
+            if response.status_code == 200:
+                created_lead = response.json()
+                lead_id = created_lead.get("id")
+                self.log_result("CRM Leads - POST", True, f"Created lead with ID: {lead_id}")
+                
+                # Test GET specific lead
+                response = self.session.get(f"{BACKEND_URL}/crm/leads/{lead_id}", headers=headers)
+                if response.status_code == 200:
+                    self.log_result("CRM Leads - GET by ID", True, "Retrieved specific lead")
+                else:
+                    self.log_result("CRM Leads - GET by ID", False, f"GET by ID failed: {response.status_code}")
+                
+                # Test PUT /api/crm/leads/{id}
+                update_data = {
+                    "status": "contacted",
+                    "notes": "עודכן בבדיקה אוטומטית",
+                    "priority": "high"
+                }
+                
+                response = self.session.put(f"{BACKEND_URL}/crm/leads/{lead_id}", json=update_data, headers=headers)
+                if response.status_code == 200:
+                    updated_lead = response.json()
+                    if updated_lead.get("status") == "contacted":
+                        self.log_result("CRM Leads - PUT", True, "Lead updated successfully")
+                    else:
+                        self.log_result("CRM Leads - PUT", False, "Lead update data incorrect")
+                else:
+                    self.log_result("CRM Leads - PUT", False, f"PUT failed: {response.status_code}")
+                
+                # Test DELETE /api/crm/leads/{id}
+                response = self.session.delete(f"{BACKEND_URL}/crm/leads/{lead_id}", headers=headers)
+                if response.status_code == 200:
+                    self.log_result("CRM Leads - DELETE", True, "Lead deleted successfully")
+                else:
+                    self.log_result("CRM Leads - DELETE", False, f"DELETE failed: {response.status_code}")
+                
+                return True
+            else:
+                self.log_result("CRM Leads - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("CRM Leads CRUD", False, f"Leads CRUD test failed: {str(e)}")
+            return False
+    
+    def test_crm_deals_crud(self):
+        """Test CRM Deals CRUD operations"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("CRM Deals CRUD", False, "No auth tokens available")
+                return False
+            
+            admin_token = self.auth_tokens.get("admin")
+            if not admin_token:
+                self.log_result("CRM Deals CRUD", False, "No admin token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {admin_token}"}
+            
+            # Test GET /api/crm/deals
+            response = self.session.get(f"{BACKEND_URL}/crm/deals", headers=headers)
+            if response.status_code == 200:
+                deals = response.json()
+                self.log_result("CRM Deals - GET", True, f"Retrieved {len(deals)} deals")
+                
+                # Test with stage filtering
+                response = self.session.get(f"{BACKEND_URL}/crm/deals?stage=proposal", headers=headers)
+                if response.status_code == 200:
+                    filtered_deals = response.json()
+                    self.log_result("CRM Deals - GET Filtered", True, f"Retrieved {len(filtered_deals)} filtered deals")
+                else:
+                    self.log_result("CRM Deals - GET Filtered", False, f"Filtering failed: {response.status_code}")
+            else:
+                self.log_result("CRM Deals - GET", False, f"GET deals failed: {response.status_code}")
+                return False
+            
+            # Test POST /api/crm/deals
+            new_deal = {
+                "title": "עסקת בדיקה אוטומטית",
+                "description": "עסקה שנוצרה בבדיקה אוטומטית",
+                "amount": 15000.0,
+                "currency": "ILS",
+                "probability": 50,
+                "expected_close_date": (datetime.utcnow() + timedelta(days=30)).isoformat(),
+                "notes": "עסקה לבדיקה",
+                "tags": ["בדיקה", "אוטומטי"]
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/crm/deals", json=new_deal, headers=headers)
+            if response.status_code == 200:
+                created_deal = response.json()
+                deal_id = created_deal.get("id")
+                self.log_result("CRM Deals - POST", True, f"Created deal with ID: {deal_id}")
+                
+                # Test GET specific deal
+                response = self.session.get(f"{BACKEND_URL}/crm/deals/{deal_id}", headers=headers)
+                if response.status_code == 200:
+                    self.log_result("CRM Deals - GET by ID", True, "Retrieved specific deal")
+                else:
+                    self.log_result("CRM Deals - GET by ID", False, f"GET by ID failed: {response.status_code}")
+                
+                # Test PUT /api/crm/deals/{id}
+                update_data = {
+                    "stage": "negotiation",
+                    "probability": 75,
+                    "notes": "עודכן בבדיקה אוטומטית"
+                }
+                
+                response = self.session.put(f"{BACKEND_URL}/crm/deals/{deal_id}", json=update_data, headers=headers)
+                if response.status_code == 200:
+                    updated_deal = response.json()
+                    if updated_deal.get("stage") == "negotiation":
+                        self.log_result("CRM Deals - PUT", True, "Deal updated successfully")
+                    else:
+                        self.log_result("CRM Deals - PUT", False, "Deal update data incorrect")
+                else:
+                    self.log_result("CRM Deals - PUT", False, f"PUT failed: {response.status_code}")
+                
+                # Test DELETE /api/crm/deals/{id}
+                response = self.session.delete(f"{BACKEND_URL}/crm/deals/{deal_id}", headers=headers)
+                if response.status_code == 200:
+                    self.log_result("CRM Deals - DELETE", True, "Deal deleted successfully")
+                else:
+                    self.log_result("CRM Deals - DELETE", False, f"DELETE failed: {response.status_code}")
+                
+                return True
+            else:
+                self.log_result("CRM Deals - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("CRM Deals CRUD", False, f"Deals CRUD test failed: {str(e)}")
+            return False
+    
+    def test_crm_tasks_crud(self):
+        """Test CRM Tasks CRUD operations"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("CRM Tasks CRUD", False, "No auth tokens available")
+                return False
+            
+            admin_token = self.auth_tokens.get("admin")
+            if not admin_token:
+                self.log_result("CRM Tasks CRUD", False, "No admin token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {admin_token}"}
+            
+            # Test GET /api/crm/tasks
+            response = self.session.get(f"{BACKEND_URL}/crm/tasks", headers=headers)
+            if response.status_code == 200:
+                tasks = response.json()
+                self.log_result("CRM Tasks - GET", True, f"Retrieved {len(tasks)} tasks")
+                
+                # Test with status filtering
+                response = self.session.get(f"{BACKEND_URL}/crm/tasks?status=pending", headers=headers)
+                if response.status_code == 200:
+                    filtered_tasks = response.json()
+                    self.log_result("CRM Tasks - GET Filtered", True, f"Retrieved {len(filtered_tasks)} filtered tasks")
+                else:
+                    self.log_result("CRM Tasks - GET Filtered", False, f"Filtering failed: {response.status_code}")
+            else:
+                self.log_result("CRM Tasks - GET", False, f"GET tasks failed: {response.status_code}")
+                return False
+            
+            # Test POST /api/crm/tasks
+            new_task = {
+                "title": "משימת בדיקה אוטומטית",
+                "description": "משימה שנוצרה בבדיקה אוטומטית",
+                "type": "call",
+                "priority": "medium",
+                "due_date": (datetime.utcnow() + timedelta(days=7)).isoformat(),
+                "notes": "משימה לבדיקה"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/crm/tasks", json=new_task, headers=headers)
+            if response.status_code == 200:
+                created_task = response.json()
+                task_id = created_task.get("id")
+                self.log_result("CRM Tasks - POST", True, f"Created task with ID: {task_id}")
+                
+                # Test GET specific task
+                response = self.session.get(f"{BACKEND_URL}/crm/tasks/{task_id}", headers=headers)
+                if response.status_code == 200:
+                    self.log_result("CRM Tasks - GET by ID", True, "Retrieved specific task")
+                else:
+                    self.log_result("CRM Tasks - GET by ID", False, f"GET by ID failed: {response.status_code}")
+                
+                # Test PUT /api/crm/tasks/{id}
+                update_data = {
+                    "status": "completed",
+                    "completed_at": datetime.utcnow().isoformat(),
+                    "notes": "הושלמה בבדיקה אוטומטית"
+                }
+                
+                response = self.session.put(f"{BACKEND_URL}/crm/tasks/{task_id}", json=update_data, headers=headers)
+                if response.status_code == 200:
+                    updated_task = response.json()
+                    if updated_task.get("status") == "completed":
+                        self.log_result("CRM Tasks - PUT", True, "Task updated successfully")
+                    else:
+                        self.log_result("CRM Tasks - PUT", False, "Task update data incorrect")
+                else:
+                    self.log_result("CRM Tasks - PUT", False, f"PUT failed: {response.status_code}")
+                
+                # Test DELETE /api/crm/tasks/{id}
+                response = self.session.delete(f"{BACKEND_URL}/crm/tasks/{task_id}", headers=headers)
+                if response.status_code == 200:
+                    self.log_result("CRM Tasks - DELETE", True, "Task deleted successfully")
+                else:
+                    self.log_result("CRM Tasks - DELETE", False, f"DELETE failed: {response.status_code}")
+                
+                return True
+            else:
+                self.log_result("CRM Tasks - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("CRM Tasks CRUD", False, f"Tasks CRUD test failed: {str(e)}")
+            return False
+    
+    def test_crm_analytics_endpoint(self):
+        """Test CRM Analytics endpoint"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("CRM Analytics", False, "No auth tokens available")
+                return False
+            
+            admin_token = self.auth_tokens.get("admin")
+            if not admin_token:
+                self.log_result("CRM Analytics", False, "No admin token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {admin_token}"}
+            
+            # Test GET /api/crm/analytics/summary
+            response = self.session.get(f"{BACKEND_URL}/crm/analytics/summary", headers=headers)
+            if response.status_code == 200:
+                analytics = response.json()
+                
+                # Check for expected analytics fields
+                expected_fields = ["leads_by_status", "deals_by_stage", "tasks_by_status", "total_deal_value"]
+                missing_fields = [field for field in expected_fields if field not in analytics]
+                
+                if not missing_fields:
+                    self.log_result("CRM Analytics", True, 
+                                  f"Analytics retrieved successfully: "
+                                  f"leads={analytics.get('leads_by_status', {})}, "
+                                  f"deals={analytics.get('deals_by_stage', {})}, "
+                                  f"total_value={analytics.get('total_deal_value', 0)}")
+                    return True
+                else:
+                    self.log_result("CRM Analytics", False, 
+                                  f"Missing analytics fields: {missing_fields}", analytics)
+                    return False
+            else:
+                self.log_result("CRM Analytics", False, f"Analytics failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("CRM Analytics", False, f"Analytics test failed: {str(e)}")
+            return False
+    
+    def test_enhanced_contacts_crud(self):
+        """Test Enhanced Contacts CRUD operations"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Enhanced Contacts CRUD", False, "No auth tokens available")
+                return False
+            
+            admin_token = self.auth_tokens.get("admin")
+            if not admin_token:
+                self.log_result("Enhanced Contacts CRUD", False, "No admin token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {admin_token}"}
+            
+            # First create a contact to test PUT/DELETE
+            new_contact = {
+                "name": "איש קשר בדיקה",
+                "phone_number": "+972-50-999-0002",
+                "email": "contact@test.automated",
+                "company": "חברת בדיקות קשרים",
+                "tags": ["בדיקה", "אוטומטי"]
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/contacts", json=new_contact, headers=headers)
+            if response.status_code == 200:
+                created_contact = response.json()
+                contact_id = created_contact.get("id")
+                self.log_result("Enhanced Contacts - POST", True, f"Created contact with ID: {contact_id}")
+                
+                # Test PUT /api/contacts/{id}
+                update_data = {
+                    "name": "איש קשר מעודכן",
+                    "company": "חברת בדיקות מעודכנת",
+                    "tags": ["בדיקה", "מעודכן"]
+                }
+                
+                response = self.session.put(f"{BACKEND_URL}/contacts/{contact_id}", json=update_data, headers=headers)
+                if response.status_code == 200:
+                    updated_contact = response.json()
+                    if updated_contact.get("name") == "איש קשר מעודכן":
+                        self.log_result("Enhanced Contacts - PUT", True, "Contact updated successfully")
+                    else:
+                        self.log_result("Enhanced Contacts - PUT", False, "Contact update data incorrect")
+                else:
+                    self.log_result("Enhanced Contacts - PUT", False, f"PUT failed: {response.status_code}")
+                
+                # Test DELETE /api/contacts/{id}
+                response = self.session.delete(f"{BACKEND_URL}/contacts/{contact_id}", headers=headers)
+                if response.status_code == 200:
+                    self.log_result("Enhanced Contacts - DELETE", True, "Contact deleted successfully")
+                    return True
+                else:
+                    self.log_result("Enhanced Contacts - DELETE", False, f"DELETE failed: {response.status_code}")
+                    return False
+            else:
+                self.log_result("Enhanced Contacts - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Enhanced Contacts CRUD", False, f"Enhanced contacts test failed: {str(e)}")
+            return False
+    
+    def test_enhanced_calls_crud(self):
+        """Test Enhanced Calls CRUD operations"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Enhanced Calls CRUD", False, "No auth tokens available")
+                return False
+            
+            admin_token = self.auth_tokens.get("admin")
+            if not admin_token:
+                self.log_result("Enhanced Calls CRUD", False, "No admin token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {admin_token}"}
+            
+            # First create a call to test PUT/DELETE
+            new_call = {
+                "caller_name": "מתקשר בדיקה",
+                "caller_number": "+972-50-999-0003",
+                "callee_number": "+972-50-555-0001",
+                "language": "he"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/calls", json=new_call, headers=headers)
+            if response.status_code == 200:
+                created_call = response.json()
+                call_id = created_call.get("id")
+                self.log_result("Enhanced Calls - POST", True, f"Created call with ID: {call_id}")
+                
+                # Test PUT /api/calls/{id}
+                update_data = {
+                    "end_time": datetime.utcnow().isoformat(),
+                    "duration": 300,
+                    "status": "completed",
+                    "transcription": "תמלול בדיקה אוטומטית",
+                    "sentiment": "positive"
+                }
+                
+                response = self.session.put(f"{BACKEND_URL}/calls/{call_id}", json=update_data, headers=headers)
+                if response.status_code == 200:
+                    updated_call = response.json()
+                    if updated_call.get("status") == "completed":
+                        self.log_result("Enhanced Calls - PUT", True, "Call updated successfully")
+                    else:
+                        self.log_result("Enhanced Calls - PUT", False, "Call update data incorrect")
+                else:
+                    self.log_result("Enhanced Calls - PUT", False, f"PUT failed: {response.status_code}")
+                
+                # Test DELETE /api/calls/{id}
+                response = self.session.delete(f"{BACKEND_URL}/calls/{call_id}", headers=headers)
+                if response.status_code == 200:
+                    self.log_result("Enhanced Calls - DELETE", True, "Call deleted successfully")
+                    return True
+                else:
+                    self.log_result("Enhanced Calls - DELETE", False, f"DELETE failed: {response.status_code}")
+                    return False
+            else:
+                self.log_result("Enhanced Calls - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Enhanced Calls CRUD", False, f"Enhanced calls test failed: {str(e)}")
+            return False
+    
+    def test_crm_authentication_integration(self):
+        """Test that all CRM endpoints require authentication"""
+        try:
+            crm_endpoints = [
+                "/crm/leads",
+                "/crm/deals", 
+                "/crm/tasks",
+                "/crm/analytics/summary"
+            ]
+            
+            protected_count = 0
+            for endpoint in crm_endpoints:
+                # Test without auth
+                response = self.session.get(f"{BACKEND_URL}{endpoint}")
+                if response.status_code == 401:
+                    protected_count += 1
+                    self.log_result(f"CRM Auth - {endpoint}", True, 
+                                  f"Endpoint {endpoint} properly requires authentication")
+                else:
+                    self.log_result(f"CRM Auth - {endpoint}", False, 
+                                  f"Endpoint {endpoint} should require auth, got {response.status_code}")
+            
+            return protected_count == len(crm_endpoints)
+            
+        except Exception as e:
+            self.log_result("CRM Authentication Integration", False, f"CRM auth test failed: {str(e)}")
+            return False
+    
+    def test_crm_data_relationships(self):
+        """Test CRM data relationships and Hebrew content"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("CRM Data Relationships", False, "No auth tokens available")
+                return False
+            
+            admin_token = self.auth_tokens.get("admin")
+            if not admin_token:
+                self.log_result("CRM Data Relationships", False, "No admin token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {admin_token}"}
+            
+            # Test Hebrew content in leads
+            response = self.session.get(f"{BACKEND_URL}/crm/leads", headers=headers)
+            if response.status_code == 200:
+                leads = response.json()
+                hebrew_leads = [lead for lead in leads if any(ord(char) >= 0x0590 and ord(char) <= 0x05FF for char in lead.get("name", ""))]
+                
+                if hebrew_leads:
+                    self.log_result("CRM Hebrew Content", True, f"Found {len(hebrew_leads)} leads with Hebrew content")
+                else:
+                    self.log_result("CRM Hebrew Content", False, "No Hebrew content found in leads")
+                
+                # Test search functionality
+                if leads:
+                    search_term = leads[0].get("name", "").split()[0] if leads[0].get("name") else "test"
+                    response = self.session.get(f"{BACKEND_URL}/crm/leads?search={search_term}", headers=headers)
+                    if response.status_code == 200:
+                        search_results = response.json()
+                        self.log_result("CRM Search Functionality", True, f"Search returned {len(search_results)} results")
+                    else:
+                        self.log_result("CRM Search Functionality", False, f"Search failed: {response.status_code}")
+                
+                return True
+            else:
+                self.log_result("CRM Data Relationships", False, f"Failed to get leads: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("CRM Data Relationships", False, f"Data relationships test failed: {str(e)}")
+            return False
+    
     def run_all_tests(self):
         """Run all tests"""
         print("=" * 80)
