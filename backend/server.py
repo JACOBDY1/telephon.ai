@@ -1043,6 +1043,202 @@ async def health_check():
             "error": str(e)
         }
 
+# ===== AUTHENTICATION ENDPOINTS =====
+
+@api_router.post("/auth/register", response_model=Token)
+async def register_user(user_data: UserCreate):
+    """Register a new user"""
+    try:
+        # Check if username already exists
+        existing_user = await get_user_by_username(user_data.username)
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="שם משתמש כבר קיים"
+            )
+        
+        # Check if email already exists
+        existing_email = await get_user_by_email(user_data.email)
+        if existing_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="כתובת אימייל כבר רשומה"
+            )
+        
+        # Hash password
+        hashed_password = get_password_hash(user_data.password)
+        
+        # Create user
+        user_doc = {
+            "username": user_data.username,
+            "email": user_data.email,
+            "hashed_password": hashed_password,
+            "full_name": user_data.full_name,
+            "phone": user_data.phone,
+            "role": "user",
+            "is_active": True,
+            "created_at": datetime.utcnow(),
+            "last_login": None,
+            "preferences": {
+                "language": "he",
+                "theme": "light",
+                "notifications": True
+            }
+        }
+        
+        # Insert to database
+        result = users_collection.insert_one(user_doc)
+        user_id = str(result.inserted_id)
+        
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user_data.username}, expires_delta=access_token_expires
+        )
+        
+        # Return user data and token
+        user = User(
+            id=user_id,
+            username=user_data.username,
+            email=user_data.email,
+            full_name=user_data.full_name,
+            phone=user_data.phone,
+            role="user",
+            is_active=True,
+            created_at=datetime.utcnow(),
+            preferences=user_doc["preferences"]
+        )
+        
+        return Token(access_token=access_token, token_type="bearer", user=user)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error registering user: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה ברישום משתמש")
+
+@api_router.post("/auth/login", response_model=Token)
+async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
+    """Login user and return JWT token"""
+    try:
+        user = await authenticate_user(form_data.username, form_data.password)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="שם משתמש או סיסמה שגויים",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Update last login
+        users_collection.update_one(
+            {"username": user.username},
+            {"$set": {"last_login": datetime.utcnow()}}
+        )
+        
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user.username}, expires_delta=access_token_expires
+        )
+        
+        # Return user data and token
+        user_response = User(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            full_name=user.full_name,
+            phone=user.phone,
+            role=user.role,
+            is_active=user.is_active,
+            created_at=user.created_at,
+            last_login=datetime.utcnow(),
+            preferences=user.preferences
+        )
+        
+        return Token(access_token=access_token, token_type="bearer", user=user_response)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error logging in user: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בהתחברות")
+
+@api_router.get("/auth/me", response_model=User)
+async def get_current_user_profile(current_user: User = Depends(get_current_active_user)):
+    """Get current user profile"""
+    return current_user
+
+@api_router.put("/auth/profile", response_model=User)
+async def update_user_profile(
+    full_name: Optional[str] = None,
+    phone: Optional[str] = None,
+    preferences: Optional[Dict[str, Any]] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update user profile"""
+    try:
+        update_data = {}
+        if full_name is not None:
+            update_data["full_name"] = full_name
+        if phone is not None:
+            update_data["phone"] = phone
+        if preferences is not None:
+            update_data["preferences"] = preferences
+            
+        if update_data:
+            # Update in database
+            users_collection.update_one(
+                {"username": current_user.username},
+                {"$set": update_data}
+            )
+            
+            # Update current user object
+            for key, value in update_data.items():
+                setattr(current_user, key, value)
+        
+        return current_user
+        
+    except Exception as e:
+        logger.error(f"Error updating user profile: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בעדכון פרופיל")
+
+@api_router.post("/auth/change-password")
+async def change_password(
+    current_password: str,
+    new_password: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Change user password"""
+    try:
+        # Get user with password hash
+        user_in_db = await get_user_by_username(current_user.username)
+        if not user_in_db:
+            raise HTTPException(status_code=404, detail="משתמש לא נמצא")
+        
+        # Verify current password
+        if not verify_password(current_password, user_in_db.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="סיסמה נוכחית שגויה"
+            )
+        
+        # Hash new password
+        new_hashed_password = get_password_hash(new_password)
+        
+        # Update in database
+        users_collection.update_one(
+            {"username": current_user.username},
+            {"$set": {"hashed_password": new_hashed_password}}
+        )
+        
+        return {"message": "סיסמה עודכנה בהצלחה"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error changing password: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בשינוי סיסמה")
+
 # ===== ADVANCED AI ANALYTICS ENDPOINTS =====
 
 @api_router.get("/ai/realtime-analysis")
