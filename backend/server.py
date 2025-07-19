@@ -38,10 +38,21 @@ MASTERPBX_URL = "https://woopress.ippbx.co.il"
 MASTERPBX_USERNAME = "day1"
 MASTERPBX_PASSWORD = "0505552220"
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Security configuration
+SECRET_KEY = os.getenv("SECRET_KEY", "telephony_ai_secret_key_2024_hebrew_platform")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+
+# MongoDB connection for users
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/telephony_ai")
+client = MongoClient(MONGO_URL)
+db = client.get_database()
+users_collection = db.users
+sessions_collection = db.sessions
 
 # Create the main app without a prefix
 app = FastAPI(title="AI Telephony Platform", version="1.0.0")
