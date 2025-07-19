@@ -666,18 +666,22 @@ async def process_call_ai(call_id: str):
 
 # Contacts Management
 @api_router.post("/contacts", response_model=Contact)
-async def create_contact(contact_data: ContactCreate):
+async def create_contact(
+    contact_data: ContactCreate,
+    current_user: User = Depends(get_current_active_user)
+):
     """Create a new contact"""
     contact_dict = contact_data.dict()
     contact_obj = Contact(**contact_dict)
-    await db.contacts.insert_one(contact_obj.dict())
+    await async_db.contacts.insert_one(contact_obj.dict())
     return contact_obj
 
 @api_router.get("/contacts", response_model=List[Contact])
 async def get_contacts(
     limit: int = Query(50, ge=1, le=1000),
     skip: int = Query(0, ge=0),
-    search: Optional[str] = Query(None)
+    search: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_active_user)
 ):
     """Get contacts with optional search"""
     query = {}
