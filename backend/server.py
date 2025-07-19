@@ -128,6 +128,146 @@ class SalesPlaybook(BaseModel):
     language: str = "he"
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+# ===== USER AUTHENTICATION MODELS =====
+
+class User(BaseModel):
+    id: Optional[str] = None
+    username: str
+    email: EmailStr
+    full_name: str
+    phone: Optional[str] = None
+    role: str = "user"  # user, admin, manager
+    is_active: bool = True
+    created_at: Optional[datetime] = None
+    last_login: Optional[datetime] = None
+    preferences: Dict[str, Any] = {}
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+    full_name: str
+    phone: Optional[str] = None
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user: User
+
+class UserInDB(BaseModel):
+    id: str
+    username: str
+    email: str
+    hashed_password: str
+    full_name: str
+    phone: Optional[str] = None
+    role: str = "user"
+    is_active: bool = True
+    created_at: datetime
+    last_login: Optional[datetime] = None
+    preferences: Dict[str, Any] = {}
+
+# ===== AUTHENTICATION FUNCTIONS =====
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password: str) -> str:
+    """Hash a password"""
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """Create a JWT token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+async def get_user_by_username(username: str) -> Optional[UserInDB]:
+    """Get user by username"""
+    try:
+        user_data = users_collection.find_one({"username": username})
+        if user_data:
+            user_data["id"] = str(user_data["_id"])
+            del user_data["_id"]
+            return UserInDB(**user_data)
+        return None
+    except Exception as e:
+        logger.error(f"Error getting user by username: {str(e)}")
+        return None
+
+async def get_user_by_email(email: str) -> Optional[UserInDB]:
+    """Get user by email"""
+    try:
+        user_data = users_collection.find_one({"email": email})
+        if user_data:
+            user_data["id"] = str(user_data["_id"])
+            del user_data["_id"]
+            return UserInDB(**user_data)
+        return None
+    except Exception as e:
+        logger.error(f"Error getting user by email: {str(e)}")
+        return None
+
+async def authenticate_user(username: str, password: str) -> Optional[UserInDB]:
+    """Authenticate a user"""
+    user = await get_user_by_username(username)
+    if not user:
+        return None
+    if not verify_password(password, user.hashed_password):
+        return None
+    return user
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """Get current user from JWT token"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="אישורים לא תקינים",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except jwt.PyJWTError:
+        raise credentials_exception
+    
+    user = await get_user_by_username(username)
+    if user is None:
+        raise credentials_exception
+    
+    # Convert to User model (without password)
+    return User(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        full_name=user.full_name,
+        phone=user.phone,
+        role=user.role,
+        is_active=user.is_active,
+        created_at=user.created_at,
+        last_login=user.last_login,
+        preferences=user.preferences
+    )
+
+async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+    """Get current active user"""
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="משתמש לא פעיל")
+    return current_user
+
 # Advanced AI Analytics Models
 class RealTimeAnalysis(BaseModel):
     sentiment: str
