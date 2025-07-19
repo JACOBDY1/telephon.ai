@@ -1890,45 +1890,11 @@ logger = logging.getLogger(__name__)
 @app.on_event("startup")
 async def startup_event():
     logger.info("AI Telephony Platform API starting up...")
-    # Initialize default data if needed
-    await initialize_default_data()
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
     logger.info("Shutting down AI Telephony Platform API...")
     client.close()
-
-async def initialize_default_data():
-    """Initialize database with default data if empty"""
-    # Check if contacts collection is empty and add sample data
-    contacts_count = await db.contacts.count_documents({})
-    if contacts_count == 0:
-        sample_contacts = [
-            {
-                "id": str(uuid.uuid4()),
-                "name": "יוסי כהן",
-                "phone_number": "+972-50-123-4567",
-                "email": "yossi@example.com",
-                "company": "חברת הטכנולוגיה",
-                "tags": ["לקוח פוטנציאלי"],
-                "total_calls": 3,
-                "last_call_date": datetime.utcnow() - timedelta(days=1),
-                "created_at": datetime.utcnow()
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "name": "Sarah Johnson",
-                "phone_number": "+1-555-987-6543",
-                "email": "sarah@company.com",
-                "company": "Tech Corp",
-                "tags": ["enterprise"],
-                "total_calls": 1,
-                "last_call_date": datetime.utcnow() - timedelta(days=2),
-                "created_at": datetime.utcnow()
-            }
-        ]
-        await db.contacts.insert_many(sample_contacts)
-        logger.info("Initialized sample contacts")
 
 if __name__ == "__main__":
     import uvicorn
