@@ -1024,6 +1024,7 @@ def analyze_sentiment(calls):
 # Health check endpoint
 @api_router.get("/health")
 async def health_check():
+    """Health check endpoint - public access"""
     """Health check endpoint"""
     try:
         # Test database connection
