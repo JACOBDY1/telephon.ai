@@ -1,54 +1,662 @@
-import { useEffect } from "react";
-import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import axios from 'axios';
+import { Phone, Video, MessageSquare, Users, BarChart3, Settings, Search, Bell, User, ChevronDown, Play, Pause, Volume2, VolumeX, Menu, X, Calendar, Mail, PhoneCall, TrendingUp, Clock, Globe, Mic, MicOff, Camera, CameraOff, Share, Download } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
+// Mock data for demonstration
+const mockCallData = [
+  { id: 1, caller: "יוסי כהן", number: "+972-50-123-4567", duration: "00:05:23", status: "completed", transcription: "שלום, אני מעוניין לקבל מידע על המוצרים החדשים", sentiment: "positive", time: "10:30" },
+  { id: 2, caller: "Sarah Johnson", number: "+1-555-987-6543", duration: "00:03:45", status: "completed", transcription: "Hi, I'd like to schedule a demo for next week", sentiment: "neutral", time: "11:15" },
+  { id: 3, caller: "Ahmed Al-Hassan", number: "+971-50-765-4321", duration: "00:07:12", status: "in-progress", transcription: "مرحبا، أحتاج إلى مساعدة في الفوترة", sentiment: "negative", time: "11:45" }
+];
+
+const mockPlaybook = {
+  title: "Qualified Lead Playbook",
+  sections: [
+    {
+      title: "Qualification",
+      items: [
+        { label: "Budget", prompt: "What's your budget for this solution?" },
+        { label: "Timeline", prompt: "When are you looking to implement?" },
+        { label: "Decision Maker", prompt: "Who else is involved in the decision?" }
+      ]
+    },
+    {
+      title: "Needs Analysis",
+      items: [
+        { label: "Current Solution", prompt: "What are you using currently?" },
+        { label: "Pain Points", prompt: "What challenges are you facing?" },
+        { label: "Goals", prompt: "What outcomes are you hoping to achieve?" }
+      ]
+    },
+    {
+      title: "Demo Scheduling",
+      items: [
+        { label: "Best Time", prompt: "When would be the best time for a demo?" },
+        { label: "Key Features", prompt: "Which features are most important?" }
+      ]
+    }
+  ]
+};
+
+const App = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [currentCall, setCurrentCall] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [language, setLanguage] = useState('he');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const languages = {
+    he: { name: 'עברית', flag: '🇮🇱' },
+    en: { name: 'English', flag: '🇺🇸' },
+    ar: { name: 'العربية', flag: '🇸🇦' },
+    ru: { name: 'Русский', flag: '🇷🇺' },
+    fr: { name: 'Français', flag: '🇫🇷' },
+    es: { name: 'Español', flag: '🇪🇸' },
+    it: { name: 'Italiano', flag: '🇮🇹' }
+  };
+
+  const translations = {
+    he: {
+      dashboard: 'לוח בקרה',
+      calls: 'שיחות',
+      contacts: 'אנשי קשר',
+      analytics: 'אנליטיקס',
+      settings: 'הגדרות',
+      search: 'חיפוש...',
+      activeCalls: 'שיחות פעילות',
+      recentCalls: 'שיחות אחרונות',
+      totalCalls: 'סה״כ שיחות',
+      completedDeals: 'עסקאות שנסגרו',
+      averageCallTime: 'זמן שיחה ממוצע',
+      conversionRate: 'אחוז המרה',
+      aiInsights: 'תובנות AI',
+      salesPlaybook: 'מדריך מכירות'
+    },
+    en: {
+      dashboard: 'Dashboard',
+      calls: 'Calls',
+      contacts: 'Contacts',
+      analytics: 'Analytics',
+      settings: 'Settings',
+      search: 'Search...',
+      activeCalls: 'Active Calls',
+      recentCalls: 'Recent Calls',
+      totalCalls: 'Total Calls',
+      completedDeals: 'Completed Deals',
+      averageCallTime: 'Average Call Time',
+      conversionRate: 'Conversion Rate',
+      aiInsights: 'AI Insights',
+      salesPlaybook: 'Sales Playbook'
     }
   };
 
+  const t = translations[language] || translations.en;
+
   useEffect(() => {
-    helloWorldApi();
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setDarkMode(savedTheme === 'dark');
+    }
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
+
+  const startCall = (contact) => {
+    setCurrentCall(contact);
+    setIsCallActive(true);
+    setActiveTab('calls');
+  };
+
+  const endCall = () => {
+    setCurrentCall(null);
+    setIsCallActive(false);
+  };
+
+  const Sidebar = () => (
+    <div className={`${sidebarOpen ? 'w-64' : 'w-16'} ${darkMode ? 'bg-gray-900' : 'bg-white'} border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col`}>
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <div className={`flex items-center space-x-2 ${!sidebarOpen && 'justify-center'}`}>
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Phone className="w-4 h-4 text-white" />
+            </div>
+            {sidebarOpen && (
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                TelephonyAI
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+          >
+            {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      <nav className="flex-1 p-4">
+        <div className="space-y-2">
+          {[
+            { id: 'dashboard', icon: BarChart3, label: t.dashboard },
+            { id: 'calls', icon: Phone, label: t.calls },
+            { id: 'contacts', icon: Users, label: t.contacts },
+            { id: 'analytics', icon: TrendingUp, label: t.analytics },
+            { id: 'settings', icon: Settings, label: t.settings }
+          ].map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === id 
+                  ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400' 
+                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              } ${!sidebarOpen && 'justify-center'}`}
+            >
+              <Icon className="w-5 h-5" />
+              {sidebarOpen && <span>{label}</span>}
+            </button>
+          ))}
+        </div>
+      </nav>
+    </div>
+  );
+
+  const Header = () => (
+    <div className={`${darkMode ? 'bg-gray-900' : 'bg-white'} border-b border-gray-200 dark:border-gray-700 px-6 py-4`}>
+      <div className="flex items-center justify-between">
+        <div className="flex-1 max-w-md">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder={t.search}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          >
+            {Object.entries(languages).map(([code, { name, flag }]) => (
+              <option key={code} value={code}>
+                {flag} {name}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+          >
+            {darkMode ? '🌙' : '☀️'}
+          </button>
+
+          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg relative">
+            <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+          </button>
+
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4" />
+            </div>
+            <ChevronDown className="w-4 h-4 text-gray-400" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const Dashboard = () => (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          {t.dashboard}
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          ברוך הבא לפלטפורמת הטלפוניה המבוססת על AI
+        </p>
+      </div>
+
+      {/* Hero Section */}
+      <div className="mb-8 relative rounded-xl overflow-hidden">
+        <img 
+          src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGNvbW11bmljYXRpb258ZW58MHx8fHwxNzUyOTMwMjAxfDA&ixlib=rb-4.1.0&q=85"
+          alt="Modern Business Communication"
+          className="w-full h-64 object-cover"
+        />
+        <div className="absolute inset-0 bg-blue-900 bg-opacity-70 flex items-center justify-center">
+          <div className="text-center text-white">
+            <h2 className="text-4xl font-bold mb-4">פלטפורמת טלפוניה חכמה</h2>
+            <p className="text-xl mb-6">תמלולים, ניתוח רגשות ותובנות מתקדמות</p>
+            <button className="bg-white text-blue-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+              התחל עכשיו
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {[
+          { title: t.totalCalls, value: '1,234', icon: Phone, color: 'blue' },
+          { title: t.completedDeals, value: '89', icon: TrendingUp, color: 'green' },
+          { title: t.averageCallTime, value: '5:23', icon: Clock, color: 'purple' },
+          { title: t.conversionRate, value: '23%', icon: BarChart3, color: 'orange' }
+        ].map((stat, index) => (
+          <div key={index} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{stat.title}</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+              </div>
+              <div className={`p-3 rounded-lg bg-${stat.color}-100 dark:bg-${stat.color}-900`}>
+                <stat.icon className={`w-6 h-6 text-${stat.color}-600 dark:text-${stat.color}-400`} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Active Calls & Recent Calls */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{t.activeCalls}</h3>
+          {isCallActive && currentCall ? (
+            <div className="border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <div>
+                    <p className="font-semibold text-gray-900 dark:text-white">{currentCall.caller}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{currentCall.number}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={endCall}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  סיום
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 text-center py-8">אין שיחות פעילות כרגע</p>
+          )}
+        </div>
+
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{t.recentCalls}</h3>
+          <div className="space-y-3">
+            {mockCallData.slice(0, 3).map((call) => (
+              <div key={call.id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{call.caller}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{call.time}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-900 dark:text-white">{call.duration}</p>
+                  <span className={`inline-block w-2 h-2 rounded-full ${
+                    call.sentiment === 'positive' ? 'bg-green-500' : 
+                    call.sentiment === 'negative' ? 'bg-red-500' : 'bg-yellow-500'
+                  }`}></span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const CallsView = () => (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.calls}</h1>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2">
+          <Phone className="w-4 h-4" />
+          <span>שיחה חדשה</span>
+        </button>
+      </div>
+
+      {/* Active Call Interface */}
+      {isCallActive && currentCall && (
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 mb-8 shadow-sm border border-gray-200 dark:border-gray-700`}>
+          <div className="text-center mb-6">
+            <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <User className="w-10 h-10" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">{currentCall.caller}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{currentCall.number}</p>
+            <p className="text-green-600 font-semibold">00:02:15</p>
+          </div>
+
+          <div className="flex justify-center space-x-4 mb-6">
+            <button className="p-3 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600">
+              <Mic className="w-5 h-5" />
+            </button>
+            <button className="p-3 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600">
+              <Volume2 className="w-5 h-5" />
+            </button>
+            <button
+              onClick={endCall}
+              className="p-3 bg-red-500 rounded-full hover:bg-red-600 text-white"
+            >
+              <Phone className="w-5 h-5 transform rotate-45" />
+            </button>
+          </div>
+
+          {/* Real-time transcription */}
+          <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4`}>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">תמלול בזמן אמת:</h4>
+            <p className="text-gray-700 dark:text-gray-300">
+              "שלום, אני מעוניין לקבל מידע נוסף על המוצרים החדשים שלכם..."
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Calls List */}
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm border border-gray-200 dark:border-gray-700`}>
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">רשימת שיחות</h3>
+        </div>
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          {mockCallData.map((call) => (
+            <div key={call.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">{call.caller}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{call.number}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{call.transcription.substring(0, 50)}...</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-900 dark:text-white">{call.duration}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{call.time}</p>
+                  <span className={`inline-block w-3 h-3 rounded-full mt-1 ${
+                    call.sentiment === 'positive' ? 'bg-green-500' : 
+                    call.sentiment === 'negative' ? 'bg-red-500' : 'bg-yellow-500'
+                  }`}></span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const ContactsView = () => (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">{t.contacts}</h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm border border-gray-200 dark:border-gray-700`}>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {mockCallData.map((contact) => (
+                  <div key={contact.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-3 flex items-center justify-center">
+                        <User className="w-8 h-8" />
+                      </div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{contact.caller}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{contact.number}</p>
+                      <button
+                        onClick={() => startCall(contact)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+                      >
+                        התקשר
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sales Playbook */}
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-fit`}>
+          <div className="p-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{mockPlaybook.title}</h3>
+            
+            {mockPlaybook.sections.map((section, sectionIndex) => (
+              <div key={sectionIndex} className="mb-6">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 bg-blue-100 dark:bg-blue-900 px-3 py-2 rounded-lg">
+                  {section.title}
+                </h4>
+                <div className="space-y-2">
+                  {section.items.map((item, itemIndex) => (
+                    <div key={itemIndex} className="border-l-4 border-blue-500 pl-3">
+                      <p className="font-medium text-gray-900 dark:text-white text-sm">{item.label}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{item.prompt}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const AnalyticsView = () => (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">{t.analytics}</h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">ניתוח רגשות</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700 dark:text-gray-300">חיובי</span>
+              <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div className="bg-green-500 h-2 rounded-full w-16"></div>
+              </div>
+              <span className="text-sm text-gray-600 dark:text-gray-400">65%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700 dark:text-gray-300">ניטרלי</span>
+              <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div className="bg-yellow-500 h-2 rounded-full w-8"></div>
+              </div>
+              <span className="text-sm text-gray-600 dark:text-gray-400">25%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700 dark:text-gray-300">שלילי</span>
+              <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div className="bg-red-500 h-2 rounded-full w-4"></div>
+              </div>
+              <span className="text-sm text-gray-600 dark:text-gray-400">10%</span>
+            </div>
+          </div>
+        </div>
+
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{t.aiInsights}</h3>
+          <div className="space-y-3">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                📈 שיפור של 23% בשביעות רצון לקוחות השבוע
+              </p>
+            </div>
+            <div className="p-3 bg-green-50 dark:bg-green-900 rounded-lg">
+              <p className="text-sm text-green-800 dark:text-green-200">
+                🎯 המילות המפתח הכי יעילות: "חדשנות", "איכות", "שירות"
+              </p>
+            </div>
+            <div className="p-3 bg-orange-50 dark:bg-orange-900 rounded-lg">
+              <p className="text-sm text-orange-800 dark:text-orange-200">
+                ⏰ זמן ההמתנה הממוצע ירד ב-15% בזמן האחרון
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 mt-8`}>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">דוחות שיחות לפי שפות</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Object.entries(languages).map(([code, { name, flag }]) => (
+            <div key={code} className="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div className="text-2xl mb-2">{flag}</div>
+              <p className="font-semibold text-gray-900 dark:text-white">{name}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {Math.floor(Math.random() * 100)} שיחות
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const SettingsView = () => (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">{t.settings}</h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">הגדרות כלליות</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">שפת ממשק</label>
+              <select 
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              >
+                {Object.entries(languages).map(([code, { name, flag }]) => (
+                  <option key={code} value={code}>{flag} {name}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="flex items-center">
+                <input 
+                  type="checkbox" 
+                  checked={darkMode}
+                  onChange={(e) => setDarkMode(e.target.checked)}
+                  className="mr-2"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">מצב לילה</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">הגדרות AI</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">רגישות ניתוח רגשות</label>
+              <input 
+                type="range" 
+                min="1" 
+                max="10" 
+                defaultValue="7"
+                className="w-full"
+              />
+            </div>
+            
+            <div>
+              <label className="flex items-center">
+                <input type="checkbox" defaultChecked className="mr-2" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">תמלול אוטומטי</span>
+              </label>
+            </div>
+            
+            <div>
+              <label className="flex items-center">
+                <input type="checkbox" defaultChecked className="mr-2" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">הצעות בזמן אמת</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">חיבורים</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <span className="text-sm text-gray-700 dark:text-gray-300">Checkcall API</span>
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">מחובר</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <span className="text-sm text-gray-700 dark:text-gray-300">MasterPBX</span>
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">מחובר</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <span className="text-sm text-gray-700 dark:text-gray-300">WhatsApp Business</span>
+              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">בהמתנה</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <span className="text-sm text-gray-700 dark:text-gray-300">Google Workspace</span>
+              <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">לא מחובר</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderActiveTab = () => {
+    switch(activeTab) {
+      case 'dashboard': return <Dashboard />;
+      case 'calls': return <CallsView />;
+      case 'contacts': return <ContactsView />;
+      case 'analytics': return <AnalyticsView />;
+      case 'settings': return <SettingsView />;
+      default: return <Dashboard />;
+    }
+  };
+
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
+    <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'} transition-colors`}>
+      <div className="flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          <Header />
+          <main className="flex-1">
+            {renderActiveTab()}
+          </main>
+        </div>
+      </div>
     </div>
   );
 };
-
-function App() {
-  return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
-  );
-}
 
 export default App;

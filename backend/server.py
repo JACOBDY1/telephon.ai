@@ -1,15 +1,18 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException, Query
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import requests
+import httpx
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional, Dict, Any
 import uuid
-from datetime import datetime
-
+from datetime import datetime, timedelta
+import asyncio
+import json
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -20,13 +23,12 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # Create the main app without a prefix
-app = FastAPI()
+app = FastAPI(title="AI Telephony Platform", version="1.0.0")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-
-# Define Models
+# Pydantic Models
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_name: str
@@ -35,16 +37,153 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
-# Add your routes to the router instead of directly to app
+class CallRecord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    caller_name: str
+    caller_number: str
+    callee_number: Optional[str] = None
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    duration: Optional[int] = None  # in seconds
+    status: str = "active"  # active, completed, missed
+    transcription: Optional[str] = None
+    sentiment: Optional[str] = None  # positive, negative, neutral
+    language: Optional[str] = "he"
+    recording_url: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CallRecordCreate(BaseModel):
+    caller_name: str
+    caller_number: str
+    callee_number: Optional[str] = None
+    language: Optional[str] = "he"
+
+class Contact(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    phone_number: str
+    email: Optional[str] = None
+    company: Optional[str] = None
+    tags: List[str] = []
+    last_call_date: Optional[datetime] = None
+    total_calls: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ContactCreate(BaseModel):
+    name: str
+    phone_number: str
+    email: Optional[str] = None
+    company: Optional[str] = None
+    tags: List[str] = []
+
+class AIInsight(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    call_id: str
+    insight_type: str  # sentiment, keyword, recommendation
+    content: str
+    confidence: float
+    language: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PlaybookSection(BaseModel):
+    title: str
+    items: List[Dict[str, str]]
+
+class SalesPlaybook(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    sections: List[PlaybookSection]
+    language: str = "he"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+# Mock Checkcall API integration functions
+async def get_checkcall_calls(user_id: str, from_date: str = None, to_date: str = None):
+    """
+    Mock function to simulate Checkcall API integration
+    In production, this would make actual HTTP requests to Checkcall API
+    """
+    # Simulate API response with mock data
+    mock_calls = [
+        {
+            "id": "12345",
+            "start": "2024-01-15 10:30:00",
+            "end": "2024-01-15 10:35:23",
+            "callerid": "+972-50-123-4567",
+            "callee": "+972-3-123-4567",
+            "price": "0.15",
+            "status": "completed",
+            "recording_url": "http://example.com/recording1.wav"
+        },
+        {
+            "id": "12346", 
+            "start": "2024-01-15 11:15:00",
+            "end": "2024-01-15 11:18:45",
+            "callerid": "+1-555-987-6543",
+            "callee": "+972-3-123-4567", 
+            "price": "0.12",
+            "status": "completed",
+            "recording_url": "http://example.com/recording2.wav"
+        }
+    ]
+    return mock_calls
+
+async def get_masterpbx_call_log(token_id: str, start_date: str = None, end_date: str = None):
+    """
+    Mock function to simulate MasterPBX API integration
+    In production, this would make actual HTTP requests to MasterPBX API
+    """
+    mock_log = [
+        {
+            "tenant_id": "tenant123",
+            "caller": "+972-50-123-4567",
+            "callee": "+972-3-123-4567",
+            "start_time": "2024-01-15 10:30:00",
+            "duration": "323",
+            "status": "ANSWERED"
+        }
+    ]
+    return mock_log
+
+async def mock_transcribe_audio(audio_url: str, language: str = "he-IL") -> str:
+    """
+    Mock transcription function
+    In production, this would use Google Cloud Speech-to-Text or similar
+    """
+    mock_transcriptions = {
+        "he": "שלום, אני מעוניין לקבל מידע נוסף על המוצרים החדשים שלכם",
+        "en": "Hi, I'd like to get more information about your new products",
+        "ar": "مرحبا، أريد الحصول على مزيد من المعلومات حول منتجاتكم الجديدة"
+    }
+    return mock_transcriptions.get(language, mock_transcriptions["en"])
+
+async def mock_analyze_sentiment(text: str, language: str = "he") -> str:
+    """
+    Mock sentiment analysis function
+    In production, this would use Google Cloud Natural Language, HuggingFace models, etc.
+    """
+    # Simple mock logic
+    positive_keywords = ["מעולה", "נהדר", "תודה", "excellent", "great", "thanks", "شكرا", "ممتاز"]
+    negative_keywords = ["בעיה", "לא טוב", "problem", "bad", "مشكلة", "سيء"]
+    
+    text_lower = text.lower()
+    
+    if any(keyword in text_lower for keyword in positive_keywords):
+        return "positive"
+    elif any(keyword in text_lower for keyword in negative_keywords):
+        return "negative"
+    else:
+        return "neutral"
+
+# API Routes
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "AI Telephony Platform API", "version": "1.0.0"}
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_dict = input.dict()
     status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
+    await db.status_checks.insert_one(status_obj.dict())
     return status_obj
 
 @api_router.get("/status", response_model=List[StatusCheck])
@@ -52,9 +191,283 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Calls Management
+@api_router.post("/calls", response_model=CallRecord)
+async def create_call(call_data: CallRecordCreate):
+    """Create a new call record"""
+    call_dict = call_data.dict()
+    call_dict["start_time"] = datetime.utcnow()
+    call_obj = CallRecord(**call_dict)
+    
+    # Insert into database
+    await db.calls.insert_one(call_obj.dict())
+    
+    # Update contact statistics
+    await update_contact_call_stats(call_obj.caller_number)
+    
+    return call_obj
+
+@api_router.get("/calls", response_model=List[CallRecord])
+async def get_calls(
+    limit: int = Query(50, ge=1, le=1000),
+    skip: int = Query(0, ge=0),
+    status: Optional[str] = Query(None),
+    language: Optional[str] = Query(None)
+):
+    """Get calls with optional filtering"""
+    query = {}
+    if status:
+        query["status"] = status
+    if language:
+        query["language"] = language
+    
+    calls = await db.calls.find(query).skip(skip).limit(limit).sort("created_at", -1).to_list(limit)
+    return [CallRecord(**call) for call in calls]
+
+@api_router.get("/calls/{call_id}", response_model=CallRecord)
+async def get_call(call_id: str):
+    """Get a specific call by ID"""
+    call = await db.calls.find_one({"id": call_id})
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
+    return CallRecord(**call)
+
+@api_router.put("/calls/{call_id}/end")
+async def end_call(call_id: str):
+    """End an active call"""
+    call = await db.calls.find_one({"id": call_id})
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
+    
+    end_time = datetime.utcnow()
+    start_time = call["start_time"]
+    duration = int((end_time - start_time).total_seconds())
+    
+    update_data = {
+        "end_time": end_time,
+        "duration": duration,
+        "status": "completed"
+    }
+    
+    await db.calls.update_one({"id": call_id}, {"$set": update_data})
+    
+    # Trigger AI processing for completed call
+    await process_call_ai(call_id)
+    
+    return {"message": "Call ended successfully", "duration": duration}
+
+async def process_call_ai(call_id: str):
+    """Process call with AI (transcription, sentiment analysis)"""
+    call = await db.calls.find_one({"id": call_id})
+    if not call:
+        return
+    
+    # Mock transcription (in production, would process actual audio)
+    transcription = await mock_transcribe_audio("mock_audio_url", call.get("language", "he"))
+    sentiment = await mock_analyze_sentiment(transcription, call.get("language", "he"))
+    
+    # Update call with AI results
+    await db.calls.update_one(
+        {"id": call_id},
+        {"$set": {
+            "transcription": transcription,
+            "sentiment": sentiment
+        }}
+    )
+    
+    # Store AI insights
+    insight = AIInsight(
+        call_id=call_id,
+        insight_type="sentiment",
+        content=f"Call sentiment analyzed as {sentiment}",
+        confidence=0.85,
+        language=call.get("language", "he")
+    )
+    await db.ai_insights.insert_one(insight.dict())
+
+# Contacts Management
+@api_router.post("/contacts", response_model=Contact)
+async def create_contact(contact_data: ContactCreate):
+    """Create a new contact"""
+    contact_dict = contact_data.dict()
+    contact_obj = Contact(**contact_dict)
+    await db.contacts.insert_one(contact_obj.dict())
+    return contact_obj
+
+@api_router.get("/contacts", response_model=List[Contact])
+async def get_contacts(
+    limit: int = Query(50, ge=1, le=1000),
+    skip: int = Query(0, ge=0),
+    search: Optional[str] = Query(None)
+):
+    """Get contacts with optional search"""
+    query = {}
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"phone_number": {"$regex": search, "$options": "i"}},
+            {"company": {"$regex": search, "$options": "i"}}
+        ]
+    
+    contacts = await db.contacts.find(query).skip(skip).limit(limit).to_list(limit)
+    return [Contact(**contact) for contact in contacts]
+
+@api_router.get("/contacts/{contact_id}", response_model=Contact)
+async def get_contact(contact_id: str):
+    """Get a specific contact by ID"""
+    contact = await db.contacts.find_one({"id": contact_id})
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    return Contact(**contact)
+
+async def update_contact_call_stats(phone_number: str):
+    """Update contact call statistics"""
+    await db.contacts.update_one(
+        {"phone_number": phone_number},
+        {
+            "$set": {"last_call_date": datetime.utcnow()},
+            "$inc": {"total_calls": 1}
+        },
+        upsert=True
+    )
+
+# Analytics & Insights
+@api_router.get("/analytics/summary")
+async def get_analytics_summary():
+    """Get overall analytics summary"""
+    # Get date range for last 30 days
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    
+    # Aggregate data
+    total_calls = await db.calls.count_documents({})
+    recent_calls = await db.calls.count_documents({"created_at": {"$gte": thirty_days_ago}})
+    
+    # Sentiment analysis
+    sentiment_pipeline = [
+        {"$match": {"sentiment": {"$ne": None}}},
+        {"$group": {"_id": "$sentiment", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    sentiment_data = await db.calls.aggregate(sentiment_pipeline).to_list(10)
+    
+    # Language distribution
+    language_pipeline = [
+        {"$group": {"_id": "$language", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    language_data = await db.calls.aggregate(language_pipeline).to_list(10)
+    
+    # Average call duration
+    duration_pipeline = [
+        {"$match": {"duration": {"$ne": None}}},
+        {"$group": {"_id": None, "avg_duration": {"$avg": "$duration"}}}
+    ]
+    duration_result = await db.calls.aggregate(duration_pipeline).to_list(1)
+    avg_duration = duration_result[0]["avg_duration"] if duration_result else 0
+    
+    return {
+        "total_calls": total_calls,
+        "recent_calls": recent_calls,
+        "sentiment_distribution": {item["_id"]: item["count"] for item in sentiment_data},
+        "language_distribution": {item["_id"]: item["count"] for item in language_data},
+        "average_call_duration": round(avg_duration, 2)
+    }
+
+@api_router.get("/analytics/insights", response_model=List[AIInsight])
+async def get_ai_insights(
+    limit: int = Query(20, ge=1, le=100),
+    insight_type: Optional[str] = Query(None)
+):
+    """Get AI insights"""
+    query = {}
+    if insight_type:
+        query["insight_type"] = insight_type
+    
+    insights = await db.ai_insights.find(query).limit(limit).sort("created_at", -1).to_list(limit)
+    return [AIInsight(**insight) for insight in insights]
+
+# Sales Playbook
+@api_router.get("/playbook/default")
+async def get_default_playbook():
+    """Get the default sales playbook"""
+    default_playbook = {
+        "title": "Qualified Lead Playbook",
+        "language": "he",
+        "sections": [
+            {
+                "title": "Qualification",
+                "items": [
+                    {"label": "Budget", "prompt": "What's your budget for this solution?"},
+                    {"label": "Timeline", "prompt": "When are you looking to implement?"},
+                    {"label": "Decision Maker", "prompt": "Who else is involved in the decision?"}
+                ]
+            },
+            {
+                "title": "Needs Analysis",
+                "items": [
+                    {"label": "Current Solution", "prompt": "What are you using currently?"},
+                    {"label": "Pain Points", "prompt": "What challenges are you facing?"},
+                    {"label": "Goals", "prompt": "What outcomes are you hoping to achieve?"}
+                ]
+            },
+            {
+                "title": "Demo Scheduling",
+                "items": [
+                    {"label": "Best Time", "prompt": "When would be the best time for a demo?"},
+                    {"label": "Key Features", "prompt": "Which features are most important?"}
+                ]
+            }
+        ]
+    }
+    return default_playbook
+
+# Mock external API integration endpoints
+@api_router.get("/integrations/checkcall/calls")
+async def get_checkcall_integration_calls(
+    user_id: str = Query(...),
+    from_date: Optional[str] = Query(None),
+    to_date: Optional[str] = Query(None)
+):
+    """Get calls from Checkcall API integration"""
+    calls = await get_checkcall_calls(user_id, from_date, to_date)
+    return {"status": "success", "data": calls}
+
+@api_router.get("/integrations/masterpbx/calllog")
+async def get_masterpbx_integration_calllog(
+    token_id: str = Query(...),
+    start_date: Optional[str] = Query(None),
+    end_date: Optional[str] = Query(None)
+):
+    """Get call log from MasterPBX API integration"""
+    call_log = await get_masterpbx_call_log(token_id, start_date, end_date)
+    return {"status": "success", "data": call_log}
+
+# Health check endpoint
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    try:
+        # Test database connection
+        await db.command("ping")
+        return {
+            "status": "healthy",
+            "timestamp": datetime.utcnow(),
+            "services": {
+                "database": "connected",
+                "api": "running"
+            }
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "timestamp": datetime.utcnow(),
+            "error": str(e)
+        }
+
 # Include the router in the main app
 app.include_router(api_router)
 
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -70,6 +483,49 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_event():
+    logger.info("AI Telephony Platform API starting up...")
+    # Initialize default data if needed
+    await initialize_default_data()
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    logger.info("Shutting down AI Telephony Platform API...")
     client.close()
+
+async def initialize_default_data():
+    """Initialize database with default data if empty"""
+    # Check if contacts collection is empty and add sample data
+    contacts_count = await db.contacts.count_documents({})
+    if contacts_count == 0:
+        sample_contacts = [
+            {
+                "id": str(uuid.uuid4()),
+                "name": "יוסי כהן",
+                "phone_number": "+972-50-123-4567",
+                "email": "yossi@example.com",
+                "company": "חברת הטכנולוגיה",
+                "tags": ["לקוח פוטנציאלי"],
+                "total_calls": 3,
+                "last_call_date": datetime.utcnow() - timedelta(days=1),
+                "created_at": datetime.utcnow()
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Sarah Johnson",
+                "phone_number": "+1-555-987-6543",
+                "email": "sarah@company.com",
+                "company": "Tech Corp",
+                "tags": ["enterprise"],
+                "total_calls": 1,
+                "last_call_date": datetime.utcnow() - timedelta(days=2),
+                "created_at": datetime.utcnow()
+            }
+        ]
+        await db.contacts.insert_many(sample_contacts)
+        logger.info("Initialized sample contacts")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
