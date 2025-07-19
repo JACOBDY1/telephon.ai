@@ -18,6 +18,8 @@ import SettingsView from './components/SettingsView';
 import AutomationCenter from './components/AutomationCenter';
 import CallFlowCanvas from './components/CallFlowCanvas';
 import DocumentGenerator from './components/DocumentGenerator';
+import AIAnalytics from './components/AIAnalytics';
+import MessagingCenter from './components/MessagingCenter';
 
 // Import additional components for advanced features
 import { 
