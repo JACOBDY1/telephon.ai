@@ -14,16 +14,14 @@ import ContactsView from './components/ContactsView';
 import AnalyticsView from './components/AnalyticsView';
 import SettingsView from './components/SettingsView';
 
-// Import remaining icons
-import { 
-  Plus, Edit, Trash2, Play, BookOpen, FileText, CheckCircle, Clock, Zap, 
-  Target, Activity, Workflow, Star, Bot, BarChart3, Phone
-} from 'lucide-react';
+// Import additional components for advanced features
+import { Plus, Edit, Trash2, Play, BookOpen, FileText, CheckCircle, Clock, Zap, Target, Activity, Workflow } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const App = () => {
+  // Main state
   const [darkMode, setDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isCallActive, setIsCallActive] = useState(false);
@@ -32,6 +30,8 @@ const App = () => {
   const [language, setLanguage] = useState('he');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  // API Data state
   const [realCallData, setRealCallData] = useState([]);
   const [checkcallData, setCheckcallData] = useState([]);
   const [masterpbxData, setMasterpbxData] = useState([]);
@@ -42,7 +42,7 @@ const App = () => {
     backend: 'checking'
   });
 
-  // Advanced State Management
+  // Advanced features state
   const [crmData, setCrmData] = useState({
     leads: [],
     contacts: [],
@@ -57,6 +57,7 @@ const App = () => {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [notifications, setNotifications] = useState([]);
 
+  // Language and translations
   const languages = {
     he: { name: 'עברית', flag: '🇮🇱' },
     en: { name: 'English', flag: '🇺🇸' },
