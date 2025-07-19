@@ -1568,7 +1568,7 @@ async def toggle_automation_rule(rule_id: str, current_user: User = Depends(get_
 # ===== CALL FLOW CANVAS ENDPOINTS =====
 
 @api_router.get("/callflows")
-async def get_call_flows():
+async def get_call_flows(current_user: User = Depends(get_current_active_user)):
     """Get all call flows"""
     try:
         flows = [
