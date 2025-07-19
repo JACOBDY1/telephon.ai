@@ -1002,8 +1002,8 @@ class APITester:
             if response.status_code == 200:
                 analytics = response.json()
                 
-                # Check for expected analytics fields
-                expected_fields = ["leads_by_status", "deals_by_stage", "tasks_by_status", "total_deal_value"]
+                # Check for expected analytics fields (note: field is total_won_value, not total_deal_value)
+                expected_fields = ["leads_by_status", "deals_by_stage", "tasks_by_status", "total_won_value"]
                 missing_fields = [field for field in expected_fields if field not in analytics]
                 
                 if not missing_fields:
@@ -1011,7 +1011,7 @@ class APITester:
                                   f"Analytics retrieved successfully: "
                                   f"leads={analytics.get('leads_by_status', {})}, "
                                   f"deals={analytics.get('deals_by_stage', {})}, "
-                                  f"total_value={analytics.get('total_deal_value', 0)}")
+                                  f"total_value={analytics.get('total_won_value', 0)}")
                     return True
                 else:
                     self.log_result("CRM Analytics", False, 
