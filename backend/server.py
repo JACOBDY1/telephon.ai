@@ -888,6 +888,375 @@ async def health_check():
             "error": str(e)
         }
 
+# ===== ADVANCED AI ANALYTICS ENDPOINTS =====
+
+@api_router.get("/ai/realtime-analysis")
+async def get_realtime_analysis():
+    """Get real-time AI analysis during active call"""
+    try:
+        # Simulate real-time AI analysis
+        sentiments = ['positive', 'negative', 'neutral']
+        sentiment = random.choice(sentiments)
+        
+        keywords = [
+            'מחיר', 'הנחה', 'תנאים', 'חוזה', 'משלוח', 'תמיכה',
+            'איכות', 'מוצר', 'שירות', 'זמן', 'תשלום', 'הזמנה'
+        ]
+        
+        selected_keywords = random.sample(keywords, 3)
+        
+        suggestions = {
+            'positive': [
+                'הלקוח מרוצה - זה הזמן לסגור את העסקה',
+                'הזכר את ההטבות הנוספות',
+                'הציע אפשרות לשדרוג'
+            ],
+            'negative': [
+                'הלקוח מביע חוסר שביעות רצון - הקשב בעיון',
+                'הציע פתרון אלטרנטיבי',
+                'העבר למנהל אם נדרש'
+            ],
+            'neutral': [
+                'המשך בשיחה רגילה',
+                'נסה לזהות צרכים נוספים',
+                'שאל שאלות מפתח'
+            ]
+        }
+        
+        analysis = RealTimeAnalysis(
+            sentiment=sentiment,
+            confidence=round(random.uniform(70, 95), 2),
+            keywords=selected_keywords,
+            emotions={
+                'happiness': round(random.uniform(0, 100), 2),
+                'anger': round(random.uniform(0, 30), 2),
+                'surprise': round(random.uniform(0, 50), 2),
+                'sadness': round(random.uniform(0, 20), 2)
+            },
+            suggestions=suggestions[sentiment],
+            risk_level='high' if sentiment == 'negative' else 'low' if sentiment == 'positive' else 'medium'
+        )
+        
+        return {"status": "success", "data": analysis.dict()}
+    
+    except Exception as e:
+        logger.error(f"Error getting real-time analysis: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/ai/transcription")
+async def get_transcription():
+    """Get real-time transcription entries"""
+    try:
+        # Simulate transcription entries
+        sample_texts = [
+            "שלום, אני מעוניין בשירותים שלכם",
+            "כמה עולה המוצר?",
+            "האם יש אפשרות להנחה?",
+            "מתי אוכל לקבל את המוצר?",
+            "תודה על המידע, אני אחשוב על זה"
+        ]
+        
+        entries = []
+        for i in range(3):
+            entry = TranscriptionEntry(
+                speaker=random.choice(['customer', 'agent']),
+                text=random.choice(sample_texts),
+                timestamp=datetime.now().strftime("%H:%M:%S"),
+                sentiment=random.choice(['positive', 'negative', 'neutral'])
+            )
+            entries.append(entry.dict())
+        
+        return {"status": "success", "data": entries}
+    
+    except Exception as e:
+        logger.error(f"Error getting transcription: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== MESSAGING CENTER ENDPOINTS =====
+
+@api_router.get("/messaging/conversations")
+async def get_conversations():
+    """Get all messaging conversations"""
+    try:
+        conversations = [
+            {
+                "id": "1",
+                "contact": {"name": "יוסי כהן", "phone": "+972-50-123-4567"},
+                "platform": "whatsapp",
+                "last_message": {
+                    "text": "תודה על השירות המעולה!",
+                    "timestamp": "14:30",
+                    "is_read": True,
+                    "sender": "customer"
+                },
+                "status": "active",
+                "unread_count": 0,
+                "tags": ["לקוח VIP", "עסקה פתוחה"]
+            },
+            {
+                "id": "2",
+                "contact": {"name": "Sarah Miller", "phone": "+1-555-987-6543"},
+                "platform": "sms",
+                "last_message": {
+                    "text": "מתי תוכל להתקשר אלי?",
+                    "timestamp": "13:45",
+                    "is_read": False,
+                    "sender": "customer"
+                },
+                "status": "pending",
+                "unread_count": 2,
+                "tags": ["פרוספקט"]
+            }
+        ]
+        
+        return {"status": "success", "data": conversations}
+    
+    except Exception as e:
+        logger.error(f"Error getting conversations: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/messaging/campaigns")
+async def get_campaigns():
+    """Get all messaging campaigns"""
+    try:
+        campaigns = [
+            {
+                "id": "1",
+                "name": "ברכה ללקוחות חדשים",
+                "platform": "whatsapp",
+                "status": "active",
+                "sent": 145,
+                "delivered": 142,
+                "read": 128,
+                "replied": 34,
+                "created": "2024-01-15",
+                "schedule": "מיידי",
+                "template": "ברוכים הבאים! תודה על הצטרפותכם לשירותי {company_name}",
+                "target_audience": ["new_customers"]
+            },
+            {
+                "id": "2",
+                "name": "תזכורת פגישה",
+                "platform": "sms",
+                "status": "scheduled",
+                "sent": 0,
+                "delivered": 0,
+                "read": 0,
+                "replied": 0,
+                "created": "2024-01-14",
+                "schedule": "יומי ב-09:00",
+                "template": "תזכורת: יש לך פגישה ב-{meeting_time} עם {agent_name}",
+                "target_audience": ["customers_with_meetings"]
+            }
+        ]
+        
+        return {"status": "success", "data": campaigns}
+    
+    except Exception as e:
+        logger.error(f"Error getting campaigns: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/messaging/templates")
+async def get_message_templates():
+    """Get all message templates"""
+    try:
+        templates = [
+            {
+                "id": "1",
+                "name": "ברכה ראשונית",
+                "platform": "whatsapp",
+                "category": "ברכות",
+                "content": "שלום {name}! תודה על פנייתך. נציג יחזור אליך בקרוב 😊",
+                "variables": ["name"],
+                "usage": 45
+            },
+            {
+                "id": "2",
+                "name": "תזכורת תשלום",
+                "platform": "sms",
+                "category": "תזכורות",
+                "content": "תזכורת: התשלום בסך {amount} ₪ יגיע לפירעון ב-{due_date}",
+                "variables": ["amount", "due_date"],
+                "usage": 23
+            }
+        ]
+        
+        return {"status": "success", "data": templates}
+    
+    except Exception as e:
+        logger.error(f"Error getting templates: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== DOCUMENT GENERATOR ENDPOINTS =====
+
+@api_router.get("/documents/templates")
+async def get_document_templates():
+    """Get all document templates"""
+    try:
+        templates = [
+            {
+                "id": "quote",
+                "name": "הצעת מחיר",
+                "description": "הצעת מחיר מפורטת עם פירוט מוצרים ומחירים",
+                "type": "quote",
+                "fields": [
+                    {"name": "customerName", "label": "שם לקוח", "type": "text", "required": True},
+                    {"name": "customerEmail", "label": "אימייל לקוח", "type": "email", "required": True},
+                    {"name": "validUntil", "label": "תוקף עד", "type": "date", "required": True}
+                ]
+            },
+            {
+                "id": "contract",
+                "name": "חוזה שירות",
+                "description": "חוזה שירות סטנדרטי עם תנאים כלליים",
+                "type": "contract",
+                "fields": [
+                    {"name": "customerName", "label": "שם לקוח", "type": "text", "required": True},
+                    {"name": "serviceType", "label": "סוג שירות", "type": "select", "required": True},
+                    {"name": "startDate", "label": "תאריך התחלה", "type": "date", "required": True}
+                ]
+            }
+        ]
+        
+        return {"status": "success", "data": templates}
+    
+    except Exception as e:
+        logger.error(f"Error getting document templates: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/documents/generate")
+async def generate_document(template_id: str, data: Dict[str, Any]):
+    """Generate a document from template"""
+    try:
+        # Simulate document generation
+        document = {
+            "id": str(uuid.uuid4()),
+            "template_id": template_id,
+            "name": f"מסמך - {data.get('customerName', 'לקוח חדש')}",
+            "created": datetime.now().isoformat(),
+            "status": "draft",
+            "data": data,
+            "download_url": f"/api/documents/download/{uuid.uuid4()}"
+        }
+        
+        return {"status": "success", "data": document}
+    
+    except Exception as e:
+        logger.error(f"Error generating document: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== AUTOMATION CENTER ENDPOINTS =====
+
+@api_router.get("/automations/rules")
+async def get_automation_rules():
+    """Get all automation rules"""
+    try:
+        rules = [
+            {
+                "id": "1",
+                "name": "SMS אוטומטי ללידים חדשים",
+                "type": "sms",
+                "active": True,
+                "triggers": 15,
+                "success_rate": 85,
+                "template": "שלום {name}, תודה על פנייתך! נציג יחזור אליך בקרוב.",
+                "conditions": ["new_lead", "source_website"],
+                "actions": ["send_sms", "create_task", "notify_agent"],
+                "last_run": "2024-01-15 14:30"
+            },
+            {
+                "id": "2",
+                "name": "WhatsApp מעקב אחר שיחות לא נענו",
+                "type": "whatsapp",
+                "active": True,
+                "triggers": 8,
+                "success_rate": 92,
+                "template": "היי! ראיתי שניסיתי להתקשר אליך. איך אוכל לעזור? 😊",
+                "conditions": ["missed_call", "duration_0"],
+                "actions": ["send_whatsapp", "schedule_callback"],
+                "last_run": "2024-01-15 13:45"
+            }
+        ]
+        
+        return {"status": "success", "data": rules}
+    
+    except Exception as e:
+        logger.error(f"Error getting automation rules: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/automations/rules")
+async def create_automation_rule(rule: AutomationRule):
+    """Create a new automation rule"""
+    try:
+        new_rule = {
+            "id": str(uuid.uuid4()),
+            **rule.dict(),
+            "created": datetime.now().isoformat(),
+            "triggers": 0,
+            "success_rate": 0,
+            "last_run": None
+        }
+        
+        return {"status": "success", "data": new_rule}
+    
+    except Exception as e:
+        logger.error(f"Error creating automation rule: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.put("/automations/rules/{rule_id}/toggle")
+async def toggle_automation_rule(rule_id: str):
+    """Toggle automation rule active status"""
+    try:
+        # Simulate toggling
+        return {"status": "success", "message": f"Rule {rule_id} toggled"}
+    
+    except Exception as e:
+        logger.error(f"Error toggling automation rule: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== CALL FLOW CANVAS ENDPOINTS =====
+
+@api_router.get("/callflows")
+async def get_call_flows():
+    """Get all call flows"""
+    try:
+        flows = [
+            {
+                "id": "1",
+                "name": "זרימה בסיסית - קבלת שיחות",
+                "description": "זרימה סטנדרטית לקבלת שיחות עם בוט ראשוני",
+                "nodes": [
+                    {"id": "start", "type": "start", "x": 100, "y": 100, "label": "שיחה נכנסת"},
+                    {"id": "greeting", "type": "message", "x": 250, "y": 100, "label": "ברוכים הבאים"},
+                    {"id": "menu", "type": "bot", "x": 400, "y": 100, "label": "תפריט ראשי"}
+                ],
+                "connections": []
+            }
+        ]
+        
+        return {"status": "success", "data": flows}
+    
+    except Exception as e:
+        logger.error(f"Error getting call flows: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/callflows")
+async def save_call_flow(flow_data: Dict[str, Any]):
+    """Save a call flow"""
+    try:
+        new_flow = {
+            "id": str(uuid.uuid4()),
+            **flow_data,
+            "created": datetime.now().isoformat(),
+            "updated": datetime.now().isoformat()
+        }
+        
+        return {"status": "success", "data": new_flow}
+    
+    except Exception as e:
+        logger.error(f"Error saving call flow: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include the router in the main app
 app.include_router(api_router)
 
