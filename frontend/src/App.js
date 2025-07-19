@@ -1,46 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import axios from 'axios';
-import { Phone, Video, MessageSquare, Users, BarChart3, Settings, Search, Bell, User, ChevronDown, Play, Pause, Volume2, VolumeX, Menu, X, Calendar, Mail, PhoneCall, TrendingUp, Clock, Globe, Mic, MicOff, Camera, CameraOff, Share, Download } from 'lucide-react';
+import { Phone, Video, MessageSquare, Users, BarChart3, Settings, Search, Bell, User, ChevronDown, Play, Pause, Volume2, VolumeX, Menu, X, Calendar, Mail, PhoneCall, TrendingUp, Clock, Globe, Mic, MicOff, Camera, CameraOff, Share, Download, RefreshCw, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-
-// Mock data for demonstration
-const mockCallData = [
-  { id: 1, caller: "יוסי כהן", number: "+972-50-123-4567", duration: "00:05:23", status: "completed", transcription: "שלום, אני מעוניין לקבל מידע על המוצרים החדשים", sentiment: "positive", time: "10:30" },
-  { id: 2, caller: "Sarah Johnson", number: "+1-555-987-6543", duration: "00:03:45", status: "completed", transcription: "Hi, I'd like to schedule a demo for next week", sentiment: "neutral", time: "11:15" },
-  { id: 3, caller: "Ahmed Al-Hassan", number: "+971-50-765-4321", duration: "00:07:12", status: "in-progress", transcription: "مرحبا، أحتاج إلى مساعدة في الفوترة", sentiment: "negative", time: "11:45" }
-];
-
-const mockPlaybook = {
-  title: "Qualified Lead Playbook",
-  sections: [
-    {
-      title: "Qualification",
-      items: [
-        { label: "Budget", prompt: "What's your budget for this solution?" },
-        { label: "Timeline", prompt: "When are you looking to implement?" },
-        { label: "Decision Maker", prompt: "Who else is involved in the decision?" }
-      ]
-    },
-    {
-      title: "Needs Analysis",
-      items: [
-        { label: "Current Solution", prompt: "What are you using currently?" },
-        { label: "Pain Points", prompt: "What challenges are you facing?" },
-        { label: "Goals", prompt: "What outcomes are you hoping to achieve?" }
-      ]
-    },
-    {
-      title: "Demo Scheduling",
-      items: [
-        { label: "Best Time", prompt: "When would be the best time for a demo?" },
-        { label: "Key Features", prompt: "Which features are most important?" }
-      ]
-    }
-  ]
-};
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -50,6 +14,16 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [language, setLanguage] = useState('he');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [realCallData, setRealCallData] = useState([]);
+  const [checkcallData, setCheckcallData] = useState([]);
+  const [masterpbxData, setMasterpbxData] = useState([]);
+  const [realtimeAnalytics, setRealtimeAnalytics] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState({
+    checkcall: 'checking',
+    masterpbx: 'checking',
+    backend: 'checking'
+  });
 
   const languages = {
     he: { name: 'עברית', flag: '🇮🇱' },
@@ -76,7 +50,12 @@ const App = () => {
       averageCallTime: 'זמן שיחה ממוצע',
       conversionRate: 'אחוז המרה',
       aiInsights: 'תובנות AI',
-      salesPlaybook: 'מדריך מכירות'
+      salesPlaybook: 'מדריך מכירות',
+      realTime: 'זמן אמת',
+      loading: 'טוען...',
+      connected: 'מחובר',
+      disconnected: 'מנותק',
+      checking: 'בודק...'
     },
     en: {
       dashboard: 'Dashboard',
@@ -92,17 +71,83 @@ const App = () => {
       averageCallTime: 'Average Call Time',
       conversionRate: 'Conversion Rate',
       aiInsights: 'AI Insights',
-      salesPlaybook: 'Sales Playbook'
+      salesPlaybook: 'Sales Playbook',
+      realTime: 'Real Time',
+      loading: 'Loading...',
+      connected: 'Connected',
+      disconnected: 'Disconnected',
+      checking: 'Checking...'
     }
   };
 
   const t = translations[language] || translations.en;
+
+  // Load real data from APIs
+  const loadRealData = async () => {
+    setLoading(true);
+    try {
+      // Check backend health
+      const healthResponse = await axios.get(`${API}/health`);
+      setConnectionStatus(prev => ({ ...prev, backend: healthResponse.data.status === 'healthy' ? 'connected' : 'disconnected' }));
+
+      // Load Checkcall data
+      try {
+        const checkcallResponse = await axios.get(`${API}/integrations/checkcall/calls`);
+        if (checkcallResponse.data.status === 'success') {
+          setCheckcallData(checkcallResponse.data.data || []);
+          setConnectionStatus(prev => ({ ...prev, checkcall: 'connected' }));
+        } else {
+          setConnectionStatus(prev => ({ ...prev, checkcall: 'disconnected' }));
+        }
+      } catch (error) {
+        console.warn('Checkcall API error:', error);
+        setConnectionStatus(prev => ({ ...prev, checkcall: 'disconnected' }));
+      }
+
+      // Load MasterPBX data
+      try {
+        const masterpbxResponse = await axios.get(`${API}/integrations/masterpbx/calllog`);
+        if (masterpbxResponse.data.status === 'success') {
+          setMasterpbxData(masterpbxResponse.data.data || []);
+          setConnectionStatus(prev => ({ ...prev, masterpbx: 'connected' }));
+        } else {
+          setConnectionStatus(prev => ({ ...prev, masterpbx: 'disconnected' }));
+        }
+      } catch (error) {
+        console.warn('MasterPBX API error:', error);
+        setConnectionStatus(prev => ({ ...prev, masterpbx: 'disconnected' }));
+      }
+
+      // Load real-time analytics
+      try {
+        const analyticsResponse = await axios.get(`${API}/analytics/realtime`);
+        setRealtimeAnalytics(analyticsResponse.data);
+      } catch (error) {
+        console.warn('Analytics API error:', error);
+      }
+
+      // Load regular calls data
+      const callsResponse = await axios.get(`${API}/calls`);
+      setRealCallData(callsResponse.data || []);
+
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setConnectionStatus(prev => ({ ...prev, backend: 'disconnected' }));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       setDarkMode(savedTheme === 'dark');
     }
+    loadRealData();
+    
+    // Refresh data every 30 seconds
+    const interval = setInterval(loadRealData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -119,6 +164,15 @@ const App = () => {
   const endCall = () => {
     setCurrentCall(null);
     setIsCallActive(false);
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'connected': return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'disconnected': return <XCircle className="w-4 h-4 text-red-500" />;
+      case 'checking': return <AlertCircle className="w-4 h-4 text-yellow-500" />;
+      default: return <AlertCircle className="w-4 h-4 text-gray-500" />;
+    }
   };
 
   const Sidebar = () => (
@@ -168,6 +222,27 @@ const App = () => {
           ))}
         </div>
       </nav>
+
+      {/* Connection Status */}
+      {sidebarOpen && (
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">מצב חיבורים</div>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 dark:text-gray-300">Checkcall</span>
+              {getStatusIcon(connectionStatus.checkcall)}
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 dark:text-gray-300">MasterPBX</span>
+              {getStatusIcon(connectionStatus.masterpbx)}
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 dark:text-gray-300">Backend</span>
+              {getStatusIcon(connectionStatus.backend)}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
