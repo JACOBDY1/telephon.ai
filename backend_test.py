@@ -1226,7 +1226,7 @@ class APITester:
         """Run all tests"""
         print("=" * 80)
         print("BACKEND API COMPREHENSIVE TESTS")
-        print("Authentication System + API Integrations")
+        print("Authentication System + CRM System + API Integrations")
         print("=" * 80)
         print(f"Testing backend at: {BACKEND_URL}")
         print(f"Test started at: {datetime.now().isoformat()}")
@@ -1234,7 +1234,7 @@ class APITester:
         
         # Run tests in order of importance
         # Authentication tests first (high priority)
-        auth_tests = [
+        test_sections = [
             ("AUTHENTICATION SYSTEM TESTS", [
                 self.test_demo_data_creation,
                 self.test_user_registration,
@@ -1243,6 +1243,17 @@ class APITester:
                 self.test_protected_endpoints,
                 self.test_profile_update,
                 self.test_password_change
+            ]),
+            ("CRM SYSTEM TESTS", [
+                self.test_crm_demo_data_population,
+                self.test_crm_leads_crud,
+                self.test_crm_deals_crud,
+                self.test_crm_tasks_crud,
+                self.test_crm_analytics_endpoint,
+                self.test_enhanced_contacts_crud,
+                self.test_enhanced_calls_crud,
+                self.test_crm_authentication_integration,
+                self.test_crm_data_relationships
             ]),
             ("API INTEGRATION TESTS", [
                 self.test_health_check,
@@ -1258,7 +1269,7 @@ class APITester:
             ])
         ]
         
-        for section_name, tests in auth_tests:
+        for section_name, tests in test_sections:
             print(f"\n{'='*20} {section_name} {'='*20}")
             for test in tests:
                 try:
@@ -1283,11 +1294,17 @@ class APITester:
         # Categorize results
         auth_results = [r for r in self.results if any(keyword in r["test"].lower() 
                        for keyword in ["auth", "login", "register", "jwt", "protected", "profile", "password", "demo"])]
-        api_results = [r for r in self.results if r not in auth_results]
+        crm_results = [r for r in self.results if any(keyword in r["test"].lower() 
+                      for keyword in ["crm", "leads", "deals", "tasks", "contacts", "calls", "analytics"])]
+        api_results = [r for r in self.results if r not in auth_results and r not in crm_results]
         
         print(f"\nAuthentication Tests: {len(auth_results)} total")
         auth_passed = sum(1 for r in auth_results if r["success"])
         print(f"  Passed: {auth_passed}, Failed: {len(auth_results) - auth_passed}")
+        
+        print(f"\nCRM System Tests: {len(crm_results)} total")
+        crm_passed = sum(1 for r in crm_results if r["success"])
+        print(f"  Passed: {crm_passed}, Failed: {len(crm_results) - crm_passed}")
         
         print(f"\nAPI Integration Tests: {len(api_results)} total")
         api_passed = sum(1 for r in api_results if r["success"])
