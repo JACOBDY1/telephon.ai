@@ -1476,7 +1476,7 @@ async def get_document_templates(current_user: User = Depends(get_current_active
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/documents/generate")
-async def generate_document(template_id: str, data: Dict[str, Any]):
+async def generate_document(template_id: str, data: Dict[str, Any], current_user: User = Depends(get_current_active_user)):
     """Generate a document from template"""
     try:
         # Simulate document generation
