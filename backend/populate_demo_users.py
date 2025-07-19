@@ -27,12 +27,13 @@ def create_demo_users():
     """Create demo users in MongoDB"""
     
     # MongoDB connection
-    MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/telephony_ai")
-    print(f"Connecting to MongoDB: {MONGO_URL}")
+    MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
+    DB_NAME = os.getenv("DB_NAME", "test_database")
+    print(f"Connecting to MongoDB: {MONGO_URL}/{DB_NAME}")
     
     try:
         client = MongoClient(MONGO_URL)
-        db = client.get_database()
+        db = client[DB_NAME]
         users_collection = db.users
         
         # Check if users already exist
