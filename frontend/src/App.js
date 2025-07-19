@@ -94,6 +94,8 @@ const App = () => {
       automations: 'אוטומציות',
       callFlows: 'זרימות שיחות',
       documents: 'מחולל מסמכים',
+      aiAnalytics: 'ניתוח AI',
+      messaging: 'מרכז הודעות',
       search: 'חיפוש...',
       activeCalls: 'שיחות פעילות',
       recentCalls: 'שיחות אחרונות',
