@@ -1536,7 +1536,7 @@ async def get_automation_rules(current_user: User = Depends(get_current_active_u
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/automations/rules")
-async def create_automation_rule(rule: AutomationRule):
+async def create_automation_rule(rule: AutomationRule, current_user: User = Depends(get_current_active_user)):
     """Create a new automation rule"""
     try:
         new_rule = {
