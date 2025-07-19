@@ -1441,7 +1441,7 @@ async def get_message_templates(current_user: User = Depends(get_current_active_
 # ===== DOCUMENT GENERATOR ENDPOINTS =====
 
 @api_router.get("/documents/templates")
-async def get_document_templates():
+async def get_document_templates(current_user: User = Depends(get_current_active_user)):
     """Get all document templates"""
     try:
         templates = [
