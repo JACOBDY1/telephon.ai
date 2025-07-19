@@ -2019,6 +2019,356 @@ async def save_call_flow(flow_data: Dict[str, Any], current_user: User = Depends
         logger.error(f"Error saving call flow: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ===== CRM CRUD ENDPOINTS =====
+
+# LEADS ENDPOINTS
+@api_router.get("/crm/leads", response_model=List[Lead])
+async def get_leads(
+    limit: int = Query(50, ge=1, le=1000),
+    skip: int = Query(0, ge=0),
+    status: Optional[str] = Query(None),
+    assigned_to: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get leads with optional filtering"""
+    query = {}
+    if status:
+        query["status"] = status
+    if assigned_to:
+        query["assigned_to"] = assigned_to
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"phone": {"$regex": search, "$options": "i"}},
+            {"company": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}}
+        ]
+    
+    leads = await async_db.leads.find(query).skip(skip).limit(limit).sort("created_at", -1).to_list(limit)
+    return [Lead(**lead) for lead in leads]
+
+@api_router.post("/crm/leads", response_model=Lead)
+async def create_lead(
+    lead_data: LeadCreate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a new lead"""
+    lead_dict = lead_data.dict()
+    lead_dict["created_by"] = current_user.id
+    lead_obj = Lead(**lead_dict)
+    await async_db.leads.insert_one(lead_obj.dict())
+    return lead_obj
+
+@api_router.get("/crm/leads/{lead_id}", response_model=Lead)
+async def get_lead(
+    lead_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get a specific lead by ID"""
+    lead = await async_db.leads.find_one({"id": lead_id})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return Lead(**lead)
+
+@api_router.put("/crm/leads/{lead_id}", response_model=Lead)
+async def update_lead(
+    lead_id: str,
+    lead_update: LeadUpdate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update a lead"""
+    lead = await async_db.leads.find_one({"id": lead_id})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    update_data = {k: v for k, v in lead_update.dict().items() if v is not None}
+    update_data["updated_at"] = datetime.utcnow()
+    
+    await async_db.leads.update_one({"id": lead_id}, {"$set": update_data})
+    
+    updated_lead = await async_db.leads.find_one({"id": lead_id})
+    return Lead(**updated_lead)
+
+@api_router.delete("/crm/leads/{lead_id}")
+async def delete_lead(
+    lead_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete a lead"""
+    result = await async_db.leads.delete_one({"id": lead_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return {"message": "Lead deleted successfully"}
+
+# DEALS ENDPOINTS
+@api_router.get("/crm/deals", response_model=List[Deal])
+async def get_deals(
+    limit: int = Query(50, ge=1, le=1000),
+    skip: int = Query(0, ge=0),
+    stage: Optional[str] = Query(None),
+    assigned_to: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get deals with optional filtering"""
+    query = {}
+    if stage:
+        query["stage"] = stage
+    if assigned_to:
+        query["assigned_to"] = assigned_to
+    if search:
+        query["$or"] = [
+            {"title": {"$regex": search, "$options": "i"}},
+            {"description": {"$regex": search, "$options": "i"}}
+        ]
+    
+    deals = await async_db.deals.find(query).skip(skip).limit(limit).sort("created_at", -1).to_list(limit)
+    return [Deal(**deal) for deal in deals]
+
+@api_router.post("/crm/deals", response_model=Deal)
+async def create_deal(
+    deal_data: DealCreate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a new deal"""
+    deal_dict = deal_data.dict()
+    deal_dict["created_by"] = current_user.id
+    deal_obj = Deal(**deal_dict)
+    await async_db.deals.insert_one(deal_obj.dict())
+    return deal_obj
+
+@api_router.get("/crm/deals/{deal_id}", response_model=Deal)
+async def get_deal(
+    deal_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get a specific deal by ID"""
+    deal = await async_db.deals.find_one({"id": deal_id})
+    if not deal:
+        raise HTTPException(status_code=404, detail="Deal not found")
+    return Deal(**deal)
+
+@api_router.put("/crm/deals/{deal_id}", response_model=Deal)
+async def update_deal(
+    deal_id: str,
+    deal_update: DealUpdate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update a deal"""
+    deal = await async_db.deals.find_one({"id": deal_id})
+    if not deal:
+        raise HTTPException(status_code=404, detail="Deal not found")
+    
+    update_data = {k: v for k, v in deal_update.dict().items() if v is not None}
+    update_data["updated_at"] = datetime.utcnow()
+    
+    await async_db.deals.update_one({"id": deal_id}, {"$set": update_data})
+    
+    updated_deal = await async_db.deals.find_one({"id": deal_id})
+    return Deal(**updated_deal)
+
+@api_router.delete("/crm/deals/{deal_id}")
+async def delete_deal(
+    deal_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete a deal"""
+    result = await async_db.deals.delete_one({"id": deal_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Deal not found")
+    return {"message": "Deal deleted successfully"}
+
+# TASKS ENDPOINTS
+@api_router.get("/crm/tasks", response_model=List[Task])
+async def get_tasks(
+    limit: int = Query(50, ge=1, le=1000),
+    skip: int = Query(0, ge=0),
+    status: Optional[str] = Query(None),
+    assigned_to: Optional[str] = Query(None),
+    type: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get tasks with optional filtering"""
+    query = {}
+    if status:
+        query["status"] = status
+    if assigned_to:
+        query["assigned_to"] = assigned_to
+    if type:
+        query["type"] = type
+    
+    tasks = await async_db.tasks.find(query).skip(skip).limit(limit).sort("created_at", -1).to_list(limit)
+    return [Task(**task) for task in tasks]
+
+@api_router.post("/crm/tasks", response_model=Task)
+async def create_task(
+    task_data: TaskCreate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a new task"""
+    task_dict = task_data.dict()
+    task_dict["created_by"] = current_user.id
+    task_obj = Task(**task_dict)
+    await async_db.tasks.insert_one(task_obj.dict())
+    return task_obj
+
+@api_router.get("/crm/tasks/{task_id}", response_model=Task)
+async def get_task(
+    task_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get a specific task by ID"""
+    task = await async_db.tasks.find_one({"id": task_id})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return Task(**task)
+
+@api_router.put("/crm/tasks/{task_id}", response_model=Task)
+async def update_task(
+    task_id: str,
+    task_update: TaskUpdate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update a task"""
+    task = await async_db.tasks.find_one({"id": task_id})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    update_data = {k: v for k, v in task_update.dict().items() if v is not None}
+    update_data["updated_at"] = datetime.utcnow()
+    
+    # Handle status change to completed
+    if update_data.get("status") == "completed" and task.get("status") != "completed":
+        update_data["completed_at"] = datetime.utcnow()
+    
+    await async_db.tasks.update_one({"id": task_id}, {"$set": update_data})
+    
+    updated_task = await async_db.tasks.find_one({"id": task_id})
+    return Task(**updated_task)
+
+@api_router.delete("/crm/tasks/{task_id}")
+async def delete_task(
+    task_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete a task"""
+    result = await async_db.tasks.delete_one({"id": task_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"message": "Task deleted successfully"}
+
+# ENHANCED CONTACTS ENDPOINTS
+@api_router.put("/contacts/{contact_id}", response_model=Contact)
+async def update_contact(
+    contact_id: str,
+    contact_update: ContactUpdate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update a contact"""
+    contact = await async_db.contacts.find_one({"id": contact_id})
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    
+    update_data = {k: v for k, v in contact_update.dict().items() if v is not None}
+    
+    await async_db.contacts.update_one({"id": contact_id}, {"$set": update_data})
+    
+    updated_contact = await async_db.contacts.find_one({"id": contact_id})
+    return Contact(**updated_contact)
+
+@api_router.delete("/contacts/{contact_id}")
+async def delete_contact(
+    contact_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete a contact"""
+    result = await async_db.contacts.delete_one({"id": contact_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    return {"message": "Contact deleted successfully"}
+
+# ENHANCED CALLS ENDPOINTS
+@api_router.put("/calls/{call_id}", response_model=CallRecord)
+async def update_call(
+    call_id: str,
+    call_update: CallRecordUpdate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update a call record"""
+    call = await async_db.calls.find_one({"id": call_id})
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
+    
+    update_data = {k: v for k, v in call_update.dict().items() if v is not None}
+    
+    await async_db.calls.update_one({"id": call_id}, {"$set": update_data})
+    
+    updated_call = await async_db.calls.find_one({"id": call_id})
+    return CallRecord(**updated_call)
+
+@api_router.delete("/calls/{call_id}")
+async def delete_call(
+    call_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete a call record"""
+    result = await async_db.calls.delete_one({"id": call_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Call not found")
+    return {"message": "Call deleted successfully"}
+
+# CRM ANALYTICS ENDPOINTS
+@api_router.get("/crm/analytics/summary")
+async def get_crm_analytics_summary(current_user: User = Depends(get_current_active_user)):
+    """Get CRM analytics summary"""
+    try:
+        # Get counts
+        total_leads = await async_db.leads.count_documents({})
+        total_deals = await async_db.deals.count_documents({})
+        total_tasks = await async_db.tasks.count_documents({})
+        total_contacts = await async_db.contacts.count_documents({})
+        
+        # Get leads by status
+        leads_by_status = {}
+        for status in ["new", "contacted", "qualified", "lost", "converted"]:
+            count = await async_db.leads.count_documents({"status": status})
+            leads_by_status[status] = count
+        
+        # Get deals by stage
+        deals_by_stage = {}
+        for stage in ["proposal", "negotiation", "closed_won", "closed_lost"]:
+            count = await async_db.deals.count_documents({"stage": stage})
+            deals_by_stage[stage] = count
+        
+        # Get tasks by status
+        tasks_by_status = {}
+        for status in ["pending", "completed", "cancelled"]:
+            count = await async_db.tasks.count_documents({"status": status})
+            tasks_by_status[status] = count
+        
+        # Calculate total deal value
+        deals_cursor = async_db.deals.find({"stage": "closed_won"})
+        deals = await deals_cursor.to_list(None)
+        total_won_value = sum(deal.get("amount", 0) for deal in deals)
+        
+        return {
+            "totals": {
+                "leads": total_leads,
+                "deals": total_deals,
+                "tasks": total_tasks,
+                "contacts": total_contacts
+            },
+            "leads_by_status": leads_by_status,
+            "deals_by_stage": deals_by_stage,
+            "tasks_by_status": tasks_by_status,
+            "total_won_value": total_won_value
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting CRM analytics: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error retrieving analytics")
+
 # Include the router in the main app
 app.include_router(api_router)
 
