@@ -83,7 +83,7 @@ const Sidebar = ({
               <Icon className="w-5 h-5" />
               {sidebarOpen && (
                 <>
-                  <span>{label}</span>
+                  <span className="truncate">{label}</span>
                   {badge && (
                     <span className={`ml-auto text-xs px-2 py-1 rounded-full ${
                       badge === 'NEW' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
