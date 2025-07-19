@@ -1,5 +1,7 @@
 import React from 'react';
-import { Search, RefreshCw, Bell, User, ChevronDown, Menu, Sun, Moon } from 'lucide-react';
+import { Search, User, ChevronDown, Menu, Sun, Moon } from 'lucide-react';
+import NotificationCenter from './NotificationCenter';
+import { useAuth } from '../contexts/AuthContext';
 
 const Header = ({ 
   darkMode, 
@@ -11,9 +13,28 @@ const Header = ({
   languages, 
   t,
   notifications = [],
+  setNotifications,
   sidebarOpen,
   setSidebarOpen
 }) => {
+  const { user, logout } = useAuth();
+
+  const handleMarkAsRead = (notificationId) => {
+    setNotifications(prev => prev.map(notification =>
+      notification.id === notificationId 
+        ? { ...notification, read: true }
+        : notification
+    ));
+  };
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(prev => prev.map(notification => ({ ...notification, read: true })));
+  };
+
+  const handleClearAll = () => {
+    setNotifications([]);
+  };
+
   return (
     <div className={`${darkMode ? 'bg-gray-900' : 'bg-white'} border-b border-gray-200 dark:border-gray-700 px-4 py-3 lg:px-6 lg:py-4`}>
       <div className="flex items-center justify-between gap-4">
@@ -71,23 +92,62 @@ const Header = ({
           </select>
 
           {/* Notifications */}
-          <div className="relative">
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg relative">
-              <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-              {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-              )}
-            </button>
-          </div>
+          <NotificationCenter
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
+            onClearAll={handleClearAll}
+          />
 
           {/* User menu - simplified on mobile */}
-          <div className="relative">
+          <div className="relative group">
             <button className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+              </div>
+              <div className="hidden sm:block text-left">
+                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                  {user?.full_name || user?.username}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {user?.role === 'admin' ? 'מנהל מערכת' : user?.role === 'manager' ? 'מנהל' : 'משתמש'}
+                </div>
               </div>
               <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-300 hidden sm:block" />
             </button>
+
+            {/* User dropdown menu */}
+            <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                <div className="font-medium text-gray-900 dark:text-white">
+                  {user?.full_name || user?.username}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {user?.email}
+                </div>
+              </div>
+              <div className="py-2">
+                <button 
+                  className="w-full text-right px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  onClick={() => window.location.hash = '#profile'}
+                >
+                  פרופיל
+                </button>
+                <button 
+                  className="w-full text-right px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  onClick={() => window.location.hash = '#settings'}
+                >
+                  הגדרות
+                </button>
+                <hr className="my-2 border-gray-200 dark:border-gray-700" />
+                <button 
+                  onClick={logout}
+                  className="w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  התנתק
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
