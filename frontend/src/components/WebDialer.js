@@ -265,7 +265,7 @@ const WebDialer = () => {
   );
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md mx-auto">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md mx-auto w-full">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg">
         <h2 className="text-xl font-bold text-center">חייגן Web</h2>
@@ -282,7 +282,7 @@ const WebDialer = () => {
           }`}
         >
           <Phone className="inline-block ml-1" size={16} />
-          חייגן
+          <span className="hidden sm:inline">חייגן</span>
         </button>
         <button
           onClick={() => setActiveTab('contacts')}
@@ -293,7 +293,7 @@ const WebDialer = () => {
           }`}
         >
           <Users className="inline-block ml-1" size={16} />
-          אנשי קשר
+          <span className="hidden sm:inline">אנשי קשר</span>
         </button>
         <button
           onClick={() => setActiveTab('history')}
@@ -304,12 +304,12 @@ const WebDialer = () => {
           }`}
         >
           <Clock className="inline-block ml-1" size={16} />
-          היסטוריה
+          <span className="hidden sm:inline">היסטוריה</span>
         </button>
       </div>
 
       {/* Content */}
-      <div className="p-6 bg-white dark:bg-gray-800 rounded-b-lg min-h-[500px]">
+      <div className="p-4 sm:p-6 bg-white dark:bg-gray-800 rounded-b-lg min-h-[500px]">
         {activeTab === 'dialer' && <DialPad />}
         {activeTab === 'contacts' && <ContactsList />}
         {activeTab === 'history' && <CallHistory />}
