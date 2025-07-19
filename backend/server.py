@@ -20,6 +20,17 @@ from cryptography.fernet import Fernet
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# Real API Configuration
+CHECKCALL_USERNAME = "office@day-1.co.il"
+CHECKCALL_PASSWORD = "121212kobi!"
+CHECKCALL_USER_ID = "2367"
+CHECKCALL_API_BASE = "http://ws.callindex.co.il/index.php"
+WEBHOOK_URL = "https://hook.us1.make.com/pu4619an5ekdfcaakli38gfsdy5lr40s"
+
+MASTERPBX_URL = "https://woopress.ippbx.co.il"
+MASTERPBX_USERNAME = "day1"
+MASTERPBX_PASSWORD = "0505552220"
+
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
