@@ -692,7 +692,7 @@ async def get_contacts(
             {"company": {"$regex": search, "$options": "i"}}
         ]
     
-    contacts = await db.contacts.find(query).skip(skip).limit(limit).to_list(limit)
+    contacts = await async_db.contacts.find(query).skip(skip).limit(limit).to_list(limit)
     return [Contact(**contact) for contact in contacts]
 
 @api_router.get("/contacts/{contact_id}", response_model=Contact)
