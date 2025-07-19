@@ -1658,6 +1658,8 @@ const App = () => {
       case 'documents': return <DocumentGenerator darkMode={darkMode} t={t} />;
       case 'aiAnalytics': return <AIAnalytics darkMode={darkMode} t={t} currentCall={currentCall} isCallActive={isCallActive} />;
       case 'messaging': return <MessagingCenter darkMode={darkMode} t={t} />;
+      case 'webDialer': return <WebDialer darkMode={darkMode} t={t} />;
+      case 'modules': return <ModuleManager darkMode={darkMode} t={t} />;
       case 'settings': return <SettingsView />;
       default: return <Dashboard />;
     }
