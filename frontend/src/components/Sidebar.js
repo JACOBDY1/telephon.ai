@@ -51,6 +51,7 @@ const Sidebar = ({
           {[
             { id: 'dashboard', icon: BarChart3, label: t.dashboard },
             { id: 'calls', icon: Phone, label: t.calls },
+            { id: 'webDialer', icon: PhoneCall, label: t.webDialer, badge: 'Web' },
             { id: 'crm', icon: Users2, label: t.crm, badge: crmData.leads.length },
             { id: 'attendance', icon: UserCheck, label: t.attendance, badge: attendanceData.filter(a => a.status === 'present').length },
             { id: 'analytics', icon: TrendingUp, label: t.analytics },
@@ -59,6 +60,7 @@ const Sidebar = ({
             { id: 'messaging', icon: MessageSquare, label: t.messaging, badge: '💬' },
             { id: 'callFlows', icon: Palette, label: t.callFlows, badge: 'מתקדם' },
             { id: 'documents', icon: FileText, label: t.documents, badge: 'חדש' },
+            { id: 'modules', icon: Puzzle, label: t.modules, badge: 'חדש' },
             { id: 'marketplace', icon: ShoppingCart, label: t.marketplace, badge: 'NEW' },
             { id: 'learning', icon: BookOpen, label: t.learning, badge: learningModules.length },
             { id: 'settings', icon: Settings, label: t.settings }
