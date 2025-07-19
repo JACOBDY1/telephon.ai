@@ -368,7 +368,7 @@ class APITester:
             if demo_token:
                 headers = {"Authorization": f"Bearer {demo_token}"}
                 
-                # Test password change
+                # Test password change (use form data)
                 password_data = {
                     "current_password": "demo123",
                     "new_password": "newdemo123"
@@ -376,8 +376,8 @@ class APITester:
                 
                 response = self.session.post(
                     f"{BACKEND_URL}/auth/change-password",
-                    json=password_data,
-                    headers=headers
+                    data=password_data,  # Use form data instead of JSON
+                    headers={**headers, "Content-Type": "application/x-www-form-urlencoded"}
                 )
                 
                 if response.status_code == 200:
