@@ -71,6 +71,7 @@ const MainApp = () => {
       messaging: 'מרכז הודעות',
       webDialer: 'חייגן Web',
       modules: 'מנהל מודולים',
+      subscription: 'ניהול מנוי',
       profile: 'פרופיל',
       account: 'חשבון',
       notifications: 'התראות',
