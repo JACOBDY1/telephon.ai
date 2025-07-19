@@ -1240,6 +1240,264 @@ async def change_password(
         logger.error(f"Error changing password: {str(e)}")
         raise HTTPException(status_code=500, detail="שגיאה בשינוי סיסמה")
 
+@api_router.post("/setup/demo-data")
+async def create_demo_data():
+    """Create demo users and data - Development only"""
+    try:
+        # Demo users data
+        demo_users = [
+            {
+                "username": "admin",
+                "email": "admin@telephony.ai",
+                "password": "admin123",
+                "full_name": "מנהל המערכת",
+                "phone": "+972-50-123-4567",
+                "role": "admin"
+            },
+            {
+                "username": "manager",
+                "email": "manager@telephony.ai", 
+                "password": "manager123",
+                "full_name": "דנה לוי - מנהלת מכירות",
+                "phone": "+972-50-234-5678",
+                "role": "manager"
+            },
+            {
+                "username": "agent1",
+                "email": "agent1@telephony.ai",
+                "password": "agent123", 
+                "full_name": "יוסי כהן - נציג מכירות",
+                "phone": "+972-50-345-6789",
+                "role": "user"
+            },
+            {
+                "username": "agent2",
+                "email": "agent2@telephony.ai",
+                "password": "agent123",
+                "full_name": "שרה מילר - נציגת תמיכה", 
+                "phone": "+972-50-456-7890",
+                "role": "user"
+            },
+            {
+                "username": "demo",
+                "email": "demo@telephony.ai",
+                "password": "demo123",
+                "full_name": "משתמש דמו",
+                "phone": "+972-50-567-8901", 
+                "role": "user"
+            }
+        ]
+        
+        created_users = []
+        
+        for user_data in demo_users:
+            # Check if user already exists
+            existing_user = await get_user_by_username(user_data["username"])
+            if existing_user:
+                logger.info(f"User {user_data['username']} already exists, skipping...")
+                continue
+                
+            # Hash password
+            hashed_password = get_password_hash(user_data["password"])
+            
+            # Create user document
+            user_doc = {
+                "username": user_data["username"],
+                "email": user_data["email"],
+                "hashed_password": hashed_password,
+                "full_name": user_data["full_name"], 
+                "phone": user_data["phone"],
+                "role": user_data["role"],
+                "is_active": True,
+                "created_at": datetime.utcnow(),
+                "last_login": None,
+                "preferences": {
+                    "language": "he",
+                    "theme": "light",
+                    "notifications": True
+                }
+            }
+            
+            # Insert to database
+            result = users_collection.insert_one(user_doc)
+            user_id = str(result.inserted_id)
+            
+            created_users.append({
+                "id": user_id,
+                "username": user_data["username"],
+                "email": user_data["email"],
+                "full_name": user_data["full_name"],
+                "role": user_data["role"]
+            })
+            
+            logger.info(f"Created demo user: {user_data['username']}")
+        
+        # Create demo CRM data for users
+        demo_crm_data = {
+            "leads": [
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "אברהם שטרן",
+                    "company": "חברת הייטק צעירה",
+                    "email": "avraham@startup.co.il",
+                    "phone": "+972-50-111-2222",
+                    "status": "hot",
+                    "value": 85000,
+                    "source": "אתר אינטרנט",
+                    "assigned_to": "agent1",
+                    "created_at": datetime.utcnow(),
+                    "notes": "מעוניין בחבילה מתקדמת, יש תקציב מאושר"
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "רחל גולדברג", 
+                    "company": "רשת חנויות אופנה",
+                    "email": "rachel@fashion.co.il",
+                    "phone": "+972-50-222-3333",
+                    "status": "warm",
+                    "value": 45000,
+                    "source": "Google Ads",
+                    "assigned_to": "agent2",
+                    "created_at": datetime.utcnow() - timedelta(days=2),
+                    "notes": "צריכה להציג למועצת המנהלים"
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "David Miller",
+                    "company": "International Trading",
+                    "email": "david@trading.com",
+                    "phone": "+1-555-444-5555",
+                    "status": "cold",
+                    "value": 120000,
+                    "source": "המלצה",
+                    "assigned_to": "manager",
+                    "created_at": datetime.utcnow() - timedelta(days=5),
+                    "notes": "לקוח פוטנציאלי גדול, דורש מפגש פרונטלי"
+                }
+            ],
+            "deals": [
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "עסקת מערכת CRM מלאה",
+                    "client": "אברהם שטרן",
+                    "value": 85000,
+                    "stage": "משא ומתן",
+                    "probability": 85,
+                    "expected_close": datetime.utcnow() + timedelta(days=15),
+                    "assigned_to": "agent1",
+                    "created_at": datetime.utcnow() - timedelta(days=10)
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "חבילת תמיכה שנתית",
+                    "client": "רחל גולדברג",
+                    "value": 45000,
+                    "stage": "הצעה נשלחה",
+                    "probability": 60,
+                    "expected_close": datetime.utcnow() + timedelta(days=30),
+                    "assigned_to": "agent2",
+                    "created_at": datetime.utcnow() - timedelta(days=7)
+                }
+            ],
+            "tasks": [
+                {
+                    "id": str(uuid.uuid4()),
+                    "title": "התקשר לאברהם לבירור סופי",
+                    "description": "לוודא שכל התנאים ברורים לפני חתימה",
+                    "assigned_to": "agent1",
+                    "due_date": datetime.utcnow() + timedelta(days=1),
+                    "priority": "high",
+                    "status": "pending",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "title": "הכנת הצגה לרחל",
+                    "description": "הצגת ROI למועצת המנהלים",
+                    "assigned_to": "agent2", 
+                    "due_date": datetime.utcnow() + timedelta(days=3),
+                    "priority": "medium",
+                    "status": "in_progress",
+                    "created_at": datetime.utcnow() - timedelta(days=1)
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "title": "מעקב עם David Miller",
+                    "description": "תיאום פגישה בארה\"ב",
+                    "assigned_to": "manager",
+                    "due_date": datetime.utcnow() + timedelta(days=7),
+                    "priority": "high", 
+                    "status": "pending",
+                    "created_at": datetime.utcnow() - timedelta(days=2)
+                }
+            ]
+        }
+        
+        # Store CRM data in database
+        crm_collection = db.crm_data
+        crm_collection.delete_many({})  # Clear existing demo data
+        crm_collection.insert_one(demo_crm_data)
+        
+        # Create demo conversations
+        demo_conversations = [
+            {
+                "id": str(uuid.uuid4()),
+                "contact": {
+                    "name": "אברהם שטרן",
+                    "phone": "+972-50-111-2222",
+                    "email": "avraham@startup.co.il"
+                },
+                "platform": "whatsapp",
+                "messages": [
+                    {
+                        "id": str(uuid.uuid4()),
+                        "text": "שלום, אני מעוניין במידע על המערכת שלכם",
+                        "sender": "customer",
+                        "timestamp": datetime.utcnow() - timedelta(hours=2),
+                        "is_read": True
+                    },
+                    {
+                        "id": str(uuid.uuid4()),
+                        "text": "שלום אברהם! בוודאי אשמח לעזור. איזה סוג מערכת מעניין אותך?",
+                        "sender": "agent",
+                        "timestamp": datetime.utcnow() - timedelta(hours=2, minutes=5),
+                        "is_read": True
+                    },
+                    {
+                        "id": str(uuid.uuid4()),
+                        "text": "אנחנו חברת הייטק עם 50 עובדים, מחפשים פתרון CRM מתקדם",
+                        "sender": "customer", 
+                        "timestamp": datetime.utcnow() - timedelta(hours=1),
+                        "is_read": True
+                    }
+                ],
+                "status": "active",
+                "assigned_to": "agent1",
+                "created_at": datetime.utcnow() - timedelta(hours=3)
+            }
+        ]
+        
+        # Store conversations
+        conversations_collection = db.conversations
+        conversations_collection.delete_many({})
+        conversations_collection.insert_many(demo_conversations)
+        
+        return {
+            "status": "success",
+            "message": f"נוצרו {len(created_users)} משתמשי דמו ונתונים",
+            "users_created": created_users,
+            "demo_data": {
+                "leads": len(demo_crm_data["leads"]),
+                "deals": len(demo_crm_data["deals"]),
+                "tasks": len(demo_crm_data["tasks"]),
+                "conversations": len(demo_conversations)
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error creating demo data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"שגיאה ביצירת נתוני דמו: {str(e)}")
+
 # ===== ADVANCED AI ANALYTICS ENDPOINTS =====
 
 @api_router.get("/ai/realtime-analysis")
