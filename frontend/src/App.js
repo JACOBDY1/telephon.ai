@@ -14,6 +14,11 @@ import ContactsView from './components/ContactsView';
 import AnalyticsView from './components/AnalyticsView';
 import SettingsView from './components/SettingsView';
 
+// Import new advanced components
+import AutomationCenter from './components/AutomationCenter';
+import CallFlowCanvas from './components/CallFlowCanvas';
+import DocumentGenerator from './components/DocumentGenerator';
+
 // Import additional components for advanced features
 import { 
   Plus, Edit, Trash2, Play, BookOpen, FileText, CheckCircle, Clock, Zap, Target, Activity, Workflow,
