@@ -65,7 +65,7 @@ const Header = ({
           >
             {Object.entries(languages).map(([code, { name, flag }]) => (
               <option key={code} value={code}>
-                <span className="hidden sm:inline">{flag} </span>{name}
+                {flag} {name}
               </option>
             ))}
           </select>
