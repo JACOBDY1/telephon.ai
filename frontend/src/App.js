@@ -5,7 +5,7 @@ import LoginPage from './components/LoginPage';
 import UserProfile from './components/UserProfile';
 import CRMManager from './components/CRMManager';
 import WebDialer from './components/WebDialer';
-import ModuleManager from './components/ModuleManager';
+import SubscriptionManager from './components/SubscriptionManager';
 import axios from 'axios';
 
 // Import components
