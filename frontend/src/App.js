@@ -302,6 +302,20 @@ const App = () => {
     setActiveModal(null);
   };
 
+  // Status icon helper function
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'connected':
+        return <Wifi className="w-3 h-3 text-green-500" />;
+      case 'disconnected':
+        return <WifiOff className="w-3 h-3 text-red-500" />;
+      case 'checking':
+        return <AlertCircle className="w-3 h-3 text-yellow-500" />;
+      default:
+        return <AlertCircle className="w-3 h-3 text-gray-500" />;
+    }
+  };
+
   const Sidebar = () => (
     <div className={`${sidebarOpen ? 'w-64' : 'w-16'} ${darkMode ? 'bg-gray-900' : 'bg-white'} border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col`}>
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
