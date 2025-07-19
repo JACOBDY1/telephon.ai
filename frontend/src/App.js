@@ -151,7 +151,7 @@ const App = () => {
 
   const t = translations[language] || translations.en;
 
-  // Load mock data for advanced features
+  // Load advanced mock data
   const loadAdvancedData = async () => {
     // Mock CRM data
     setCrmData({
@@ -258,6 +258,7 @@ const App = () => {
     }
   };
 
+  // Lifecycle hooks
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
@@ -275,6 +276,7 @@ const App = () => {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
+  // Call functions
   const startCall = (contact) => {
     setCurrentCall(contact);
     setIsCallActive(true);
@@ -286,15 +288,7 @@ const App = () => {
     setIsCallActive(false);
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'connected': return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'disconnected': return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'checking': return <AlertCircle className="w-4 h-4 text-yellow-500" />;
-      default: return <AlertCircle className="w-4 h-4 text-gray-500" />;
-    }
-  };
-
+  // Modal functions
   const openModal = (modalType, data = null) => {
     setActiveModal({ type: modalType, data });
   };
