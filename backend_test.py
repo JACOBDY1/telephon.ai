@@ -42,6 +42,7 @@ class APITester:
         self.results = []
         self.session = requests.Session()
         self.session.timeout = 30
+        self.auth_tokens = {}  # Store auth tokens for different users
         
     def log_result(self, test_name, success, message, response_data=None):
         """Log test result"""
@@ -58,6 +59,367 @@ class APITester:
         if response_data and not success:
             print(f"   Response: {response_data}")
     
+    # ===== AUTHENTICATION SYSTEM TESTS =====
+    
+    def test_user_registration(self):
+        """Test user registration endpoint"""
+        try:
+            # Test valid registration
+            test_user = {
+                "username": f"testuser_{int(time.time())}",
+                "email": f"test_{int(time.time())}@example.com",
+                "password": "testpass123",
+                "full_name": "משתמש בדיקה",
+                "phone": "+972-50-999-8888"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/register", json=test_user)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "access_token" in data and "user" in data:
+                    self.log_result("User Registration - Valid", True, 
+                                  f"Successfully registered user: {test_user['username']}")
+                    
+                    # Test duplicate username
+                    response2 = self.session.post(f"{BACKEND_URL}/auth/register", json=test_user)
+                    if response2.status_code == 400:
+                        self.log_result("User Registration - Duplicate", True, 
+                                      "Properly rejects duplicate username")
+                    else:
+                        self.log_result("User Registration - Duplicate", False, 
+                                      f"Should reject duplicate, got status {response2.status_code}")
+                    return True
+                else:
+                    self.log_result("User Registration - Valid", False, 
+                                  "Missing required fields in registration response", data)
+                    return False
+            else:
+                self.log_result("User Registration - Valid", False, 
+                              f"Registration failed with status {response.status_code}", response.text)
+                return False
+                
+        except Exception as e:
+            self.log_result("User Registration", False, f"Registration test failed: {str(e)}")
+            return False
+    
+    def test_user_login(self):
+        """Test user login with demo users"""
+        try:
+            login_success_count = 0
+            
+            for user_key, user_data in DEMO_USERS.items():
+                # Test login with form data (OAuth2PasswordRequestForm)
+                login_data = {
+                    "username": user_data["username"],
+                    "password": user_data["password"]
+                }
+                
+                response = self.session.post(
+                    f"{BACKEND_URL}/auth/login", 
+                    data=login_data,  # Use form data, not JSON
+                    headers={"Content-Type": "application/x-www-form-urlencoded"}
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "access_token" in data and "user" in data:
+                        # Store token for later tests
+                        self.auth_tokens[user_key] = data["access_token"]
+                        
+                        # Verify user data
+                        user_info = data["user"]
+                        if (user_info.get("username") == user_data["username"] and 
+                            user_info.get("role") == user_data["role"]):
+                            login_success_count += 1
+                            self.log_result(f"Login - {user_key}", True, 
+                                          f"Successfully logged in {user_data['username']} with role {user_data['role']}")
+                        else:
+                            self.log_result(f"Login - {user_key}", False, 
+                                          f"User data mismatch for {user_data['username']}", user_info)
+                    else:
+                        self.log_result(f"Login - {user_key}", False, 
+                                      f"Missing token or user data in login response for {user_data['username']}", data)
+                else:
+                    self.log_result(f"Login - {user_key}", False, 
+                                  f"Login failed for {user_data['username']} with status {response.status_code}", response.text)
+            
+            # Test invalid login
+            invalid_login = {"username": "invalid_user", "password": "wrong_password"}
+            response = self.session.post(
+                f"{BACKEND_URL}/auth/login", 
+                data=invalid_login,
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
+            
+            if response.status_code == 401:
+                self.log_result("Login - Invalid Credentials", True, 
+                              "Properly rejects invalid credentials")
+            else:
+                self.log_result("Login - Invalid Credentials", False, 
+                              f"Should return 401 for invalid login, got {response.status_code}")
+            
+            return login_success_count >= 3  # At least 3 demo users should work
+            
+        except Exception as e:
+            self.log_result("User Login", False, f"Login test failed: {str(e)}")
+            return False
+    
+    def test_jwt_token_validation(self):
+        """Test JWT token validation and structure"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("JWT Token Validation", False, "No auth tokens available for testing")
+                return False
+            
+            # Test token structure
+            admin_token = self.auth_tokens.get("admin")
+            if admin_token:
+                try:
+                    # Decode without verification to check structure
+                    decoded = jwt.decode(admin_token, options={"verify_signature": False})
+                    
+                    required_fields = ["sub", "exp"]
+                    missing_fields = [field for field in required_fields if field not in decoded]
+                    
+                    if not missing_fields:
+                        # Check expiration
+                        exp_timestamp = decoded["exp"]
+                        exp_datetime = datetime.fromtimestamp(exp_timestamp)
+                        
+                        if exp_datetime > datetime.now():
+                            self.log_result("JWT Token Structure", True, 
+                                          f"Token valid until {exp_datetime.isoformat()}")
+                        else:
+                            self.log_result("JWT Token Structure", False, 
+                                          f"Token already expired at {exp_datetime.isoformat()}")
+                    else:
+                        self.log_result("JWT Token Structure", False, 
+                                      f"Missing required JWT fields: {missing_fields}")
+                        
+                except jwt.DecodeError:
+                    self.log_result("JWT Token Structure", False, "Invalid JWT token format")
+            
+            # Test invalid token handling
+            invalid_headers = {"Authorization": "Bearer invalid_token_here"}
+            response = self.session.get(f"{BACKEND_URL}/auth/me", headers=invalid_headers)
+            
+            if response.status_code == 401:
+                self.log_result("JWT Invalid Token", True, "Properly rejects invalid tokens")
+            else:
+                self.log_result("JWT Invalid Token", False, 
+                              f"Should return 401 for invalid token, got {response.status_code}")
+            
+            return True
+            
+        except Exception as e:
+            self.log_result("JWT Token Validation", False, f"JWT validation test failed: {str(e)}")
+            return False
+    
+    def test_protected_endpoints(self):
+        """Test protected endpoints require authentication"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Protected Endpoints", False, "No auth tokens available for testing")
+                return False
+            
+            # Test /auth/me endpoint with valid token
+            admin_token = self.auth_tokens.get("admin")
+            if admin_token:
+                headers = {"Authorization": f"Bearer {admin_token}"}
+                response = self.session.get(f"{BACKEND_URL}/auth/me", headers=headers)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "username" in data and "role" in data:
+                        self.log_result("Protected Endpoint - /auth/me", True, 
+                                      f"Successfully accessed profile for {data.get('username')}")
+                    else:
+                        self.log_result("Protected Endpoint - /auth/me", False, 
+                                      "Missing user data in profile response", data)
+                else:
+                    self.log_result("Protected Endpoint - /auth/me", False, 
+                                  f"/auth/me failed with status {response.status_code}")
+            
+            # Test /auth/me without token
+            response = self.session.get(f"{BACKEND_URL}/auth/me")
+            if response.status_code == 401:
+                self.log_result("Protected Endpoint - No Auth", True, 
+                              "Properly requires authentication for /auth/me")
+            else:
+                self.log_result("Protected Endpoint - No Auth", False, 
+                              f"Should return 401 without auth, got {response.status_code}")
+            
+            # Test other endpoints that should be protected
+            protected_endpoints = [
+                "/calls",
+                "/contacts", 
+                "/analytics/summary",
+                "/ai/realtime-analysis"
+            ]
+            
+            protected_count = 0
+            for endpoint in protected_endpoints:
+                # Test without auth
+                response = self.session.get(f"{BACKEND_URL}{endpoint}")
+                if response.status_code == 401:
+                    protected_count += 1
+                    self.log_result(f"Protected - {endpoint}", True, 
+                                  f"Endpoint {endpoint} properly requires authentication")
+                else:
+                    self.log_result(f"Protected - {endpoint}", False, 
+                                  f"Endpoint {endpoint} should require auth, got {response.status_code}")
+            
+            return protected_count >= len(protected_endpoints) // 2  # At least half should be protected
+            
+        except Exception as e:
+            self.log_result("Protected Endpoints", False, f"Protected endpoints test failed: {str(e)}")
+            return False
+    
+    def test_profile_update(self):
+        """Test user profile update functionality"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Profile Update", False, "No auth tokens available for testing")
+                return False
+            
+            demo_token = self.auth_tokens.get("demo")
+            if demo_token:
+                headers = {"Authorization": f"Bearer {demo_token}"}
+                
+                # Test profile update
+                update_data = {
+                    "full_name": "משתמש דמו מעודכן",
+                    "phone": "+972-50-999-7777",
+                    "preferences": {
+                        "language": "he",
+                        "theme": "dark",
+                        "notifications": False
+                    }
+                }
+                
+                response = self.session.put(
+                    f"{BACKEND_URL}/auth/profile", 
+                    json=update_data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if (data.get("full_name") == update_data["full_name"] and 
+                        data.get("phone") == update_data["phone"]):
+                        self.log_result("Profile Update", True, 
+                                      "Successfully updated user profile")
+                        return True
+                    else:
+                        self.log_result("Profile Update", False, 
+                                      "Profile data not updated correctly", data)
+                        return False
+                else:
+                    self.log_result("Profile Update", False, 
+                                  f"Profile update failed with status {response.status_code}", response.text)
+                    return False
+            else:
+                self.log_result("Profile Update", False, "No demo token available for profile update test")
+                return False
+                
+        except Exception as e:
+            self.log_result("Profile Update", False, f"Profile update test failed: {str(e)}")
+            return False
+    
+    def test_demo_data_creation(self):
+        """Test demo data creation endpoint"""
+        try:
+            response = self.session.post(f"{BACKEND_URL}/setup/demo-data")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "users_created" in data and "demo_data" in data:
+                    users_count = len(data.get("users_created", []))
+                    demo_data = data.get("demo_data", {})
+                    
+                    self.log_result("Demo Data Creation", True, 
+                                  f"Created {users_count} users and demo data: "
+                                  f"leads={demo_data.get('leads', 0)}, "
+                                  f"deals={demo_data.get('deals', 0)}, "
+                                  f"tasks={demo_data.get('tasks', 0)}")
+                    return True
+                else:
+                    self.log_result("Demo Data Creation", False, 
+                                  "Missing expected fields in demo data response", data)
+                    return False
+            else:
+                self.log_result("Demo Data Creation", False, 
+                              f"Demo data creation failed with status {response.status_code}", response.text)
+                return False
+                
+        except Exception as e:
+            self.log_result("Demo Data Creation", False, f"Demo data creation test failed: {str(e)}")
+            return False
+    
+    def test_password_change(self):
+        """Test password change functionality"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Password Change", False, "No auth tokens available for testing")
+                return False
+            
+            demo_token = self.auth_tokens.get("demo")
+            if demo_token:
+                headers = {"Authorization": f"Bearer {demo_token}"}
+                
+                # Test password change
+                password_data = {
+                    "current_password": "demo123",
+                    "new_password": "newdemo123"
+                }
+                
+                response = self.session.post(
+                    f"{BACKEND_URL}/auth/change-password",
+                    json=password_data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "message" in data:
+                        self.log_result("Password Change", True, "Successfully changed password")
+                        
+                        # Test login with new password
+                        login_data = {
+                            "username": "demo",
+                            "password": "newdemo123"
+                        }
+                        
+                        login_response = self.session.post(
+                            f"{BACKEND_URL}/auth/login",
+                            data=login_data,
+                            headers={"Content-Type": "application/x-www-form-urlencoded"}
+                        )
+                        
+                        if login_response.status_code == 200:
+                            self.log_result("Password Change - Login Test", True, 
+                                          "Can login with new password")
+                        else:
+                            self.log_result("Password Change - Login Test", False, 
+                                          "Cannot login with new password")
+                        
+                        return True
+                    else:
+                        self.log_result("Password Change", False, 
+                                      "Missing success message in password change response", data)
+                        return False
+                else:
+                    self.log_result("Password Change", False, 
+                                  f"Password change failed with status {response.status_code}", response.text)
+                    return False
+            else:
+                self.log_result("Password Change", False, "No demo token available for password change test")
+                return False
+                
+        except Exception as e:
+            self.log_result("Password Change", False, f"Password change test failed: {str(e)}")
+            return False
     def test_health_check(self):
         """Test the health check endpoint"""
         try:
