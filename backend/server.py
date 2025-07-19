@@ -48,9 +48,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 # MongoDB connection for users
-MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/telephony_ai")
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.getenv("DB_NAME", "test_database")
 client = MongoClient(MONGO_URL)
-db = client.get_database()
+db = client[DB_NAME]
 users_collection = db.users
 sessions_collection = db.sessions
 
