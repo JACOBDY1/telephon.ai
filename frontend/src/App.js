@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import axios from 'axios';
+
+// Import components
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import Dashboard from './components/Dashboard';
+import CRMView from './components/CRMView';
+import AttendanceView from './components/AttendanceView';
+import MarketplaceView from './components/MarketplaceView';
+import CallsView from './components/CallsView';
+import ContactsView from './components/ContactsView';
+import AnalyticsView from './components/AnalyticsView';
+import SettingsView from './components/SettingsView';
+
+// Import remaining icons
 import { 
-  Phone, Video, MessageSquare, Users, BarChart3, Settings, Search, Bell, User, ChevronDown, 
-  Play, Pause, Volume2, VolumeX, Menu, X, Calendar, Mail, PhoneCall, TrendingUp, Clock, 
-  Globe, Mic, MicOff, Camera, CameraOff, Share, Download, RefreshCw, CheckCircle, XCircle, 
-  AlertCircle, Plus, Edit, Trash2, Filter, Star, BookOpen, ShoppingCart, Headphones,
-  Users2, UserCheck, UserX, MapPin, Building, DollarSign, Target, Tag, FileText, 
-  Activity, Workflow, PieChart, LineChart, BarChart, Zap, Bot, Brain, Lightbulb,
-  MousePointer2, Eye, EyeOff, Lock, Unlock, Shield, Key, Database, Cloud, Server,
-  Smartphone, Tablet, Monitor, Laptop, Watch, Headset, Printer, Router, Wifi,
-  MessageCircle, Send, Paperclip, Image, Video as VideoIcon, Music, File, Archive,
-  Copy, Move, Link, Share2, Export, Import, Save, FolderOpen, Folder, Home, ArrowRight,
-  ChevronLeft, ChevronRight, ChevronUp, MoreHorizontal, MoreVertical, Info, Help,
-  AlertTriangle, CheckSquare, Square, Circle, Diamond, Heart, Bookmark, Flag
+  Plus, Edit, Trash2, Play, BookOpen, FileText, CheckCircle, Clock, Zap, 
+  Target, Activity, Workflow, Star, Bot, BarChart3
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
