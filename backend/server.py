@@ -638,7 +638,7 @@ async def end_call(
         "status": "completed"
     }
     
-    await db.calls.update_one({"id": call_id}, {"$set": update_data})
+    await async_db.calls.update_one({"id": call_id}, {"$set": update_data})
     
     # Trigger AI processing for completed call
     await process_call_ai(call_id)
