@@ -1367,7 +1367,7 @@ async def get_conversations(current_user: User = Depends(get_current_active_user
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/messaging/campaigns")
-async def get_campaigns():
+async def get_campaigns(current_user: User = Depends(get_current_active_user)):
     """Get all messaging campaigns"""
     try:
         campaigns = [
