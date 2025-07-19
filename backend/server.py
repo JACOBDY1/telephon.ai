@@ -1242,7 +1242,7 @@ async def change_password(
 # ===== ADVANCED AI ANALYTICS ENDPOINTS =====
 
 @api_router.get("/ai/realtime-analysis")
-async def get_realtime_analysis():
+async def get_realtime_analysis(current_user: User = Depends(get_current_active_user)):
     """Get real-time AI analysis during active call"""
     try:
         # Simulate real-time AI analysis
