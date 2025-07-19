@@ -17,7 +17,7 @@ import SettingsView from './components/SettingsView';
 // Import remaining icons
 import { 
   Plus, Edit, Trash2, Play, BookOpen, FileText, CheckCircle, Clock, Zap, 
-  Target, Activity, Workflow, Star, Bot, BarChart3
+  Target, Activity, Workflow, Star, Bot, BarChart3, Phone
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
