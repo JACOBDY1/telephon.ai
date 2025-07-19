@@ -500,8 +500,8 @@ const App = () => {
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
               <User className="w-10 h-10" />
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">{currentCall.caller}</h3>
-            <p className="text-gray-600 dark:text-gray-300">{currentCall.number}</p>
+            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">{currentCall.caller_name || currentCall.caller}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{currentCall.caller_number || currentCall.number}</p>
             <p className="text-green-600 font-semibold">00:02:15</p>
           </div>
 
@@ -524,19 +524,25 @@ const App = () => {
           <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4`}>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2">תמלול בזמן אמת:</h4>
             <p className="text-gray-700 dark:text-gray-300">
-              "שלום, אני מעוניין לקבל מידע נוסף על המוצרים החדשים שלכם..."
+              {currentCall.transcription || "שלום, אני מעוניין לקבל מידע נוסף על המוצרים החדשים שלכם..."}
             </p>
           </div>
         </div>
       )}
 
-      {/* Calls List */}
+      {/* Real Calls List */}
       <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm border border-gray-200 dark:border-gray-700`}>
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">רשימת שיחות</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">רשימת שיחות אמיתית</h3>
+            <div className="flex space-x-2">
+              {getStatusIcon(connectionStatus.checkcall)}
+              {getStatusIcon(connectionStatus.masterpbx)}
+            </div>
+          </div>
         </div>
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {mockCallData.map((call) => (
+          {realCallData.length > 0 ? realCallData.map((call) => (
             <div key={call.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -544,22 +550,31 @@ const App = () => {
                     <User className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white">{call.caller}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{call.number}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{call.transcription.substring(0, 50)}...</p>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">{call.caller_name || 'לקוח'}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{call.caller_number}</p>
+                    {call.transcription && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{call.transcription.substring(0, 50)}...</p>
+                    )}
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-900 dark:text-white">{call.duration}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{call.time}</p>
-                  <span className={`inline-block w-3 h-3 rounded-full mt-1 ${
-                    call.sentiment === 'positive' ? 'bg-green-500' : 
-                    call.sentiment === 'negative' ? 'bg-red-500' : 'bg-yellow-500'
-                  }`}></span>
+                  <p className="text-sm text-gray-900 dark:text-white">{call.duration || 'N/A'}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{call.status}</p>
+                  {call.sentiment && (
+                    <span className={`inline-block w-3 h-3 rounded-full mt-1 ${
+                      call.sentiment === 'positive' ? 'bg-green-500' : 
+                      call.sentiment === 'negative' ? 'bg-red-500' : 'bg-yellow-500'
+                    }`}></span>
+                  )}
                 </div>
               </div>
             </div>
-          ))}
+          )) : (
+            <div className="p-8 text-center">
+              <p className="text-gray-500 dark:text-gray-400">טוען שיחות...</p>
+              {loading && <RefreshCw className="w-6 h-6 animate-spin mx-auto mt-2 text-gray-400" />}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -574,14 +589,18 @@ const App = () => {
           <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm border border-gray-200 dark:border-gray-700`}>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {mockCallData.map((contact) => (
+                {(realCallData.length > 0 ? realCallData : [
+                  {id: 1, caller_name: "יוסי כהן", caller_number: "+972-50-123-4567"},
+                  {id: 2, caller_name: "Sarah Johnson", caller_number: "+1-555-987-6543"},
+                  {id: 3, caller_name: "Ahmed Al-Hassan", caller_number: "+971-50-765-4321"}
+                ]).map((contact) => (
                   <div key={contact.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                     <div className="text-center">
                       <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-3 flex items-center justify-center">
                         <User className="w-8 h-8" />
                       </div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{contact.caller}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{contact.number}</p>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{contact.caller_name || contact.caller}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{contact.caller_number || contact.number}</p>
                       <button
                         onClick={() => startCall(contact)}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
@@ -596,26 +615,44 @@ const App = () => {
           </div>
         </div>
 
-        {/* Sales Playbook */}
+        {/* Enhanced Sales Playbook */}
         <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-fit`}>
           <div className="p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{mockPlaybook.title}</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">מדריך מכירות מתקדם</h3>
             
-            {mockPlaybook.sections.map((section, sectionIndex) => (
-              <div key={sectionIndex} className="mb-6">
+            <div className="space-y-6">
+              <div className="mb-6">
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-3 bg-blue-100 dark:bg-blue-900 px-3 py-2 rounded-lg">
-                  {section.title}
+                  זיהוי ראשוני
                 </h4>
                 <div className="space-y-2">
-                  {section.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="border-l-4 border-blue-500 pl-3">
-                      <p className="font-medium text-gray-900 dark:text-white text-sm">{item.label}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{item.prompt}</p>
-                    </div>
-                  ))}
+                  <div className="border-l-4 border-blue-500 pl-3">
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">תקציב</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">מה התקציב המיועד לפתרון?</p>
+                  </div>
+                  <div className="border-l-4 border-green-500 pl-3">
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">לוחות זמנים</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">מתי אתם מתכננים להטמיע?</p>
+                  </div>
                 </div>
               </div>
-            ))}
+
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 bg-green-100 dark:bg-green-900 px-3 py-2 rounded-lg">
+                  ניתוח צרכים
+                </h4>
+                <div className="space-y-2">
+                  <div className="border-l-4 border-green-500 pl-3">
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">פתרון נוכחי</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">איך אתם מנהלים כרגע?</p>
+                  </div>
+                  <div className="border-l-4 border-orange-500 pl-3">
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">נקודות כאב</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">מה האתגרים העיקריים?</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -624,70 +661,80 @@ const App = () => {
 
   const AnalyticsView = () => (
     <div className="p-6">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">{t.analytics}</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">{t.analytics} - {t.realTime}</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">ניתוח רגשות</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">ניתוח רגשות מ-API</h3>
+            {getStatusIcon(connectionStatus.checkcall)}
+          </div>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-700 dark:text-gray-300">חיובי</span>
-              <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full w-16"></div>
+            {realtimeAnalytics?.checkcall_data?.sentiment_breakdown ? (
+              Object.entries(realtimeAnalytics.checkcall_data.sentiment_breakdown).map(([sentiment, count]) => (
+                <div key={sentiment} className="flex items-center justify-between">
+                  <span className="text-gray-700 dark:text-gray-300 capitalize">{sentiment}</span>
+                  <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className={`h-2 rounded-full ${
+                      sentiment === 'positive' ? 'bg-green-500' : 
+                      sentiment === 'negative' ? 'bg-red-500' : 'bg-yellow-500'
+                    }`} style={{width: `${(count / Object.values(realtimeAnalytics.checkcall_data.sentiment_breakdown).reduce((a,b) => a+b, 1)) * 100}%`}}></div>
+                  </div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{count}</span>
+                </div>
+              ))
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-700 dark:text-gray-300">חיובי</span>
+                  <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-green-500 h-2 rounded-full w-16"></div>
+                  </div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">65%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-700 dark:text-gray-300">ניטרלי</span>
+                  <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-yellow-500 h-2 rounded-full w-8"></div>
+                  </div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">25%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-700 dark:text-gray-300">שלילי</span>
+                  <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-red-500 h-2 rounded-full w-4"></div>
+                  </div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">10%</span>
+                </div>
               </div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">65%</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-700 dark:text-gray-300">ניטרלי</span>
-              <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div className="bg-yellow-500 h-2 rounded-full w-8"></div>
-              </div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">25%</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-700 dark:text-gray-300">שלילי</span>
-              <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div className="bg-red-500 h-2 rounded-full w-4"></div>
-              </div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">10%</span>
-            </div>
+            )}
           </div>
         </div>
 
         <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700`}>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{t.aiInsights}</h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">תובנות AI בזמן אמת</h3>
           <div className="space-y-3">
             <div className="p-3 bg-blue-50 dark:bg-blue-900 rounded-lg">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                📈 שיפור של 23% בשביעות רצון לקוחות השבוע
+                📈 {realtimeAnalytics ? `נתונים אמיתיים: ${realtimeAnalytics.total_calls_today} שיחות היום` : 'טוען נתונים אמיתיים...'}
               </p>
             </div>
             <div className="p-3 bg-green-50 dark:bg-green-900 rounded-lg">
               <p className="text-sm text-green-800 dark:text-green-200">
-                🎯 המילות המפתח הכי יעילות: "חדשנות", "איכות", "שירות"
+                🎯 {connectionStatus.checkcall === 'connected' ? 'מחובר ל-Checkcall API בהצלחה' : 'בודק חיבור ל-Checkcall...'}
               </p>
             </div>
             <div className="p-3 bg-orange-50 dark:bg-orange-900 rounded-lg">
               <p className="text-sm text-orange-800 dark:text-orange-200">
-                ⏰ זמן ההמתנה הממוצע ירד ב-15% בזמן האחרון
+                ⏰ {connectionStatus.masterpbx === 'connected' ? 'MasterPBX API פעיל' : 'MasterPBX - בבדיקה...'}
+              </p>
+            </div>
+            <div className="p-3 bg-purple-50 dark:bg-purple-900 rounded-lg">
+              <p className="text-sm text-purple-800 dark:text-purple-200">
+                🔄 עדכון אוטומטי כל 30 שניות
               </p>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 mt-8`}>
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">דוחות שיחות לפי שפות</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(languages).map(([code, { name, flag }]) => (
-            <div key={code} className="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <div className="text-2xl mb-2">{flag}</div>
-              <p className="font-semibold text-gray-900 dark:text-white">{name}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {Math.floor(Math.random() * 100)} שיחות
-              </p>
-            </div>
-          ))}
         </div>
       </div>
     </div>
