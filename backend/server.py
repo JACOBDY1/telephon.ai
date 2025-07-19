@@ -647,7 +647,7 @@ async def end_call(
 
 async def process_call_ai(call_id: str):
     """Process call with AI (transcription, sentiment analysis)"""
-    call = await db.calls.find_one({"id": call_id})
+    call = await async_db.calls.find_one({"id": call_id})
     if not call:
         return
     
