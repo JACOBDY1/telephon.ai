@@ -1555,7 +1555,7 @@ async def create_automation_rule(rule: AutomationRule, current_user: User = Depe
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.put("/automations/rules/{rule_id}/toggle")
-async def toggle_automation_rule(rule_id: str):
+async def toggle_automation_rule(rule_id: str, current_user: User = Depends(get_current_active_user)):
     """Toggle automation rule active status"""
     try:
         # Simulate toggling
