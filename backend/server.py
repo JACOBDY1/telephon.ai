@@ -696,9 +696,12 @@ async def get_contacts(
     return [Contact(**contact) for contact in contacts]
 
 @api_router.get("/contacts/{contact_id}", response_model=Contact)
-async def get_contact(contact_id: str):
+async def get_contact(
+    contact_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
     """Get a specific contact by ID"""
-    contact = await db.contacts.find_one({"id": contact_id})
+    contact = await async_db.contacts.find_one({"id": contact_id})
     if not contact:
         raise HTTPException(status_code=404, detail="Contact not found")
     return Contact(**contact)
