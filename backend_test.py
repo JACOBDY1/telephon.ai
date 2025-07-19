@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import time
 
 # Backend URL from frontend/.env
-BACKEND_URL = "https://16feba7f-d0da-4864-9978-da0649e254d1.preview.emergentagent.com/api"
+BACKEND_URL = "https://d049263f-d848-461f-9be9-362032e6c2b9.preview.emergentagent.com/api"
 
 # Test credentials provided
 CHECKCALL_CREDS = {
