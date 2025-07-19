@@ -2,6 +2,7 @@
 """
 Backend API Integration Tests
 Tests the real API integrations for Checkcall and MasterPBX
+AND comprehensive authentication system testing
 """
 
 import requests
@@ -9,6 +10,8 @@ import json
 import sys
 from datetime import datetime, timedelta
 import time
+import jwt
+import base64
 
 # Backend URL from frontend/.env
 BACKEND_URL = "https://d049263f-d848-461f-9be9-362032e6c2b9.preview.emergentagent.com/api"
@@ -23,6 +26,15 @@ CHECKCALL_CREDS = {
 MASTERPBX_CREDS = {
     "username": "day1",
     "password": "0505552220"
+}
+
+# Demo user credentials for authentication testing
+DEMO_USERS = {
+    "admin": {"username": "admin", "password": "admin123", "role": "admin"},
+    "manager": {"username": "manager", "password": "manager123", "role": "manager"},
+    "demo": {"username": "demo", "password": "demo123", "role": "user"},
+    "agent1": {"username": "agent1", "password": "agent123", "role": "user"},
+    "agent2": {"username": "agent2", "password": "agent123", "role": "user"}
 }
 
 class APITester:
