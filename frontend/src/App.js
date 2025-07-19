@@ -731,6 +731,278 @@ const App = () => {
       </div>
     </div>
   );
+
+  // Marketplace View
+  const MarketplaceView = () => (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.marketplace} - חנות דיגיטלית מתקדמת</h1>
+        <div className="flex space-x-2">
+          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+            <option value="all">כל הקטגוריות</option>
+            <option value="plugins">פלאגינים</option>
+            <option value="analytics">אנליטיקות</option>
+            <option value="automation">אוטומציה</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Marketplace Hero */}
+      <div className="relative rounded-xl overflow-hidden mb-8">
+        <img 
+          src="https://images.unsplash.com/photo-1677693972403-db681288b5da"
+          alt="Digital Marketplace"
+          className="w-full h-48 object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-purple-900/80 flex items-center justify-center">
+          <div className="text-center text-white">
+            <h2 className="text-3xl font-bold mb-2">מרקטפלייס של TelephonyAI</h2>
+            <p className="text-lg">פלאגינים, כלים ושירותים להרחבת הפלטפורמה</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Featured Items */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {marketplaceItems.map((item) => (
+          <div key={item.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border hover:shadow-lg transition-shadow`}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                {item.category === 'plugins' && <Bot className="w-6 h-6 text-blue-600" />}
+                {item.category === 'analytics' && <BarChart className="w-6 h-6 text-blue-600" />}
+                {item.category === 'automation' && <Workflow className="w-6 h-6 text-blue-600" />}
+              </div>
+              <div className="flex items-center space-x-1">
+                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                <span className="text-sm text-gray-600 dark:text-gray-300">{item.rating}</span>
+              </div>
+            </div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{item.name}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              תוסף מתקדם לשיפור הפונקציונליות של המערכת
+            </p>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-2xl font-bold text-green-600">${item.price}</span>
+              <span className="text-sm text-gray-500">{item.installs.toLocaleString()} התקנות</span>
+            </div>
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
+              התקן עכשיו
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Categories */}
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border mt-8`}>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">קטגוריות פופולריות</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { name: 'פלאגינים', icon: Bot, count: 15 },
+            { name: 'אנליטיקות', icon: BarChart3, count: 8 },
+            { name: 'אוטומציה', icon: Workflow, count: 12 },
+            { name: 'אינטגרציות', icon: Link, count: 20 }
+          ].map((category) => (
+            <div key={category.name} className="text-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+              <category.icon className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+              <p className="font-semibold text-gray-900 dark:text-white">{category.name}</p>
+              <p className="text-sm text-gray-500">{category.count} פריטים</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Learning Center View
+  const LearningView = () => (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.learning} - מרכז למידה</h1>
+        <div className="flex space-x-2">
+          <select 
+            value={selectedFilter} 
+            onChange={(e) => setSelectedFilter(e.target.value)}
+            className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+          >
+            <option value="all">כל התוכן</option>
+            <option value="tutorial">מדריכים</option>
+            <option value="course">קורסים</option>
+            <option value="documentation">תיעוד</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Learning Hero */}
+      <div className="relative rounded-xl overflow-hidden mb-8">
+        <img 
+          src="https://images.unsplash.com/photo-1551288049-bebda4e38f71"
+          alt="Learning Dashboard"
+          className="w-full h-48 object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-green-900/80 to-blue-900/80 flex items-center justify-center">
+          <div className="text-center text-white">
+            <h2 className="text-3xl font-bold mb-2">למד וגדל עם TelephonyAI</h2>
+            <p className="text-lg">מדריכים, קורסים ותיעוד מלא למיצוי מלא של הפלטפורמה</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-sm border`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">קורסים שהושלמו</p>
+              <p className="text-3xl font-bold text-green-600">{learningModules.filter(m => m.progress === 100).length}</p>
+            </div>
+            <CheckCircle className="w-8 h-8 text-green-600" />
+          </div>
+        </div>
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-sm border`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">קורסים פעילים</p>
+              <p className="text-3xl font-bold text-blue-600">{learningModules.filter(m => m.progress > 0 && m.progress < 100).length}</p>
+            </div>
+            <BookOpen className="w-8 h-8 text-blue-600" />
+          </div>
+        </div>
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-sm border`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">שעות למידה</p>
+              <p className="text-3xl font-bold text-purple-600">12.5</p>
+            </div>
+            <Clock className="w-8 h-8 text-purple-600" />
+          </div>
+        </div>
+      </div>
+
+      {/* Learning Modules */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {learningModules.map((module) => (
+          <div key={module.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border`}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{module.title}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{module.duration}</p>
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${module.progress}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">{module.progress}%</span>
+                </div>
+              </div>
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center ml-4">
+                {module.type === 'tutorial' && <Play className="w-5 h-5 text-blue-600" />}
+                {module.type === 'course' && <BookOpen className="w-5 h-5 text-blue-600" />}
+                {module.type === 'documentation' && <FileText className="w-5 h-5 text-blue-600" />}
+              </div>
+            </div>
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
+              {module.progress === 0 ? 'התחל' : module.progress === 100 ? 'סקור שוב' : 'המשך'}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Automations View
+  const AutomationsView = () => (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.automations} - מערכת אוטומציות מתקדמת</h1>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+          <Plus className="w-4 h-4" />
+          <span>אוטומציה חדשה</span>
+        </button>
+      </div>
+
+      {/* Automation Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-sm border`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">אוטומציות פעילות</p>
+              <p className="text-3xl font-bold text-green-600">{automationRules.filter(r => r.active).length}</p>
+            </div>
+            <Zap className="w-8 h-8 text-green-600" />
+          </div>
+        </div>
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-sm border`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">הפעלות היום</p>
+              <p className="text-3xl font-bold text-blue-600">{automationRules.reduce((sum, rule) => sum + rule.triggers, 0)}</p>
+            </div>
+            <Activity className="w-8 h-8 text-blue-600" />
+          </div>
+        </div>
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-sm border`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">זמן חיסכון</p>
+              <p className="text-3xl font-bold text-purple-600">4.2h</p>
+            </div>
+            <Clock className="w-8 h-8 text-purple-600" />
+          </div>
+        </div>
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-sm border`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">שיעור הצלחה</p>
+              <p className="text-3xl font-bold text-orange-600">97%</p>
+            </div>
+            <Target className="w-8 h-8 text-orange-600" />
+          </div>
+        </div>
+      </div>
+
+      {/* Automation Rules */}
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm border`}>
+        <div className="p-6 border-b">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">כללי אוטומציה</h3>
+        </div>
+        <div className="divide-y">
+          {automationRules.map((rule) => (
+            <div key={rule.id} className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Workflow className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">{rule.name}</h4>
+                    <p className="text-sm text-gray-500">{rule.triggers} הפעלות השבוע</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center">
+                    <span className={`w-2 h-2 rounded-full mr-2 ${rule.active ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                      {rule.active ? 'פעיל' : 'כבוי'}
+                    </span>
+                  </div>
+                  <button className="text-blue-600 hover:text-blue-800">
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button className="text-red-600 hover:text-red-800">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const Dashboard = () => (
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
