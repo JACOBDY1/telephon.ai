@@ -55,6 +55,8 @@ const Sidebar = ({
             { id: 'attendance', icon: UserCheck, label: t.attendance, badge: attendanceData.filter(a => a.status === 'present').length },
             { id: 'analytics', icon: TrendingUp, label: t.analytics },
             { id: 'automations', icon: Workflow, label: t.automations, badge: automationRules.filter(r => r.active).length },
+            { id: 'callFlows', icon: Palette, label: t.callFlows, badge: 'מתקדם' },
+            { id: 'documents', icon: FileText, label: t.documents, badge: 'חדש' },
             { id: 'marketplace', icon: ShoppingCart, label: t.marketplace, badge: 'NEW' },
             { id: 'learning', icon: BookOpen, label: t.learning, badge: learningModules.length },
             { id: 'settings', icon: Settings, label: t.settings }
