@@ -1326,7 +1326,7 @@ async def get_transcription(current_user: User = Depends(get_current_active_user
 # ===== MESSAGING CENTER ENDPOINTS =====
 
 @api_router.get("/messaging/conversations")
-async def get_conversations():
+async def get_conversations(current_user: User = Depends(get_current_active_user)):
     """Get all messaging conversations"""
     try:
         conversations = [
