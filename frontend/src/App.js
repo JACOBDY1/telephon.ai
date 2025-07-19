@@ -1646,6 +1646,9 @@ const App = () => {
       case 'automations': return <AutomationsView />;
       case 'marketplace': return <MarketplaceView />;
       case 'learning': return <LearningView />;
+      case 'automations': return <AutomationCenter darkMode={darkMode} t={t} />;
+      case 'callFlows': return <CallFlowCanvas darkMode={darkMode} t={t} />;
+      case 'documents': return <DocumentGenerator darkMode={darkMode} t={t} />;
       case 'settings': return <SettingsView />;
       default: return <Dashboard />;
     }
