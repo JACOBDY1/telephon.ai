@@ -764,8 +764,260 @@ const BarberProfessionalApp = () => {
     });
   };
 
-  // Dashboard View
-  const DashboardView = () => (
+  // דשבורד מתקדם של HairPro IL Advanced
+  const AdvancedDashboard = () => (
+    <div className="space-y-6">
+      {/* כותרת מתקדמת */}
+      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white p-6 rounded-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">HairPro IL Advanced 💇‍♀️</h1>
+            <p className="text-blue-100 mt-1">מערכת ניהול מתקדמת לסלון שיער</p>
+            <p className="text-blue-200 text-sm">{currentTime.toLocaleDateString('he-IL')} • {currentTime.toLocaleTimeString('he-IL')}</p>
+          </div>
+          <div className="text-left">
+            <div className={`inline-flex items-center px-6 py-3 rounded-full text-lg font-medium ${
+              workStatus === 'working' ? 'bg-green-500' : 
+              workStatus === 'break' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`}>
+              <Scissors className="w-5 h-5 ml-2" />
+              {workStatus === 'working' ? 'עובד עם לקוח' : 
+               workStatus === 'break' ? 'בהפסקה' : 'מוכן ללקוח הבא'}
+            </div>
+            {currentClient && (
+              <div className="mt-2 text-center">
+                <div className="text-sm opacity-80">לקוח נוכחי:</div>
+                <div className="font-semibold">{currentClient.clientName}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* כרטיסי סטטיסטיקות מתקדמים */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { 
+            title: 'לקוחות היום', 
+            value: todayStats.appointmentsCompleted, 
+            icon: Users, 
+            color: 'bg-gradient-to-br from-blue-400 to-blue-600',
+            suffix: 'טיפולים',
+            change: '+12%',
+            changeType: 'positive'
+          },
+          { 
+            title: 'הכנסות היום', 
+            value: `₪${todayStats.totalRevenue?.toLocaleString()}`, 
+            icon: DollarSign, 
+            color: 'bg-gradient-to-br from-green-400 to-green-600',
+            change: '+8%',
+            changeType: 'positive'
+          },
+          { 
+            title: 'יעילות צבע', 
+            value: `${todayStats.efficiency}%`, 
+            icon: Droplets, 
+            color: 'bg-gradient-to-br from-purple-400 to-purple-600',
+            change: '+5%',
+            changeType: 'positive'
+          },
+          { 
+            title: 'שביעות רצון', 
+            value: `${todayStats.customerSatisfaction}`, 
+            icon: Star, 
+            color: 'bg-gradient-to-br from-yellow-400 to-orange-500',
+            suffix: '⭐',
+            change: '+2%',
+            changeType: 'positive'
+          }
+        ].map((stat, index) => (
+          <div key={index} className="bg-white rounded-xl p-6 shadow-lg border hover:shadow-xl transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-lg ${stat.color}`}>
+                <stat.icon className="w-6 h-6 text-white" />
+              </div>
+              {stat.change && (
+                <div className={`text-sm font-medium ${
+                  stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  <TrendingUp className="w-4 h-4 inline ml-1" />
+                  {stat.change}
+                </div>
+              )}
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-600 mb-1">{stat.title}</h3>
+              <div className="text-2xl font-bold text-gray-900">
+                {stat.value}
+                {stat.suffix && <span className="text-sm text-gray-500 mr-1">{stat.suffix}</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* יעדים יומיים מתקדמים */}
+      <div className="bg-white rounded-xl p-6 shadow-lg border">
+        <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+          <Target className="w-6 h-6 text-green-500" />
+          יעדים יומיים - HairPro Advanced
+        </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {Object.entries(dailyGoals).map(([key, goal]) => (
+            <div key={key} className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-700">
+                  {key === 'appointments' ? '🧑‍🦱 טיפולים' :
+                   key === 'revenue' ? '💰 הכנסות' :
+                   key === 'tips' ? '🎁 טיפים' :
+                   key === 'newCustomers' ? '👥 לקוחות חדשים' :
+                   key === 'satisfaction' ? '⭐ שביעות רצון' :
+                   key === 'colorEfficiency' ? '🎨 יעילות צבע' :
+                   key === 'wasteReduction' ? '♻️ הפחתת בזבוז' : key}
+                </span>
+                <div className="text-sm text-gray-600 font-semibold">
+                  {typeof goal.current === 'number' && goal.current < 10 ? goal.current : 
+                   typeof goal.current === 'string' ? goal.current : goal.current}
+                  /{goal.target}
+                  {key === 'satisfaction' && ' ⭐'}
+                  {key === 'colorEfficiency' && '%'}
+                  {key === 'wasteReduction' && '%'}
+                </div>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div 
+                  className={`h-3 rounded-full transition-all duration-500 ${
+                    goal.percentage >= 100 ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                    goal.percentage >= 80 ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
+                    goal.percentage >= 60 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-gradient-to-r from-red-400 to-red-600'
+                  }`}
+                  style={{ width: `${Math.min(goal.percentage, 100)}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className={`font-medium ${
+                  goal.percentage >= 100 ? 'text-green-600' :
+                  goal.percentage >= 80 ? 'text-blue-600' :
+                  goal.percentage >= 60 ? 'text-orange-600' : 'text-red-600'
+                }`}>
+                  {goal.percentage >= 100 ? '🎉 יעד הושג!' :
+                   goal.percentage >= 80 ? '💪 כמעט שם!' :
+                   goal.percentage >= 60 ? '⚡ בדרך!' : '🚀 בואו נתחיל!'}
+                </span>
+                <span className="text-gray-500">{goal.percentage}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* גרף צריכת צבעים */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl p-6 shadow-lg border">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <PieChart className="w-5 h-5 text-purple-500" />
+            צריכת צבעים היום
+          </h3>
+          <div className="space-y-3">
+            {Object.entries(analyticsData.colorUsage).map(([color, percentage]) => (
+              <div key={color} className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="font-medium">{color}</span>
+                  <span className="text-gray-600">{percentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full ${
+                      color === 'בלונדים' ? 'bg-yellow-400' :
+                      color === 'חומים' ? 'bg-amber-600' :
+                      color === 'שחורים' ? 'bg-gray-800' :
+                      'bg-red-500'
+                    }`}
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-lg border">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-blue-500" />
+            תובנות עסקיות
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm font-medium">חיסכון בצבע</span>
+              </div>
+              <span className="text-green-600 font-bold">{analyticsData.wasteReduction}%</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm font-medium">יעילות כללית</span>
+              </div>
+              <span className="text-blue-600 font-bold">{analyticsData.efficiency}%</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span className="text-sm font-medium">צבע פופולרי</span>
+              </div>
+              <span className="text-purple-600 font-bold">{analyticsData.trends.popularColors[0]}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* כפתורי פעולה מהירה */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <button
+          onClick={() => setActiveView('calendar')}
+          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl flex items-center gap-3 hover:shadow-lg transition-all transform hover:scale-105"
+        >
+          <Calendar className="w-8 h-8" />
+          <div className="text-right">
+            <div className="font-semibold">יומן שבועי</div>
+            <div className="text-sm opacity-80">ניהול תורים</div>
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveView('clients')}
+          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl flex items-center gap-3 hover:shadow-lg transition-all transform hover:scale-105"
+        >
+          <Users className="w-8 h-8" />
+          <div className="text-right">
+            <div className="font-semibold">לקוחות VIP</div>
+            <div className="text-sm opacity-80">כרטיסי כימיה</div>
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveView('formula')}
+          className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white p-6 rounded-xl flex items-center gap-3 hover:shadow-lg transition-all transform hover:scale-105"
+        >
+          <Beaker className="w-8 h-8" />
+          <div className="text-right">
+            <div className="font-semibold">פורמולות</div>
+            <div className="text-sm opacity-80">שקילה דיגיטלית</div>
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveView('inventory')}
+          className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl flex items-center gap-3 hover:shadow-lg transition-all transform hover:scale-105"
+        >
+          <Package className="w-8 h-8" />
+          <div className="text-right">
+            <div className="font-semibold">מלאי חכם</div>
+            <div className="text-sm opacity-80">חיזוי AI</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white p-6 rounded-2xl">
