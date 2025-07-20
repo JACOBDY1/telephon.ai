@@ -134,6 +134,7 @@ const MainApp = () => {
       profile: 'Profile',
       account: 'Account',
       notifications: 'Notifications',
+      mobileApp: 'Mobile App',
       search: 'Search...',
       activeCalls: 'Active Calls',
       recentCalls: 'Recent Calls',
