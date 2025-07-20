@@ -141,19 +141,6 @@ const BarberProfessionalApp = () => {
   const [viewMode, setViewMode] = useState('day'); // day, week, month
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
-  
-  // דוחות וניתוחים מתקדמים
-  const [analyticsData, setAnalyticsData] = useState({
-    colorUsage: {},
-    wasteReduction: 0,
-    efficiency: 0,
-    clientSatisfaction: 0,
-    revenue: {
-      daily: 0,
-      weekly: 0,
-      monthly: 0
-    }
-  });
 
   // Update time every second
   useEffect(() => {
