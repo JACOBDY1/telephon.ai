@@ -654,6 +654,262 @@ const BarberProfessionalApp = () => {
   // Dashboard View (מתוחזק לתאימות)
   const DashboardView = () => (
     <div className="space-y-6">
+      {/* Welcome Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white p-6 rounded-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">שלום, מאסטר ספר! ✂️</h1>
+            <p className="text-blue-100">{currentTime.toLocaleDateString('he-IL')} • {currentTime.toLocaleTimeString('he-IL')}</p>
+          </div>
+          <div className="text-right">
+            <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+              workStatus === 'working' ? 'bg-green-500' : 
+              workStatus === 'break' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`}>
+              <Scissors className="w-4 h-4 ml-2" />
+              {workStatus === 'working' ? 'עובד עם לקוח' : 
+               workStatus === 'break' ? 'בהפסקה' : 'מוכן ללקוח הבא'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Today's Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { 
+            title: 'לקוחות היום', 
+            value: todayStats.appointmentsCompleted || 0, 
+            icon: Users, 
+            color: 'bg-blue-500',
+            suffix: 'לקוחות'
+          },
+          { 
+            title: 'הכנסות היום', 
+            value: `₪${(todayStats.totalRevenue || 0).toLocaleString()}`, 
+            icon: DollarSign, 
+            color: 'bg-green-500'
+          },
+          { 
+            title: 'טיפים היום', 
+            value: `₪${(todayStats.tips || 0).toLocaleString()}`, 
+            icon: Gift, 
+            color: 'bg-purple-500'
+          },
+          { 
+            title: 'דירוג שביעות רצון', 
+            value: `${todayStats.customerSatisfaction || 0}`, 
+            icon: Star, 
+            color: 'bg-yellow-500',
+            suffix: '⭐'
+          }
+        ].map((stat, index) => (
+          <div key={index} className="bg-white rounded-xl p-6 shadow-sm border">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-lg ${stat.color}`}>
+                <stat.icon className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-600 mb-1">{stat.title}</h3>
+              <div className="text-2xl font-bold text-gray-900">
+                {stat.value}
+                {stat.suffix && <span className="text-sm text-gray-500 mr-1">{stat.suffix}</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Daily Goals Progress */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Target className="w-5 h-5 text-green-500" />
+          יעדים יומיים
+        </h3>
+        <div className="space-y-4">
+          {Object.entries(dailyGoals).map(([key, goal]) => (
+            <div key={key} className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">
+                  {key === 'appointments' ? 'טיפולים' :
+                   key === 'revenue' ? 'הכנסות' :
+                   key === 'tips' ? 'טיפים' :
+                   key === 'newCustomers' ? 'לקוחות חדשים' :
+                   key === 'satisfaction' ? 'שביעות רצון' :
+                   key === 'colorEfficiency' ? 'יעילות צבע' :
+                   key === 'wasteReduction' ? 'הפחתת בזבוז' : key}
+                </span>
+                <div className="text-sm text-gray-600">
+                  {goal?.current || 0}/{goal?.target || 0}
+                </div>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div 
+                  className={`h-3 rounded-full transition-all ${
+                    (goal?.percentage || 0) >= 100 ? 'bg-green-500' :
+                    (goal?.percentage || 0) >= 80 ? 'bg-blue-500' :
+                    (goal?.percentage || 0) >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{ width: `${Math.min(goal?.percentage || 0, 100)}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className={`font-medium ${
+                  (goal?.percentage || 0) >= 100 ? 'text-green-600' :
+                  (goal?.percentage || 0) >= 80 ? 'text-blue-600' :
+                  (goal?.percentage || 0) >= 60 ? 'text-yellow-600' : 'text-red-600'
+                }`}>
+                  {(goal?.percentage || 0) >= 100 ? '🎉 יעד הושג!' :
+                   (goal?.percentage || 0) >= 80 ? '💪 כמעט שם!' :
+                   (goal?.percentage || 0) >= 60 ? '⚡ בדרך!' : '🚀 בואו נתחיל!'}
+                </span>
+                <span className="text-gray-500">{goal?.percentage || 0}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 gap-4">
+        <button
+          onClick={() => setActiveView('appointments')}
+          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl flex items-center gap-3 hover:shadow-lg transition-all"
+        >
+          <Calendar className="w-8 h-8" />
+          <div className="text-right">
+            <div className="font-semibold">היומן שלי</div>
+            <div className="text-sm opacity-80">ניהול תורים</div>
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveView('clients')}
+          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl flex items-center gap-3 hover:shadow-lg transition-all"
+        >
+          <Users className="w-8 h-8" />
+          <div className="text-right">
+            <div className="font-semibold">הלקוחות שלי</div>
+            <div className="text-sm opacity-80">רשימת לקוחות</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+
+  // רכיב ניהול לקוחות מתקדם עם כרטיסי כימיה
+  const AdvancedClientsView = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <Users className="w-8 h-8 text-purple-600" />
+          HairPro - ניהול לקוחות מתקדם
+        </h2>
+        <div className="flex gap-2">
+          <div className="relative">
+            <Search className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="חיפוש לקוחות..."
+              className="pl-4 pr-10 py-2 border rounded-lg w-64"
+            />
+          </div>
+          <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            לקוחה חדשה
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {clients.map(client => (
+          <div key={client.id} className="bg-white rounded-xl shadow-lg border p-6 hover:shadow-xl transition-shadow">
+            {/* פרופיל לקוחה */}
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
+                <User className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900">{client.name}</h3>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    {client.phone}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    {client.email}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* פרופיל שיער */}
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <Palette className="w-4 h-4 text-purple-500" />
+                פרופיל שיער
+              </h4>
+              <div className="space-y-1 text-sm">
+                <div>צבע טבעי: <span className="font-medium">{client.hairProfile?.naturalColor}</span></div>
+                <div>צבע נוכחי: <span className="font-medium">{client.hairProfile?.currentColor}</span></div>
+                <div>סוג שיער: <span className="font-medium">{client.hairProfile?.hairType}</span></div>
+              </div>
+            </div>
+
+            {/* כרטיס כימיה */}
+            {client.chemistryCard && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <h4 className="font-semibold mb-2 flex items-center gap-2 text-red-700">
+                  <AlertCircle className="w-4 h-4" />
+                  כרטיס כימיה
+                </h4>
+                {client.chemistryCard.allergies?.length > 0 && (
+                  <div className="text-sm text-red-600">
+                    <strong>אלרגיות:</strong> {client.chemistryCard.allergies.join(', ')}
+                  </div>
+                )}
+                {client.chemistryCard.sensitivities?.length > 0 && (
+                  <div className="text-sm text-orange-600 mt-1">
+                    <strong>רגישויות:</strong> {client.chemistryCard.sensitivities.join(', ')}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* מדדים */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="text-center p-3 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">{client.metrics?.totalVisits || 0}</div>
+                <div className="text-xs text-blue-500">ביקורים</div>
+              </div>
+              <div className="text-center p-3 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">₪{(client.metrics?.totalSpent || 0).toLocaleString()}</div>
+                <div className="text-xs text-green-500">סה"כ הוצאות</div>
+              </div>
+            </div>
+
+            {/* פעולות */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => startAppointment(client.id)}
+                className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 text-sm font-medium"
+              >
+                טיפול חדש
+              </button>
+              <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">
+                <Edit className="w-4 h-4" />
+              </button>
+              <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">
+                <Phone className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">היומן שלי - היום</h2>
         <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
