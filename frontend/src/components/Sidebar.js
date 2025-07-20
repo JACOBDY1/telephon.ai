@@ -98,13 +98,7 @@ const Sidebar = ({
           ].map(({ id, icon: Icon, label, badge }) => (
             <button
               key={id}
-              onClick={() => {
-                setActiveTab(id);
-                // Close sidebar on mobile after selection
-                if (window.innerWidth < 1024) {
-                  setSidebarOpen(false);
-                }
-              }}
+              onClick={() => handleMenuClick(id)}
               className={`w-full flex items-center space-x-3 px-3 py-2 lg:py-3 rounded-lg transition-colors relative text-sm lg:text-base ${
                 activeTab === id 
                   ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400' 
