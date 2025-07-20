@@ -2579,6 +2579,499 @@ async def get_crm_analytics_summary(current_user: User = Depends(get_current_act
         logger.error(f"Error getting CRM analytics: {str(e)}")
         raise HTTPException(status_code=500, detail="Error retrieving analytics")
 
+# ===== ATTENDANCE & BOOKING ENDPOINTS =====
+
+@api_router.get("/attendance/employees")
+async def get_employees(current_user: User = Depends(get_current_active_user)):
+    """Get all employees for attendance tracking"""
+    try:
+        employees = await async_db.employees.find({}).to_list(100)
+        return [Employee(**emp) for emp in employees]
+    except Exception as e:
+        logger.error(f"Error getting employees: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error retrieving employees")
+
+@api_router.post("/attendance/employees", response_model=Employee)
+async def create_employee(
+    employee_data: EmployeeCreate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a new employee"""
+    try:
+        employee_obj = Employee(**employee_data.dict())
+        await async_db.employees.insert_one(employee_obj.dict())
+        return employee_obj
+    except Exception as e:
+        logger.error(f"Error creating employee: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error creating employee")
+
+@api_router.post("/attendance/checkin/{employee_id}")
+async def check_in_employee(
+    employee_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Check in an employee"""
+    try:
+        current_time = datetime.now().strftime("%H:%M:%S")
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        
+        # Update employee status
+        await async_db.employees.update_one(
+            {"id": employee_id},
+            {"$set": {
+                "attendance_status": "present",
+                "check_in": current_time,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        # Create attendance record
+        attendance_record = AttendanceRecord(
+            employee_id=employee_id,
+            date=current_date,
+            check_in=current_time,
+            status="present"
+        )
+        
+        await async_db.attendance.insert_one(attendance_record.dict())
+        
+        return {"message": "Employee checked in successfully", "time": current_time}
+    except Exception as e:
+        logger.error(f"Error checking in employee: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error checking in")
+
+@api_router.post("/attendance/checkout/{employee_id}")
+async def check_out_employee(
+    employee_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Check out an employee"""
+    try:
+        current_time = datetime.now().strftime("%H:%M:%S")
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        
+        # Update employee status
+        await async_db.employees.update_one(
+            {"id": employee_id},
+            {"$set": {
+                "check_out": current_time,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        # Update attendance record
+        attendance_record = await async_db.attendance.find_one({
+            "employee_id": employee_id,
+            "date": current_date
+        })
+        
+        if attendance_record:
+            # Calculate hours worked
+            check_in_time = datetime.strptime(attendance_record["check_in"], "%H:%M:%S")
+            check_out_time = datetime.strptime(current_time, "%H:%M:%S")
+            hours_worked = (check_out_time - check_in_time).seconds / 3600
+            
+            await async_db.attendance.update_one(
+                {"employee_id": employee_id, "date": current_date},
+                {"$set": {
+                    "check_out": current_time,
+                    "hours_worked": round(hours_worked, 2),
+                    "updated_at": datetime.utcnow()
+                }}
+            )
+        
+        return {"message": "Employee checked out successfully", "time": current_time}
+    except Exception as e:
+        logger.error(f"Error checking out employee: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error checking out")
+
+@api_router.get("/bookings")
+async def get_bookings(
+    date: Optional[str] = None,
+    employee_id: Optional[str] = None,
+    status: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get bookings with optional filtering"""
+    try:
+        query = {}
+        if date:
+            query["date"] = date
+        if employee_id:
+            query["employee_id"] = employee_id
+        if status:
+            query["status"] = status
+        
+        bookings = await async_db.bookings.find(query).sort("date", 1).to_list(100)
+        return [Booking(**booking) for booking in bookings]
+    except Exception as e:
+        logger.error(f"Error getting bookings: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error retrieving bookings")
+
+@api_router.post("/bookings", response_model=Booking)
+async def create_booking(
+    booking_data: BookingCreate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a new booking"""
+    try:
+        booking_dict = booking_data.dict()
+        booking_dict["created_by"] = current_user.id
+        booking_obj = Booking(**booking_dict)
+        
+        await async_db.bookings.insert_one(booking_obj.dict())
+        
+        # Automatically create a potential lead from this booking
+        lead_data = BookingLeadCreate(
+            name=booking_data.client_name,
+            phone=booking_data.client_phone,
+            email=booking_data.client_email,
+            interest=f"Follow-up from {booking_data.service} booking",
+            value=booking_data.value,
+            assigned_to=booking_data.employee_id,
+            booking_id=booking_obj.id
+        )
+        
+        lead_obj = BookingLead(**lead_data.dict())
+        await async_db.booking_leads.insert_one(lead_obj.dict())
+        
+        return booking_obj
+    except Exception as e:
+        logger.error(f"Error creating booking: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error creating booking")
+
+@api_router.put("/bookings/{booking_id}")
+async def update_booking(
+    booking_id: str,
+    status: Optional[str] = None,
+    notes: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update booking status and notes"""
+    try:
+        update_data = {"updated_at": datetime.utcnow()}
+        if status:
+            update_data["status"] = status
+        if notes is not None:
+            update_data["notes"] = notes
+        
+        await async_db.bookings.update_one(
+            {"id": booking_id},
+            {"$set": update_data}
+        )
+        
+        updated_booking = await async_db.bookings.find_one({"id": booking_id})
+        if not updated_booking:
+            raise HTTPException(status_code=404, detail="Booking not found")
+        
+        return Booking(**updated_booking)
+    except Exception as e:
+        logger.error(f"Error updating booking: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error updating booking")
+
+@api_router.get("/booking-leads")
+async def get_booking_leads(
+    status: Optional[str] = None,
+    assigned_to: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get booking-generated leads"""
+    try:
+        query = {}
+        if status:
+            query["status"] = status
+        if assigned_to:
+            query["assigned_to"] = assigned_to
+        
+        leads = await async_db.booking_leads.find(query).sort("created_at", -1).to_list(100)
+        return [BookingLead(**lead) for lead in leads]
+    except Exception as e:
+        logger.error(f"Error getting booking leads: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error retrieving booking leads")
+
+@api_router.put("/booking-leads/{lead_id}")
+async def update_booking_lead(
+    lead_id: str,
+    status: Optional[str] = None,
+    probability: Optional[int] = None,
+    notes: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update booking lead"""
+    try:
+        update_data = {"updated_at": datetime.utcnow()}
+        if status:
+            update_data["status"] = status
+        if probability is not None:
+            update_data["probability"] = probability
+        if notes is not None:
+            update_data["notes"] = notes
+        
+        await async_db.booking_leads.update_one(
+            {"id": lead_id},
+            {"$set": update_data}
+        )
+        
+        updated_lead = await async_db.booking_leads.find_one({"id": lead_id})
+        if not updated_lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+        
+        return BookingLead(**updated_lead)
+    except Exception as e:
+        logger.error(f"Error updating booking lead: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error updating lead")
+
+@api_router.get("/attendance/dashboard")
+async def get_attendance_dashboard(
+    date: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get attendance dashboard data"""
+    try:
+        target_date = date or datetime.now().strftime("%Y-%m-%d")
+        
+        # Get all employees
+        total_employees = await async_db.employees.count_documents({"status": "active"})
+        
+        # Get attendance for target date
+        present_count = await async_db.attendance.count_documents({
+            "date": target_date,
+            "status": "present"
+        })
+        
+        absent_count = total_employees - present_count
+        attendance_percentage = (present_count / total_employees * 100) if total_employees > 0 else 0
+        
+        # Get bookings for today
+        today_bookings = await async_db.bookings.find({"date": target_date}).to_list(100)
+        
+        # Get recent leads from bookings
+        recent_leads = await async_db.booking_leads.find({}).sort("created_at", -1).limit(5).to_list(5)
+        
+        return {
+            "attendance": {
+                "total_employees": total_employees,
+                "present": present_count,
+                "absent": absent_count,
+                "percentage": round(attendance_percentage, 1)
+            },
+            "bookings": {
+                "today_total": len(today_bookings),
+                "confirmed": len([b for b in today_bookings if b.get("status") == "confirmed"]),
+                "pending": len([b for b in today_bookings if b.get("status") == "pending"])
+            },
+            "leads": {
+                "recent_count": len(recent_leads),
+                "hot_leads": len([l for l in recent_leads if l.get("status") == "hot"])
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting attendance dashboard: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error retrieving dashboard data")
+
+# ===== DOCUMENT GENERATION WITH PDF SUPPORT =====
+
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib import colors
+import io
+
+@api_router.post("/documents/generate-pdf")
+async def generate_pdf_document(
+    template_id: str,
+    data: Dict[str, Any],
+    current_user: User = Depends(get_current_active_user)
+):
+    """Generate a PDF document from template"""
+    try:
+        # Create PDF in memory
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        story = []
+        
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            alignment=1,  # Center
+            spaceAfter=30
+        )
+        
+        # Add title based on template
+        template_titles = {
+            "quote": "הצעת מחיר",
+            "contract": "חוזה שירות", 
+            "invoice": "חשבונית",
+            "report": "דוח פעילות"
+        }
+        
+        title = template_titles.get(template_id, "מסמך")
+        story.append(Paragraph(title, title_style))
+        story.append(Spacer(1, 20))
+        
+        # Add customer information
+        if data.get("customerName"):
+            story.append(Paragraph(f"<b>שם לקוח:</b> {data['customerName']}", styles['Normal']))
+        if data.get("customerEmail"):
+            story.append(Paragraph(f"<b>אימייל:</b> {data['customerEmail']}", styles['Normal']))
+        if data.get("customerPhone"):
+            story.append(Paragraph(f"<b>טלפון:</b> {data['customerPhone']}", styles['Normal']))
+        
+        story.append(Spacer(1, 20))
+        
+        # Add other fields based on template
+        for key, value in data.items():
+            if key not in ["customerName", "customerEmail", "customerPhone"] and value:
+                story.append(Paragraph(f"<b>{key}:</b> {value}", styles['Normal']))
+        
+        story.append(Spacer(1, 30))
+        
+        # Add footer
+        story.append(Paragraph(
+            f"מסמך נוצר ב-{datetime.now().strftime('%d/%m/%Y')} • AI Telephony Platform",
+            styles['Normal']
+        ))
+        
+        # Build PDF
+        doc.build(story)
+        
+        # Get PDF content as base64
+        buffer.seek(0)
+        pdf_content = base64.b64encode(buffer.getvalue()).decode()
+        buffer.close()
+        
+        # Save document to database
+        document = GeneratedDocument(
+            template_id=template_id,
+            name=f"{title} - {data.get('customerName', 'לקוח חדש')}",
+            customer_name=data.get('customerName', ''),
+            customer_email=data.get('customerEmail'),
+            data=data,
+            pdf_content=pdf_content,
+            created_by=current_user.id
+        )
+        
+        await async_db.documents.insert_one(document.dict())
+        
+        return {
+            "status": "success",
+            "document_id": document.id,
+            "pdf_content": pdf_content,
+            "download_url": f"/api/documents/download/{document.id}"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating PDF document: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating document: {str(e)}")
+
+@api_router.get("/documents/download/{document_id}")
+async def download_document(
+    document_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Download a generated document"""
+    try:
+        document = await async_db.documents.find_one({"id": document_id})
+        if not document:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        if not document.get("pdf_content"):
+            raise HTTPException(status_code=404, detail="PDF content not found")
+        
+        # Decode base64 PDF content
+        pdf_bytes = base64.b64decode(document["pdf_content"])
+        
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={document['name']}.pdf"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error downloading document: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error downloading document")
+
+# ===== EMAIL INTEGRATION FOR DOCUMENTS =====
+
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+
+@api_router.post("/documents/send-email")
+async def send_document_email(
+    document_send: DocumentSend,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Send document via email"""
+    try:
+        # Get document
+        document = await async_db.documents.find_one({"id": document_send.document_id})
+        if not document:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        # Email configuration (you'll need to add these to your .env)
+        smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+        smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        smtp_username = os.getenv("SMTP_USERNAME", "your-email@gmail.com")
+        smtp_password = os.getenv("SMTP_PASSWORD", "your-app-password")
+        
+        # Create message
+        msg = MIMEMultipart()
+        msg['From'] = smtp_username
+        msg['To'] = document_send.recipient_email
+        msg['Subject'] = document_send.subject or f"{document['name']} - AI Telephony Platform"
+        
+        # Email body
+        body = document_send.message or f"""
+        שלום,
+        
+        מצורף אליכם {document['name']}.
+        
+        תודה,
+        צוות AI Telephony Platform
+        """
+        
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        
+        # Attach PDF
+        if document.get("pdf_content"):
+            pdf_bytes = base64.b64decode(document["pdf_content"])
+            attachment = MIMEBase('application', 'octet-stream')
+            attachment.set_payload(pdf_bytes)
+            encoders.encode_base64(attachment)
+            attachment.add_header(
+                'Content-Disposition',
+                f'attachment; filename= {document["name"]}.pdf'
+            )
+            msg.attach(attachment)
+        
+        # Send email
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        text = msg.as_string()
+        server.sendmail(smtp_username, document_send.recipient_email, text)
+        server.quit()
+        
+        # Update document status
+        await async_db.documents.update_one(
+            {"id": document_send.document_id},
+            {"$set": {"status": "sent", "updated_at": datetime.utcnow()}}
+        )
+        
+        return {"status": "success", "message": "Document sent successfully"}
+        
+    except Exception as e:
+        logger.error(f"Error sending document email: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error sending email: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
