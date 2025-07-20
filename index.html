@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HairPro IL Advanced - ברוכים הבאים</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Heebo', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .hero-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
+        .feature-card { transition: all 0.3s ease; }
+        .feature-card:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 hero-gradient rounded-2xl flex items-center justify-center shadow-xl">
+                        <i data-lucide="scissors" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                            HairPro IL Advanced
+                        </h1>
+                        <p class="text-sm text-gray-600">המערכת המתקדמת ביותר לסלון שיער 💇‍♀️</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+                        ✅ מערכת פעילה
+                    </div>
+                    <button class="p-2 hover:bg-gray-100 rounded-lg">
+                        <i data-lucide="settings" class="w-5 h-5 text-gray-600"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                    HairPro IL Advanced 💇‍♀️
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 text-blue-100">
+                    המערכת המתקדמת ביותר לניהול סלון שיער בישראל
+                </p>
+                <p class="text-lg mb-10 text-blue-200 max-w-3xl mx-auto">
+                    מערכת מקצועית שמתחרה ב-Spectra-CI ועולה עליה בכל הפרמטרים!
+                    שקילה דיגיטלית, כרטיסי לקוחה מתקדמים, ניהול מלאי חכם ועוד...
+                </p>
+                
+                <!-- Hero Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+                    <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6">
+                        <div class="text-3xl font-bold mb-2">40%</div>
+                        <div class="text-sm text-blue-100">חיסכון בצבע</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6">
+                        <div class="text-3xl font-bold mb-2">25%</div>
+                        <div class="text-sm text-blue-100">עליה בהכנסות</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6">
+                        <div class="text-3xl font-bold mb-2">50%</div>
+                        <div class="text-sm text-blue-100">שיפור יעילות</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6">
+                        <div class="text-3xl font-bold mb-2">80%</div>
+                        <div class="text-sm text-blue-100">הפחתת בזבוז</div>
+                    </div>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                    <a href="hairpro_main.html" class="bg-white text-purple-600 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105">
+                        🚀 כנס למערכת עכשיו
+                    </a>
+                    <button onclick="scrollToDemo()" class="border-2 border-white text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white hover:text-purple-600 transition-all">
+                        👀 תראה לי איך זה עובד
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">תכונות מתקדמות שאין ב-Spectra</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    כל מה שסלון שיער מודרני צריך במקום אחד - ועוד הרבה מעבר לזה
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1: Dashboard -->
+                <div class="feature-card bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-2xl border hover:shadow-2xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                        <i data-lucide="bar-chart-3" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">דשבורד חכם</h3>
+                    <p class="text-gray-600 mb-6">נתוני הכנסות, לקוחות וצריכת צבע בזמן אמת עם גרפים מתקדמים ותובנות עסקיות</p>
+                    <a href="hairpro_main.html" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 inline-flex items-center gap-2 transition-all">
+                        כנס לדשבורד
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 2: Clients -->
+                <div class="feature-card bg-gradient-to-br from-purple-50 to-pink-100 p-8 rounded-2xl border hover:shadow-2xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                        <i data-lucide="users" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">לקוחות VIP</h3>
+                    <p class="text-gray-600 mb-6">כרטיסי לקוחה מתקדמים עם פרופיל שיער, כרטיס כימיה, אלרגיות והיסטוריית טיפולים</p>
+                    <a href="hairpro_clients.html" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 inline-flex items-center gap-2 transition-all">
+                        ניהול לקוחות
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 3: Appointments -->
+                <div class="feature-card bg-gradient-to-br from-green-50 to-teal-100 p-8 rounded-2xl border hover:shadow-2xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                        <i data-lucide="calendar" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">יומן תורים</h3>
+                    <p class="text-gray-600 mb-6">מערכת תזמון חכמה עם תצוגת timeline, התראות אוטומטיות ומעקב שביעות רצון</p>
+                    <a href="hairpro_appointments.html" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 inline-flex items-center gap-2 transition-all">
+                        לוח תורים
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 4: Formulas -->
+                <div class="feature-card bg-gradient-to-br from-indigo-50 to-purple-100 p-8 rounded-2xl border hover:shadow-2xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                        <i data-lucide="beaker" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">שקילה דיגיטלית</h3>
+                    <p class="text-gray-600 mb-6">מערכת פורמולות חכמה עם שקילה מדויקת עד 0.1 גרם וחישוב עלויות אוטומטי</p>
+                    <a href="hairpro_formulas.html" class="bg-indigo-500 text-white px-6 py-3 rounded-lg hover:bg-indigo-600 inline-flex items-center gap-2 transition-all">
+                        פורמולות חכמות
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 5: Inventory -->
+                <div class="feature-card bg-gradient-to-br from-orange-50 to-yellow-100 p-8 rounded-2xl border hover:shadow-2xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-yellow-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                        <i data-lucide="package" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">מלאי חכם AI</h3>
+                    <p class="text-gray-600 mb-6">ניהול מלאי אוטומטי עם חיזוי צריכה, הזמנות חכמות והתראות מלאי נמוך</p>
+                    <div class="bg-orange-100 text-orange-700 px-6 py-3 rounded-lg inline-flex items-center gap-2">
+                        בפיתוח מתקדם
+                        <i data-lucide="zap" class="w-4 h-4"></i>
+                    </div>
+                </div>
+
+                <!-- Feature 6: Reports -->
+                <div class="feature-card bg-gradient-to-br from-red-50 to-pink-100 p-8 rounded-2xl border hover:shadow-2xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                        <i data-lucide="trending-up" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">דוחות מתקדמים</h3>
+                    <p class="text-gray-600 mb-6">אנליטיקה עסקית מתקדמת עם תחזיות, מגמות וחישובי ROI לכל שירות ולקוח</p>
+                    <div class="bg-red-100 text-red-700 px-6 py-3 rounded-lg inline-flex items-center gap-2">
+                        בפיתוח מתקדם  
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">תראה את המערכת בפעולה</h2>
+                <p class="text-xl text-gray-600">צפה בסרטונים קצרים שמראים איך HairPro IL Advanced עובדת</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Demo Video 1 -->
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover">
+                    <div class="bg-gradient-to-br from-blue-500 to-purple-600 p-8 text-white text-center">
+                        <i data-lucide="play-circle" class="w-16 h-16 mx-auto mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-2">דמו: דשבורד וסטטיסטיקות</h3>
+                        <p class="text-blue-100">צפה איך המערכת מציגה נתונים בזמן אמת</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span>תצוגת הכנסות ויעילות בזמן אמת</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span>גרפי צריכת צבעים מתקדמים</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span>יעדים יומיים ומעקב ביצועים</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demo Video 2 -->
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover">
+                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 p-8 text-white text-center">
+                        <i data-lucide="play-circle" class="w-16 h-16 mx-auto mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-2">דמו: שקילה דיגיטלית</h3>
+                        <p class="text-purple-100">כיצד להשתמש במערכת הפורמולות החכמה</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                <span>חיבור משקל Bluetooth</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                <span>יצירת פורמולות מדויקות</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                <span>חישוב עלויות אוטומטי</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Start Guide -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mt-12">
+                <h3 class="text-2xl font-bold text-center text-gray-900 mb-8">מדריך התחלה מהירה</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">1</div>
+                        <h4 class="font-bold mb-2">כנס למערכת</h4>
+                        <p class="text-sm text-gray-600">לחץ על "כנס למערכת עכשיו" ותגיע לדשבורד הראשי</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">2</div>
+                        <h4 class="font-bold mb-2">עבור בין הטאבים</h4>
+                        <p class="text-sm text-gray-600">השתמש בטאבים העליונים כדי לעבור בין דשבורד, לקוחות, תורים ופורמולות</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">3</div>
+                        <h4 class="font-bold mb-2">התחל לעבוד</h4>
+                        <p class="text-sm text-gray-600">הוסף לקוחות, צור פורמולות ותהנה מהמערכת המתקדמת ביותר</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison with Spectra -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">למה HairPro IL Advanced עדיף על Spectra-CI?</h2>
+                <p class="text-xl text-gray-600">השוואה מפורטת בין המערכות</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-2xl p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- HairPro Advantages -->
+                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                                <i data-lucide="check" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900">HairPro IL Advanced</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                <span>ממשק בעברית מלא - מותאם לישראל 🇮🇱</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                <span>מחירים בשקלים כולל מע״מ</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                <span>ניהול מקיף - לא רק צבעים אלא כל הסלון</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                <span>שקילה דיגיטלית עד 0.1 גרם</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                <span>כרטיסי לקוחה עם כרטיס כימיה מתקדם</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                <span>AI למלאי חכם ותחזיות</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                <span>תמיכה ישראלית 24/7</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                <span>עדכונים חודשיים עם תכונות חדשות</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Spectra Limitations -->
+                    <div class="bg-gray-100 rounded-xl p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 bg-gray-400 rounded-xl flex items-center justify-center">
+                                <i data-lucide="minus" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-600">Spectra-CI</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="x-circle" class="w-5 h-5 text-gray-400"></i>
+                                <span class="text-gray-600">ממשק באנגלית בלבד</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="x-circle" class="w-5 h-5 text-gray-400"></i>
+                                <span class="text-gray-600">מחירים בדולרים ללא מע״מ</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="x-circle" class="w-5 h-5 text-gray-400"></i>
+                                <span class="text-gray-600">רק ניהול צבעים - לא מערכת מלאה</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="x-circle" class="w-5 h-5 text-gray-400"></i>
+                                <span class="text-gray-600">אין שקילה דיגיטלית</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="x-circle" class="w-5 h-5 text-gray-400"></i>
+                                <span class="text-gray-600">ניהול לקוחות בסיסי</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="x-circle" class="w-5 h-5 text-gray-400"></i>
+                                <span class="text-gray-600">אין תכונות AI</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="x-circle" class="w-5 h-5 text-gray-400"></i>
+                                <span class="text-gray-600">תמיכה באנגלית בלבד</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="x-circle" class="w-5 h-5 text-gray-400"></i>
+                                <span class="text-gray-600">עדכונים נדירים</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Comparison -->
+                <div class="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-xl p-8 mt-8 text-center">
+                    <h3 class="text-2xl font-bold mb-6">התוצאות מדברות בעד עצמן!</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div>
+                            <div class="text-3xl font-bold mb-2">40%</div>
+                            <div class="text-sm text-green-100">חיסכון בעלויות צבע</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold mb-2">25%</div>
+                            <div class="text-sm text-green-100">הגדלת הכנסות</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold mb-2">50%</div>
+                            <div class="text-sm text-green-100">שיפור יעילות</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold mb-2">80%</div>
+                            <div class="text-sm text-green-100">הפחתת בזבוז</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section class="hero-gradient text-white py-20">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                מוכן לשדרג את הסלון? 💇‍♀️
+            </h2>
+            <p class="text-xl mb-8 text-blue-100">
+                הצטרף לסלונים המובילים בישראל שכבר עברו ל-HairPro IL Advanced
+            </p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                <a href="hairpro_main.html" class="bg-white text-purple-600 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105">
+                    🚀 התחל עכשיו - חינם!
+                </a>
+                <div class="text-blue-200 text-sm">
+                    ללא התחייבות • מוכן לשימוש מיידי
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 hero-gradient rounded-xl flex items-center justify-center">
+                            <i data-lucide="scissors" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <h4 class="text-xl font-bold">HairPro IL Advanced</h4>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        המערכת המתקדמת ביותר לניהול סלון שיער בישראל
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">תכונות עיקריות</h4>
+                    <ul class="text-sm text-gray-400 space-y-2">
+                        <li>• שקילה דיגיטלית מדויקת</li>
+                        <li>• כרטיסי לקוחה מתקדמים</li>
+                        <li>• יומן תורים חכם</li>
+                        <li>• דוחות עסקיים</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">יתרונות</h4>
+                    <ul class="text-sm text-gray-400 space-y-2">
+                        <li>• חיסכון 40% בצבעים</li>
+                        <li>• עליה 25% בהכנסות</li>
+                        <li>• שיפור 50% ביעילות</li>
+                        <li>• הפחתת 80% בזבוז</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">קישורים מהירים</h4>
+                    <div class="space-y-2 text-sm">
+                        <a href="hairpro_main.html" class="block text-gray-400 hover:text-white transition-colors">דשבורד ראשי</a>
+                        <a href="hairpro_clients.html" class="block text-gray-400 hover:text-white transition-colors">ניהול לקוחות</a>
+                        <a href="hairpro_appointments.html" class="block text-gray-400 hover:text-white transition-colors">יומן תורים</a>
+                        <a href="hairpro_formulas.html" class="block text-gray-400 hover:text-white transition-colors">פורמולות חכמות</a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+                © 2024 HairPro IL Advanced - פותח במיוחד עבור הסלונים המובילים בישראל 🇮🇱
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        
+        function scrollToDemo() {
+            document.getElementById('demo').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+    </script>
+</body>
+</html>
