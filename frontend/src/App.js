@@ -393,6 +393,7 @@ const MainApp = () => {
         return <MarketplaceView 
           t={t} 
           darkMode={darkMode}
+          marketplaceItems={marketplaceData}
         />;
       case 'learning': 
         return (
