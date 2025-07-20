@@ -50,26 +50,27 @@ const Sidebar = ({
   };
 
   const menuItems = [
-    { id: 'dashboard', icon: BarChart3, label: t.dashboard || 'Dashboard' },
-    { id: 'calls', icon: Phone, label: t.calls || 'Calls' },
-    { id: 'webDialer', icon: PhoneCall, label: t.webDialer || 'Web Dialer', badge: 'Web' },
-    { id: 'crm', icon: Users2, label: t.crm || 'CRM', badge: (crmData?.leads?.length || 0).toString() },
-    { id: 'attendance', icon: UserCheck, label: t.attendance || 'Attendance', badge: attendanceData.filter(a => a.status === 'present').length.toString() },
-    { id: 'analytics', icon: TrendingUp, label: t.analytics || 'Analytics' },
-    { id: 'aiAnalytics', icon: Brain, label: t.aiAnalytics || 'AI Analytics', badge: 'AI' },
-    { id: 'automations', icon: Workflow, label: t.automations || 'Automations', badge: automationRules.filter(r => r.active).length.toString() },
-    { id: 'messaging', icon: MessageSquare, label: t.messaging || 'Messaging', badge: '💬' },
-    { id: 'callFlows', icon: Palette, label: t.callFlows || 'Call Flows', badge: 'מתקדם' },
-    { id: 'documents', icon: FileText, label: t.documents || 'Documents', badge: 'חדש' },
-    { id: 'modules', icon: Puzzle, label: t.modules || 'Modules', badge: 'חדש' },
-    { id: 'mobileApp', icon: Smartphone, label: t.mobileApp || 'Mobile App', badge: 'PWA' },
-    { id: 'providerSystem', icon: Scissors, label: t.providerSystem || 'Provider System', badge: '🎯' },
-    { id: 'workflowSystem', icon: Zap, label: t.workflowSystem || 'Workflow System', badge: '⚡' },
-    { id: 'subscription', icon: CreditCard, label: t.subscription || 'Subscription', badge: '💳' },
-    { id: 'marketplace', icon: ShoppingCart, label: t.marketplace || 'Marketplace', badge: 'NEW' },
-    { id: 'learning', icon: BookOpen, label: t.learning || 'Learning', badge: learningModules.length.toString() },
-    { id: 'profile', icon: User2, label: t.profile || 'Profile', badge: '🔑' },
-    { id: 'settings', icon: Settings, label: t.settings || 'Settings' }
+    { id: 'dashboard', icon: BarChart3, label: t.dashboard || 'דשבורד', badge: '' },
+    { id: 'calls', icon: PhoneCall, label: t.calls || 'שיחות', badge: '' },
+    { id: 'contacts', icon: Users2, label: t.contacts || 'אנשי קשר', badge: '' },
+    { id: 'crm', icon: Users2, label: t.crm || 'CRM', badge: crmData?.leads?.length > 0 ? `${crmData.leads.length}` : '' },
+    { id: 'attendance', icon: UserCheck, label: t.attendance || 'נוכחות', badge: attendanceData?.length > 0 ? `${attendanceData.length}` : '' },
+    { id: 'analytics', icon: TrendingUp, label: t.analytics || 'אנליטיקס', badge: '' },
+    { id: 'marketplace', icon: ShoppingCart, label: t.marketplace || 'חנות', badge: 'חדש' },
+    { id: 'automations', icon: Workflow, label: t.automations || 'אוטומציות', badge: automationRules?.length > 0 ? `${automationRules.length}` : '' },
+    { id: 'callFlows', icon: Workflow, label: t.callFlows || 'זרימות שיחה', badge: '' },
+    { id: 'documents', icon: FileText, label: t.documents || 'מסמכים', badge: '' },
+    { id: 'aiAnalytics', icon: Brain, label: t.aiAnalytics || 'AI אנליטיקס', badge: '🤖' },
+    { id: 'messaging', icon: MessageSquare, label: t.messaging || 'מרכז הודעות', badge: '' },
+    { id: 'webDialer', icon: Phone, label: t.webDialer || 'חייגן Web', badge: '' },
+    { id: 'modules', icon: Puzzle, label: t.modules || 'מנהל מודולים', badge: '' },
+    { id: 'subscription', icon: CreditCard, label: t.subscription || 'ניהול מנוי', badge: 'Pro' },
+    { id: 'profile', icon: User2, label: t.profile || 'פרופיל', badge: '' },
+    { id: 'notifications', icon: Palette, label: t.notifications || 'התראות', badge: '' },
+    { id: 'mobileApp', icon: Smartphone, label: t.mobileApp || 'אפליקציית מובייל', badge: '📱' },
+    { id: 'providerSystem', icon: Scissors, label: t.providerSystem || 'מערכת ספרים/מטפלים', badge: '✂️' },
+    { id: 'workflowSystem', icon: Zap, label: t.workflowSystem || 'זמן-מוצר-יעדים משולב', badge: '⚡' },
+    { id: 'settings', icon: Settings, label: t.settings || 'הגדרות', badge: '' }
   ];
 
   return (
