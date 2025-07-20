@@ -12,6 +12,212 @@ import {
   ShoppingCart, CreditCard, UserPlus, MapPin, Mail
 } from 'lucide-react';
 
+// מאגר צבעים מתקדם לסלון שיער
+const colorDatabase = {
+  schwarzkopf: {
+    name: "שוורצקוף",
+    logo: "🎨",
+    series: {
+      igoraRoyal: {
+        name: "IGORA ROYAL",
+        description: "צבע קבוע מקצועי עם כיסוי של עד 100% שיער לבן",
+        colors: [
+          { code: "1-0", name: "שחור", base: 1, primary: 0, secondary: 0, hex: "#1a1a1a", price: 28 },
+          { code: "3-0", name: "חום כהה", base: 3, primary: 0, secondary: 0, hex: "#3e2723", price: 28 },
+          { code: "4-0", name: "חום בינוני", base: 4, primary: 0, secondary: 0, hex: "#5d4037", price: 28 },
+          { code: "5-0", name: "חום בהיר", base: 5, primary: 0, secondary: 0, hex: "#6d4c41", price: 28 },
+          { code: "6-0", name: "בלונד כהה", base: 6, primary: 0, secondary: 0, hex: "#8d6e63", price: 28 },
+          { code: "7-0", name: "בלונד בינוני", base: 7, primary: 0, secondary: 0, hex: "#a1887f", price: 28 },
+          { code: "8-0", name: "בלונד בהיר", base: 8, primary: 0, secondary: 0, hex: "#bcaaa4", price: 28 },
+          { code: "9-0", name: "בלונד בהיר מאוד", base: 9, primary: 0, secondary: 0, hex: "#d7ccc8", price: 28 },
+          { code: "10-0", name: "בלונד פלטינה", base: 10, primary: 0, secondary: 0, hex: "#efebe9", price: 32 },
+          { code: "4-65", name: "חום בינוני שוקולד נחושת", base: 4, primary: 6, secondary: 5, hex: "#6d4c41", price: 30 },
+          { code: "5-88", name: "חום בהיר אדום אינטנסיבי", base: 5, primary: 8, secondary: 8, hex: "#8e5a4a", price: 30 },
+          { code: "6-12", name: "בלונד כהה אפרפר פנינה", base: 6, primary: 1, secondary: 2, hex: "#9e9e9e", price: 30 },
+          { code: "7-31", name: "בלונד בינוני מט זהוב", base: 7, primary: 3, secondary: 1, hex: "#c9a961", price: 30 },
+          { code: "8-77", name: "בלונד בהיר נחושת אינטנסיבי", base: 8, primary: 7, secondary: 7, hex: "#d4a574", price: 32 },
+          { code: "9-55", name: "בלונד בהיר מאוד מהגוני אינטנסיבי", base: 9, primary: 5, secondary: 5, hex: "#c8928a", price: 32 }
+        ],
+        mixing: "1:1 עם חמצן",
+        timing: "30-45 דקות",
+        developer: [
+          { vol: "10vol (3%)", description: "טון על טון או כהייה", price: 0.05 },
+          { vol: "20vol (6%)", description: "כיסוי שיער לבן, הבהרה 1-2 טונים", price: 0.05 },
+          { vol: "30vol (9%)", description: "הבהרה 2-3 טונים", price: 0.06 },
+          { vol: "40vol (12%)", description: "הבהרה 3-4 טונים", price: 0.07 }
+        ]
+      }
+    }
+  },
+  loreal: {
+    name: "לוריאל פרופסיונל",
+    logo: "✨",
+    series: {
+      majirel: {
+        name: "MAJIREL",
+        description: "צבע קבוע עם טכנולוגיית Ionène G + Incell",
+        colors: [
+          { code: "1", name: "שחור", hex: "#000000", price: 32 },
+          { code: "3", name: "חום כהה", hex: "#3e2723", price: 32 },
+          { code: "4", name: "חום בינוני", hex: "#5d4037", price: 32 },
+          { code: "5", name: "חום בהיר", hex: "#6d4c41", price: 32 },
+          { code: "6", name: "בלונד כהה", hex: "#8d6e63", price: 32 },
+          { code: "7", name: "בלונד", hex: "#a1887f", price: 32 },
+          { code: "8", name: "בלונד בהיר", hex: "#bcaaa4", price: 32 },
+          { code: "9", name: "בלונד בהיר מאוד", hex: "#d7ccc8", price: 32 }
+        ]
+      }
+    }
+  }
+};
+
+// רכיב התראות חכם
+const NotificationCenter = ({ notifications, onClose }) => {
+  return (
+    <div className="fixed top-20 left-4 z-50 max-w-sm">
+      {notifications.map((notification, index) => (
+        <div 
+          key={notification.id} 
+          className={`mb-2 p-4 rounded-lg shadow-lg transform transition-all duration-300 ${
+            notification.type === 'error' ? 'bg-red-500' : 
+            notification.type === 'warning' ? 'bg-yellow-500' : 
+            notification.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+          } text-white`}
+          style={{ 
+            animation: 'slideIn 0.3s ease-out',
+            animationDelay: `${index * 0.1}s`
+          }}
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-2">
+              <Bell className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-semibold">{notification.title}</h4>
+                <p className="text-sm opacity-90">{notification.message}</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => onClose(notification.id)}
+              className="text-white/80 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// רכיב שעון פעילות צף
+const FloatingActivityClock = ({ workStatus, currentClient, onStatusChange }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [workTime, setWorkTime] = useState(0);
+
+  useEffect(() => {
+    let interval;
+    if (workStatus === 'working') {
+      interval = setInterval(() => {
+        setWorkTime(prev => prev + 1);
+      }, 1000);
+    } else if (workStatus === 'ready') {
+      setWorkTime(0);
+    }
+    return () => clearInterval(interval);
+  }, [workStatus]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getStatusColor = () => {
+    switch (workStatus) {
+      case 'working': return 'bg-green-500';
+      case 'break': return 'bg-yellow-500';
+      default: return 'bg-blue-500';
+    }
+  };
+
+  const getStatusText = () => {
+    switch (workStatus) {
+      case 'working': return 'עובד עם לקוח';
+      case 'break': return 'בהפסקה';
+      default: return 'מוכן ללקוח הבא';
+    }
+  };
+
+  return (
+    <div className={`fixed bottom-24 right-4 z-50 transition-all duration-300 ${
+      isExpanded ? 'w-64' : 'w-16'
+    }`}>
+      <div className={`${getStatusColor()} rounded-full shadow-lg text-white overflow-hidden`}>
+        {!isExpanded ? (
+          // צורה מצומצמת
+          <button
+            onClick={() => setIsExpanded(true)}
+            className="w-16 h-16 flex items-center justify-center hover:scale-110 transition-transform"
+          >
+            <Timer className="w-6 h-6" />
+          </button>
+        ) : (
+          // צורה מורחבת
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <Timer className="w-5 h-5" />
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="hover:bg-white/20 rounded p-1"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="text-center mb-3">
+              <div className="text-2xl font-mono font-bold">{formatTime(workTime)}</div>
+              <div className="text-xs opacity-80">{getStatusText()}</div>
+              {currentClient && (
+                <div className="text-sm mt-1">{currentClient.name}</div>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => onStatusChange('working')}
+                className={`px-2 py-1 text-xs rounded ${
+                  workStatus === 'working' 
+                    ? 'bg-white text-green-600' 
+                    : 'bg-white/20 hover:bg-white/30'
+                }`}
+              >
+                התחל עבודה
+              </button>
+              <button
+                onClick={() => onStatusChange('break')}
+                className={`px-2 py-1 text-xs rounded ${
+                  workStatus === 'break' 
+                    ? 'bg-white text-yellow-600' 
+                    : 'bg-white/20 hover:bg-white/30'
+                }`}
+              >
+                הפסקה
+              </button>
+            </div>
+            
+            <button
+              onClick={() => onStatusChange('ready')}
+              className="w-full mt-2 px-2 py-1 text-xs rounded bg-white/20 hover:bg-white/30"
+            >
+              סיים
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const BarberProfessionalApp = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [workStatus, setWorkStatus] = useState('ready'); // ready, working, break
