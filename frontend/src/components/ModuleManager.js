@@ -15,7 +15,7 @@ import {
   Play
 } from 'lucide-react';
 
-const ModuleManager = () => {
+const ModuleManager = ({ darkMode = false, t = {} }) => {
   const [availableModules, setAvailableModules] = useState([]);
   const [installedModules, setInstalledModules] = useState([]);
   const [userPlan, setUserPlan] = useState('basic');
