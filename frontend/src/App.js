@@ -27,6 +27,7 @@ import DocumentGenerator from './components/DocumentGenerator';
 import AIAnalytics from './components/AIAnalytics';
 import MessagingCenter from './components/MessagingCenter';
 import ModuleManager from './components/ModuleManager';
+import MobileApp from './components/MobileApp';
 
 const MainApp = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
