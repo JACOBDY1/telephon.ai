@@ -128,20 +128,29 @@ const MainApp = () => {
 
   const loadInitialData = async () => {
     try {
-      // Load CRM data
-      const [leadsRes, dealsRes, tasksRes] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/crm/leads`),
-        axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/crm/deals`),
-        axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/crm/tasks`)
-      ]);
+      // Load CRM data safely
+      const loadCRMData = async () => {
+        try {
+          const [leadsRes, dealsRes, tasksRes] = await Promise.all([
+            axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/crm/leads`).catch(() => ({ data: [] })),
+            axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/crm/deals`).catch(() => ({ data: [] })),
+            axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/crm/tasks`).catch(() => ({ data: [] }))
+          ]);
 
-      setCrmData({
-        leads: leadsRes.data,
-        deals: dealsRes.data,
-        tasks: tasksRes.data
-      });
+          setCrmData({
+            leads: leadsRes.data || [],
+            deals: dealsRes.data || [],
+            tasks: tasksRes.data || []
+          });
+        } catch (error) {
+          console.log('CRM data loading failed, using mock data');
+          setCrmData({ leads: [], deals: [], tasks: [] });
+        }
+      };
 
-      // Mock data for other sections
+      await loadCRMData();
+
+      // Mock data for other sections - always set regardless of API
       setAttendanceData([
         { id: 1, name: 'יואב כהן', status: 'present', time: '09:00' },
         { id: 2, name: 'שרה לוי', status: 'absent', time: '-' },
@@ -163,6 +172,11 @@ const MainApp = () => {
 
     } catch (error) {
       console.error('Error loading initial data:', error);
+      // Ensure we always have some data even on error
+      setCrmData({ leads: [], deals: [], tasks: [] });
+      setAttendanceData([]);
+      setAutomationRules([]);
+      setLearningModules([]);
     }
   };
 
