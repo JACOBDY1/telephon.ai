@@ -35,11 +35,19 @@ const MainApp = () => {
   const [language, setLanguage] = useState('he');
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState([]);
-  const [crmData, setCrmData] = useState({ leads: [], deals: [], tasks: [] });
+  // Initialize with safe defaults
+  const [crmData, setCrmData] = useState({ 
+    leads: [], 
+    deals: [], 
+    tasks: [] 
+  });
   const [attendanceData, setAttendanceData] = useState([]);
   const [automationRules, setAutomationRules] = useState([]);
   const [learningModules, setLearningModules] = useState([]);
-  const [connectionStatus, setConnectionStatus] = useState({ checkcall: true, masterpbx: true });
+  const [connectionStatus, setConnectionStatus] = useState({ 
+    checkcall: true, 
+    masterpbx: true 
+  });
 
   // Languages configuration
   const languages = {
