@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Search, Globe, Moon, Sun, User, Settings, ChevronDown, Menu, X, Wifi, Battery, Signal } from 'lucide-react';
 import NotificationCenter from './NotificationCenter';
 import GlobalSearch from './GlobalSearch';
+import AdvancedNotifications from './AdvancedNotifications';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header = ({ 
