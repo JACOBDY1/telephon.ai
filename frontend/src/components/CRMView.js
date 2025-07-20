@@ -38,7 +38,7 @@ const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, o
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">עסקאות פתוחות</p>
-              <p className="text-3xl font-bold text-green-600">{crmData.deals.length}</p>
+              <p className="text-3xl font-bold text-green-600">{crmData?.deals?.length || 0}</p>
             </div>
             <DollarSign className="w-8 h-8 text-green-600" />
           </div>
