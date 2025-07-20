@@ -39,7 +39,35 @@ const MainApp = () => {
   const [language, setLanguage] = useState('he');
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState([]);
-  // Initialize with safe defaults
+  // Add sidebar state  
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: 'שיחה החמיצה',
+      message: 'מיואב כהן - 050-1234567',
+      time: new Date(Date.now() - 5 * 60 * 1000),
+      type: 'missed_call',
+      read: false
+    },
+    {
+      id: 2, 
+      title: 'ליד חדש',
+      message: 'רחל לוי הגיש בקשה דרך האתר',
+      time: new Date(Date.now() - 15 * 60 * 1000),
+      type: 'lead',
+      read: false
+    },
+    {
+      id: 3,
+      title: 'יעד הושג',
+      message: 'השגת יעד מכירות יומי!',
+      time: new Date(Date.now() - 30 * 60 * 1000),
+      type: 'achievement',
+      read: true
+    }
+  ]);
   const [crmData, setCrmData] = useState({ 
     leads: [], 
     deals: [], 
