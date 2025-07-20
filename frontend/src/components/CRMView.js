@@ -47,7 +47,7 @@ const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, o
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">משימות היום</p>
-              <p className="text-3xl font-bold text-orange-600">{crmData.tasks.filter(t => t.status === 'pending').length}</p>
+              <p className="text-3xl font-bold text-orange-600">{crmData?.tasks?.filter(t => t.status === 'pending').length || 0}</p>
             </div>
             <CheckSquare className="w-8 h-8 text-orange-600" />
           </div>
