@@ -268,7 +268,7 @@ const BarberProfessionalApp = () => {
   }, []);
 
   const loadBarberData = () => {
-    // Today's statistics
+    // נתונים סטטיסטיים מתקדמים
     setTodayStats({
       appointmentsCompleted: 8,
       totalRevenue: 1420,
@@ -277,100 +277,334 @@ const BarberProfessionalApp = () => {
       workingHours: 6.5,
       customerSatisfaction: 4.9,
       newCustomers: 3,
-      repeatCustomers: 5
+      repeatCustomers: 5,
+      colorUsed: 245, // גרם
+      wastePercentage: 12,
+      efficiency: 88
     });
 
-    // Daily goals
+    // יעדים יומיים מתקדמים
     setDailyGoals({
       appointments: { current: 8, target: 12, percentage: 67 },
       revenue: { current: 1420, target: 1800, percentage: 79 },
       tips: { current: 180, target: 250, percentage: 72 },
       newCustomers: { current: 3, target: 4, percentage: 75 },
-      satisfaction: { current: 4.9, target: 4.5, percentage: 109 }
+      satisfaction: { current: 4.9, target: 4.5, percentage: 109 },
+      colorEfficiency: { current: 88, target: 85, percentage: 103 },
+      wasteReduction: { current: 12, target: 15, percentage: 80 }
     });
 
-    // Today's appointments
+    // לקוחות מתקדמים עם כרטיס כימיה
+    setClients([
+      {
+        id: 1,
+        name: 'שרה כהן',
+        phone: '050-1234567',
+        email: 'sarah@example.com',
+        photo: null,
+        birthDate: '1985-03-15',
+        address: 'תל אביב, ישראל',
+        registrationDate: '2023-06-15',
+        hairProfile: {
+          naturalColor: 'חום כהה 4',
+          currentColor: 'בלונד בהיר 8.3',
+          hairType: 'חלק, דק',
+          scalpCondition: 'רגיל',
+          porosity: 'נמוכה',
+          elasticity: 'טובה',
+          density: 'בינונית'
+        },
+        chemistryCard: {
+          allergies: ['PPD - פניל דיאמין'],
+          sensitivities: ['אמוניה חזקה'],
+          previousReactions: 'אדמומיות קלה עם שוורצקוף 6.0',
+          skinTest: {
+            date: '2024-01-10',
+            result: 'שלילי',
+            testedProduct: 'לוריאל מג\'ירל 8.3'
+          },
+          preferredBrands: ['לוריאל', 'וולה'],
+          avoidBrands: ['שוורצקוף איגורה']
+        },
+        preferences: {
+          colorStyle: 'בלונדים טבעיים',
+          maintenanceLevel: 'בינונית',
+          budget: 'גבוה',
+          appointmentTime: 'בוקר',
+          stylist: 'מיכל לוי'
+        },
+        history: [
+          {
+            id: 1,
+            date: '2024-01-15',
+            service: 'צביעה + תספורת',
+            formula: {
+              colors: [
+                { brand: 'loreal', code: '8.3', weight: 40, actualWeight: 42 },
+                { brand: 'loreal', code: '9.0', weight: 20, actualWeight: 19 }
+              ],
+              developer: '20vol',
+              processingTime: 35,
+              totalCost: 28.50
+            },
+            beforePhoto: null,
+            afterPhoto: null,
+            duration: 120,
+            cost: 380,
+            tip: 50,
+            satisfaction: 5,
+            stylist: 'מיכל לוי',
+            notes: 'תוצאה מושלמת, הלקוחה מרוצה מאוד',
+            nextAppointment: '2024-02-19'
+          }
+        ],
+        metrics: {
+          totalVisits: 12,
+          totalSpent: 4250,
+          averageSpent: 354,
+          lastVisit: '2024-01-15',
+          nextRecommended: '2024-02-19',
+          loyaltyScore: 95,
+          referrals: 2
+        }
+      },
+      {
+        id: 2,
+        name: 'רחל אברהם',
+        phone: '052-9876543',
+        email: 'rachel@example.com',
+        photo: null,
+        birthDate: '1978-11-22',
+        address: 'רמת גן, ישראל',
+        registrationDate: '2023-04-10',
+        hairProfile: {
+          naturalColor: 'שחור 1',
+          currentColor: 'חום ערמוני 5.52',
+          hairType: 'מתולתל, עבה',
+          scalpCondition: 'שמני',
+          porosity: 'גבוהה',
+          elasticity: 'חלשה',
+          density: 'עבה'
+        },
+        chemistryCard: {
+          allergies: [],
+          sensitivities: ['ריחות חזקים'],
+          previousReactions: 'אין',
+          skinTest: {
+            date: '2023-04-08',
+            result: 'שלילי',
+            testedProduct: 'שוורצקוף איגורה 5.52'
+          },
+          preferredBrands: ['שוורצקוף', 'ולה'],
+          avoidBrands: []
+        },
+        history: [
+          {
+            id: 1,
+            date: '2024-01-20',
+            service: 'צביעה',
+            formula: {
+              colors: [
+                { brand: 'schwarzkopf', code: '5-52', weight: 60, actualWeight: 58 }
+              ],
+              developer: '20vol',
+              processingTime: 40,
+              totalCost: 32.50
+            },
+            duration: 90,
+            cost: 320,
+            tip: 30,
+            satisfaction: 4,
+            stylist: 'דנה כהן'
+          }
+        ],
+        metrics: {
+          totalVisits: 8,
+          totalSpent: 2890,
+          averageSpent: 361,
+          lastVisit: '2024-01-20',
+          loyaltyScore: 78
+        }
+      }
+    ]);
+
+    // מלאי מתקדם
+    setInventory([
+      {
+        id: 1,
+        brand: 'schwarzkopf',
+        product: 'IGORA ROYAL 6-0',
+        category: 'color',
+        quantity: 12,
+        minStock: 5,
+        maxStock: 20,
+        unit: 'tubes',
+        pricePerUnit: 28,
+        supplier: 'ספק מרכזי',
+        lastOrdered: '2024-01-10',
+        usage: {
+          daily: 2.5,
+          weekly: 17.5,
+          monthly: 75
+        },
+        expiryDate: '2025-06-15',
+        location: 'מדף A-2'
+      },
+      {
+        id: 2,
+        brand: 'loreal',
+        product: 'MAJIREL 8.3',
+        category: 'color',
+        quantity: 8,
+        minStock: 5,
+        maxStock: 15,
+        unit: 'tubes',
+        pricePerUnit: 32,
+        supplier: 'ספק מרכזי',
+        lastOrdered: '2024-01-05',
+        usage: {
+          daily: 1.8,
+          weekly: 12.6,
+          monthly: 54
+        },
+        expiryDate: '2025-04-20'
+      },
+      {
+        id: 3,
+        product: 'חמצן 20vol',
+        category: 'developer',
+        quantity: 2000,
+        minStock: 1000,
+        maxStock: 5000,
+        unit: 'ml',
+        pricePerUnit: 0.05,
+        supplier: 'ספק מרכזי',
+        usage: {
+          daily: 150,
+          weekly: 1050,
+          monthly: 4500
+        }
+      }
+    ]);
+
+    // פורמולות שמורות
+    setFormulas([
+      {
+        id: 1,
+        name: 'בלונד זהוב קלאסי',
+        clientId: 1,
+        colors: [
+          { brand: 'loreal', code: '8.3', weight: 40 },
+          { brand: 'loreal', code: '9.0', weight: 20 }
+        ],
+        developer: '20vol',
+        processingTime: 35,
+        notes: 'מושלם לשיער דק',
+        successRate: 95,
+        lastUsed: '2024-01-15',
+        category: 'בלונדים'
+      }
+    ]);
+
+    // תורים לשבוע
     setTodayAppointments([
       {
         id: 1,
         time: '09:00',
-        clientName: 'דוד כהן',
-        service: 'תספורת + זקן',
-        price: 120,
-        duration: 45,
+        clientId: 1,
+        clientName: 'שרה כהן',
+        service: 'צביעה + תספורת',
+        price: 380,
+        duration: 120,
         status: 'completed',
-        tip: 20,
-        notes: 'לקוח קבוע, אוהב תספורת קצרה',
+        tip: 50,
+        notes: 'לקוחה VIP, מעדיפה בלונדים',
         satisfaction: 5,
-        phone: '050-1234567'
+        phone: '050-1234567',
+        allergies: ['PPD'],
+        lastColor: 'בלונד בהיר 8.3'
       },
       {
         id: 2,
-        time: '10:00',
-        clientName: 'יואב מזרחי',
-        service: 'תספורת VIP',
-        price: 180,
-        duration: 60,
+        time: '11:30',
+        clientId: 2,
+        clientName: 'רחל אברהם',
+        service: 'צביעת שורשים',
+        price: 250,
+        duration: 90,
         status: 'completed',
         tip: 30,
-        notes: 'ביקש סטייל חדש, מרוצה מהתוצאה',
-        satisfaction: 5,
+        notes: 'שיער מתולתל, זקוק לטיפול מיוחד',
+        satisfaction: 4,
         phone: '052-9876543'
       },
       {
         id: 3,
-        time: '11:30',
-        clientName: 'משה לוי',
-        service: 'תספורת + שמפו',
-        price: 140,
-        duration: 50,
-        status: 'completed',
-        tip: 15,
-        notes: 'שיער דק, זקוק לטיפוח מיוחד',
-        satisfaction: 4,
-        phone: '054-5555555'
+        time: '14:00',
+        clientName: 'מירי לוי',
+        service: 'גוונים',
+        price: 280,
+        duration: 75,
+        status: 'in-progress',
+        notes: 'לקוחה חדשה, רוצה שינוי דרמטי'
       },
       {
         id: 4,
-        time: '14:00',
-        clientName: 'אבי דוד',
-        service: 'גילוח מסורתי',
-        price: 100,
-        duration: 40,
-        status: 'in-progress',
-        tip: 0,
-        notes: 'לקוח חדש, רוצה גילוח קלאסי',
-        satisfaction: 0,
-        phone: '053-7777777'
-      },
-      {
-        id: 5,
-        time: '15:00',
-        clientName: 'רון אברהם',
-        service: 'תספורת ילדים',
-        price: 80,
-        duration: 30,
+        time: '15:30',
+        clientName: 'יעל כהן',
+        service: 'תספורת + פן',
+        price: 180,
+        duration: 60,
         status: 'upcoming',
-        tip: 0,
-        notes: 'ילד בן 8, צריך סבלנות',
-        satisfaction: 0,
-        phone: '055-1111111'
+        notes: 'תספורת לאירוע מיוחד'
       }
     ]);
 
-    // Notifications
+    // נתוני אנליטיקה
+    setAnalyticsData({
+      colorUsage: {
+        'בלונדים': 45,
+        'חומים': 35,
+        'שחורים': 12,
+        'אדומים': 8
+      },
+      wasteReduction: 22,
+      efficiency: 88,
+      clientSatisfaction: 4.8,
+      revenue: {
+        daily: 1420,
+        weekly: 8640,
+        monthly: 36800
+      },
+      trends: {
+        popularColors: ['8.3', '7.0', '6.0', '5.52'],
+        peakHours: ['10:00-12:00', '14:00-16:00'],
+        seasonalDemand: 'גוונים חמים לחורף'
+      }
+    });
+
+    // התראות
     setNotifications([
       {
         id: 1,
-        message: 'רון אברהם מגיע בעוד 15 דקות',
-        type: 'upcoming',
-        time: '14:45'
+        type: 'warning',
+        title: 'מלאי נמוך',
+        message: 'לוריאל מג\'ירל 8.3 - נותרו 3 שפופרות',
+        time: new Date(Date.now() - 10 * 60 * 1000)
       },
       {
         id: 2,
-        message: 'הגעת ליעד הטיפים היומי! 🎉',
-        type: 'achievement',
-        time: '13:20'
+        type: 'success',
+        title: 'לקוחה מרוצה',
+        message: 'שרה כהן נתנה דירוג 5 כוכבים',
+        time: new Date(Date.now() - 30 * 60 * 1000)
+      },
+      {
+        id: 3,
+        type: 'info',
+        title: 'תזכורת',
+        message: 'יעל כהן מגיעה בעוד 15 דקות',
+        time: new Date(Date.now() - 2 * 60 * 1000)
       }
     ]);
   };
