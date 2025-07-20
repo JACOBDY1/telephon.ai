@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, BarChart3, Users2, UserCheck, TrendingUp, Workflow, ShoppingCart, BookOpen, Settings, Menu, X, FileText, Palette, Brain, MessageSquare, PhoneCall, Puzzle, User2, CreditCard, Smartphone } from 'lucide-react';
+import { Phone, BarChart3, Users2, UserCheck, TrendingUp, Workflow, ShoppingCart, BookOpen, Settings, Menu, X, FileText, Palette, Brain, MessageSquare, PhoneCall, Puzzle, User2, CreditCard, Smartphone, Scissors } from 'lucide-react';
 
 const Sidebar = ({ 
   sidebarOpen = true, 
