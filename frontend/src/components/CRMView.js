@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, DollarSign, Target, CheckSquare, TrendingUp, Filter, BarChart, User } from 'lucide-react';
 
-const CRMView = ({ darkMode, t, crmData, openModal, startCall }) => {
+const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, openModal = () => {}, startCall = () => {} }) => {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
