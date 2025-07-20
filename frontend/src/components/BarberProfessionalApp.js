@@ -543,10 +543,9 @@ const BarberProfessionalApp = () => {
   const calculateColorCost = (formula) => {
     let totalCost = 0;
     formula.colors?.forEach(color => {
-      const colorData = colorDatabase[color.brand]?.series[color.series]?.colors?.find(c => c.code === color.code);
-      if (colorData) {
-        totalCost += (color.weight / 60) * colorData.price; // עלות ל-60 גרם
-      }
+      // Simplified cost calculation without database
+      const basePrice = 30; // Average price per tube
+      totalCost += (color.weight / 60) * basePrice;
     });
     return totalCost.toFixed(2);
   };
