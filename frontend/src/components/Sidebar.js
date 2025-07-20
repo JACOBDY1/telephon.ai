@@ -50,27 +50,53 @@ const Sidebar = ({
   };
 
   return (
-    <div className={`${darkMode ? 'bg-gray-900' : 'bg-white'} border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col h-full w-full`}>
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className={`flex items-center space-x-2 ${!sidebarOpen && 'justify-center'}`}>
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Phone className="w-4 h-4 text-white" />
+    <>
+      {/* Mobile Overlay */}
+      {isMobile && sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        ${isMobile ? 'fixed' : 'relative'} 
+        ${isMobile && sidebarOpen ? 'translate-x-0' : ''}
+        ${isMobile && !sidebarOpen ? '-translate-x-full' : ''}
+        ${!isMobile ? 'translate-x-0' : ''}
+        top-0 left-0 z-50 w-80 h-full
+        ${darkMode ? 'bg-gray-900' : 'bg-white'} 
+        border-r border-gray-200 dark:border-gray-700 
+        transition-transform duration-300 ease-in-out
+        flex flex-col overflow-hidden
+      `}>
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Phone className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">
+                  TelephonyAI
+                </span>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  AI-Powered Platform
+                </div>
+              </div>
             </div>
-            {sidebarOpen && (
-              <span className="text-lg lg:text-xl font-bold text-gray-900 dark:text-white">
-                TelephonyAI
-              </span>
+            {isMobile && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
             )}
           </div>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded lg:hidden"
-          >
-            {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-          </button>
         </div>
-      </div>
 
       <nav className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-1 lg:space-y-2">
