@@ -223,45 +223,89 @@ const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, o
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Leads Section */}
+        {/* Enhanced Leads Section */}
         <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{t.leads}</h3>
-            <Filter className="w-5 h-5 text-gray-400" />
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {t.leads} ({filteredLeads.length})
+            </h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveView('grid')}
+                className={`p-2 rounded-lg ${activeView === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <BarChart className="w-4 h-4" />
+              </button>
+              <Filter className="w-5 h-5 text-gray-400" />
+            </div>
           </div>
+          
           <div className="space-y-4">
-            {(crmData?.leads || []).map((lead) => (
-              <div key={lead.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white">{lead.name}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{lead.company}</p>
-                    <p className="text-xs text-gray-500">מקור: {lead.source}</p>
+            {filteredLeads.map((lead) => (
+              <div key={lead.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(`lead_${lead.id}`)}
+                      onChange={() => toggleItemSelection(lead.id, 'lead')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white">{lead.name}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{lead.company}</p>
+                      <p className="text-xs text-gray-500">מקור: {lead.source}</p>
+                    </div>
                   </div>
                   <div className="text-right">
                     <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                      lead.status === 'חם' ? 'bg-red-100 text-red-800' : 
-                      lead.status === 'חמים' ? 'bg-orange-100 text-orange-800' :
-                      'bg-blue-100 text-blue-800'
+                      lead.status === 'חם' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 
+                      lead.status === 'חמים' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                     }`}>
                       {lead.status}
                     </span>
                     <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">₪{(lead.value || 0).toLocaleString()}</p>
                   </div>
                 </div>
-                <div className="flex mt-3 space-x-2">
+                
+                {/* Enhanced Action Buttons */}
+                <div className="flex mt-4 gap-2">
                   <button 
                     onClick={() => startCall(lead)}
-                    className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 py-1 px-3 rounded text-sm"
+                    className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 px-3 rounded text-sm flex items-center gap-1 justify-center transition-colors"
                   >
+                    <Phone className="w-3 h-3" />
                     התקשר
                   </button>
-                  <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 py-1 px-3 rounded text-sm">
+                  <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 py-2 px-3 rounded text-sm flex items-center gap-1 justify-center transition-colors">
+                    <MessageSquare className="w-3 h-3" />
                     WhatsApp
+                  </button>
+                  <button className="flex-1 bg-purple-50 hover:bg-purple-100 text-purple-700 py-2 px-3 rounded text-sm flex items-center gap-1 justify-center transition-colors">
+                    <Mail className="w-3 h-3" />
+                    אימייל
+                  </button>
+                  <button 
+                    onClick={() => openModal('editLead', lead)}
+                    className="bg-gray-50 hover:bg-gray-100 text-gray-700 p-2 rounded transition-colors"
+                  >
+                    <Edit className="w-3 h-3" />
+                  </button>
+                  <button className="bg-red-50 hover:bg-red-100 text-red-700 p-2 rounded transition-colors">
+                    <Trash2 className="w-3 h-3" />
                   </button>
                 </div>
               </div>
             ))}
+            
+            {filteredLeads.length === 0 && (
+              <div className="text-center py-12">
+                <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-500 mb-2">לא נמצאו לידים</h3>
+                <p className="text-gray-400">נסה לשנות את קריטריוני החיפוש או הפילטרים</p>
+              </div>
+            )}
           </div>
         </div>
 
