@@ -87,7 +87,7 @@ const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, o
                     }`}>
                       {lead.status}
                     </span>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">₪{lead.value.toLocaleString()}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">₪{(lead.value || 0).toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="flex mt-3 space-x-2">
