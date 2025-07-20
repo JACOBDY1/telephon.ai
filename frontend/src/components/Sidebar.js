@@ -154,27 +154,17 @@ const Sidebar = ({
           </div>
         </nav>
 
-        {/* Footer Status */}
+        {/* Connection Status */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-gray-600 dark:text-gray-400">מחובר</span>
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {new Date().toLocaleTimeString('he-IL')}
-              </div>
+          <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">סטטוס חיבור:</div>
+          <div className="space-y-1">
+            <div className="flex justify-between items-center">
+              <span className="text-xs">Checkcall</span>
+              <span>{getStatusIcon(connectionStatus?.checkcall ? 'connected' : 'disconnected')}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span className="text-gray-600 dark:text-gray-400">CheckCall</span>
-                <span>{getStatusIcon(connectionStatus?.checkcall)}</span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span className="text-gray-600 dark:text-gray-400">MasterPBX</span>
-                <span>{getStatusIcon(connectionStatus?.masterpbx)}</span>
-              </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs">MasterPBX</span>
+              <span>{getStatusIcon(connectionStatus?.masterpbx ? 'connected' : 'disconnected')}</span>
             </div>
           </div>
         </div>
