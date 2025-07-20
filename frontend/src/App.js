@@ -482,33 +482,8 @@ const MainApp = () => {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'} transition-colors`}>
+    <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'} transition-colors`} dir="rtl">
       <div className="lg:flex">
-        {/* Mobile sidebar overlay */}
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-        
-        {/* Sidebar */}
-        <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 transition-transform lg:translate-x-0 lg:static lg:inset-0`}>
-          <Sidebar 
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-            darkMode={darkMode}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            t={t}
-            crmData={crmData}
-            attendanceData={attendanceData}
-            automationRules={automationRules}
-            learningModules={learningModules}
-            connectionStatus={connectionStatus}
-          />
-        </div>
-        
         <div className="flex-1 flex flex-col min-w-0">
           <Header 
             darkMode={darkMode}
@@ -529,6 +504,23 @@ const MainApp = () => {
               {renderActiveTab()}
             </div>
           </main>
+        </div>
+        
+        {/* Sidebar - RTL positioned on the right */}
+        <div className={`${sidebarOpen ? 'translate-x-0' : 'translate-x-full'} fixed inset-y-0 right-0 z-50 w-80 transition-transform lg:translate-x-0 lg:static lg:inset-0`}>
+          <Sidebar 
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            darkMode={darkMode}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            t={t}
+            crmData={crmData}
+            attendanceData={attendanceData}
+            automationRules={automationRules}
+            learningModules={learningModules}
+            connectionStatus={connectionStatus}
+          />
         </div>
       </div>
     </div>
