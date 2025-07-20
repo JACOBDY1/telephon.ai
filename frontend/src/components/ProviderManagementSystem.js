@@ -255,11 +255,11 @@ const ProviderManagementSystem = ({ darkMode = false, t = {}, user }) => {
                 </div>
               </div>
               <div className={`ml-4 px-3 py-1 rounded-full text-sm font-medium ${
-                goal.percentage >= 100 ? 'bg-green-100 text-green-800' :
-                goal.percentage >= 80 ? 'bg-blue-100 text-blue-800' :
-                goal.percentage >= 60 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                (goal?.percentage || 0) >= 100 ? 'bg-green-100 text-green-800' :
+                (goal?.percentage || 0) >= 80 ? 'bg-blue-100 text-blue-800' :
+                (goal?.percentage || 0) >= 60 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
               }`}>
-                {goal.percentage}%
+                {goal?.percentage || 0}%
               </div>
             </div>
           ))}
