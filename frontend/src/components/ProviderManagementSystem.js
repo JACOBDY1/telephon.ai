@@ -228,7 +228,7 @@ const ProviderManagementSystem = ({ darkMode = false, t = {}, user }) => {
           יעדים יומיים - Z Score היום
         </h3>
         <div className="space-y-4">
-          {Object.entries(goals.daily).map(([key, goal]) => (
+          {Object.entries(goals?.daily || {}).map(([key, goal]) => (
             <div key={key} className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex justify-between mb-1">
