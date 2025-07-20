@@ -1,7 +1,139 @@
-import React from 'react';
-import { UserCheck, UserX, Users2, Activity, User, MoreVertical } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  UserCheck, UserX, Users2, Activity, User, MoreVertical, 
+  Calendar, Clock, MapPin, Phone, MessageSquare, Award,
+  TrendingUp, Filter, Search, Download, Bell, Star,
+  CheckCircle, XCircle, AlertTriangle, BookOpen, Target
+} from 'lucide-react';
 
-const AttendanceView = ({ darkMode, t, attendanceData }) => {
+const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
+  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showLeadPopup, setShowLeadPopup] = useState(false);
+  const [bookings, setBookings] = useState([]);
+  const [leads, setLeads] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+
+  // Initialize enhanced data
+  useEffect(() => {
+    // Sample bookings data
+    setBookings([
+      {
+        id: 1,
+        employeeId: 1,
+        clientName: 'יואב כהן',
+        clientPhone: '+972-50-123-4567',
+        service: 'ייעוץ עסקי',
+        date: '2024-01-20',
+        time: '14:00',
+        status: 'confirmed',
+        value: 1500,
+        notes: 'לקוח חדש מעוניין בפתרונות טלפוניה'
+      },
+      {
+        id: 2,
+        employeeId: 3,
+        clientName: 'שרה מזרחי',
+        clientPhone: '+972-54-987-6543',
+        service: 'התקנת מערכת',
+        date: '2024-01-20',
+        time: '16:00',
+        status: 'pending',
+        value: 3000,
+        notes: 'דרושה בדיקת אתר לפני ההתקנה'
+      }
+    ]);
+
+    // Sample leads from bookings
+    setLeads([
+      {
+        id: 1,
+        name: 'דוד לוי',
+        phone: '+972-52-555-1234',
+        source: 'booking_followup',
+        interest: 'מערכת CRM מתקדמת',
+        value: 5000,
+        probability: 75,
+        assignedTo: 1,
+        status: 'hot',
+        lastContact: '2024-01-19'
+      },
+      {
+        id: 2,
+        name: 'רחל כהן',
+        phone: '+972-58-777-9999',
+        source: 'website',
+        interest: 'חייגן מתקדם',
+        value: 2500,
+        probability: 50,
+        assignedTo: 3,
+        status: 'warm',
+        lastContact: '2024-01-18'
+      }
+    ]);
+
+    // Sample notifications
+    setNotifications([
+      {
+        id: 1,
+        type: 'booking',
+        title: 'פגישה חדשה נקבעה',
+        message: 'יואב כהן קבע פגישה ל-14:00 היום',
+        time: '10:30',
+        priority: 'high'
+      },
+      {
+        id: 2,
+        type: 'lead',
+        title: 'ליד חם זקוק למעקב',
+        message: 'דוד לוי לא נענה לשיחה אמש',
+        time: '09:15',
+        priority: 'medium'
+      }
+    ]);
+  }, []);
+
+  const filterEmployees = (employees) => {
+    let filtered = employees || [];
+    
+    if (searchTerm) {
+      filtered = filtered.filter(emp => 
+        emp.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.department?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (selectedFilter !== 'all') {
+      filtered = filtered.filter(emp => emp.status === selectedFilter);
+    }
+    
+    return filtered;
+  };
+
+  const getTodayBookings = (employeeId) => {
+    return bookings.filter(booking => 
+      booking.employeeId === employeeId && 
+      booking.date === new Date().toISOString().split('T')[0]
+    );
+  };
+
+  const getEmployeeLeads = (employeeId) => {
+    return leads.filter(lead => lead.assignedTo === employeeId);
+  };
+
+  const handleBookingCreate = (employeeId) => {
+    setSelectedEmployee(employeeId);
+    setShowBookingModal(true);
+  };
+
+  const handleLeadPopup = (lead) => {
+    setSelectedEmployee(lead);
+    setShowLeadPopup(true);
+  };
+
+  const filteredEmployees = filterEmployees(attendanceData);
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
