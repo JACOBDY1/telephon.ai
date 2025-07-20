@@ -19,6 +19,20 @@ const Header = ({
   setSidebarOpen = () => {}
 }) => {
   const { user, logout } = useAuth();
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+
+  // Keyboard shortcut for global search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowGlobalSearch(true);
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleMarkAsRead = (notificationId) => {
     setNotifications(prev => prev.map(notification =>
