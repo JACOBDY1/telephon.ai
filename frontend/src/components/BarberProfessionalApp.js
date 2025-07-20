@@ -134,9 +134,6 @@ const BarberProfessionalApp = () => {
   
   // רכיבים חדשים ל-HairPro Advanced
   const [weeklyCalendar, setWeeklyCalendar] = useState({});
-  const [clients, setClients] = useState([]);
-  const [inventory, setInventory] = useState([]);
-  const [formulas, setFormulas] = useState([]);
   const [reports, setReports] = useState({});
   const [isScaleConnected, setIsScaleConnected] = useState(false);
   const [currentWeight, setCurrentWeight] = useState(0);
