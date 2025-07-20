@@ -111,13 +111,31 @@ const Header = ({
             ))}
           </select>
 
-          {/* Notifications */}
-          <NotificationCenter
-            notifications={notifications}
-            onMarkAsRead={handleMarkAsRead}
-            onMarkAllAsRead={handleMarkAllAsRead}
-            onClearAll={handleClearAll}
-          />
+          {/* Advanced Notifications */}
+          <div className="relative">
+            <button
+              onClick={() => setShowAdvancedNotifications(!showAdvancedNotifications)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg relative"
+            >
+              <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              {notifications && notifications.filter(n => !n.read && !n.archived).length > 0 && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  {notifications.filter(n => !n.read && !n.archived).length}
+                </div>
+              )}
+            </button>
+            
+            {showAdvancedNotifications && (
+              <AdvancedNotifications
+                isOpen={showAdvancedNotifications}
+                onClose={() => setShowAdvancedNotifications(false)}
+                darkMode={darkMode}
+                t={t}
+                notifications={notifications}
+                setNotifications={setNotifications}
+              />
+            )}
+          </div>
 
           {/* User menu - simplified on mobile */}
           <div className="relative group">
