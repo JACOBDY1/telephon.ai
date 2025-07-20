@@ -369,7 +369,14 @@ const MainApp = () => {
           darkMode={darkMode}
           contacts={[]}
         />;
-      case 'crm': return <CRMManager />;
+      case 'crm': 
+        return <CRMView 
+          t={t} 
+          darkMode={darkMode}
+          crmData={crmData}
+          openModal={openModal}
+          startCall={startCall}
+        />;
       case 'attendance': 
         return <AttendanceView 
           t={t} 
