@@ -158,6 +158,19 @@ const MainApp = () => {
 
   const t = translations[language] || translations.he;
 
+  // Modal and function handlers
+  const openModal = (type, data = null) => {
+    console.log('Opening modal:', type, data);
+    // In a real app, this would open a modal component
+    // For now, we'll just log it
+  };
+
+  const startCall = (contact) => {
+    console.log('Starting call to:', contact);
+    // In a real app, this would initiate a call
+    // For now, we'll just log it
+  };
+
   // Load initial data when user is authenticated
   useEffect(() => {
     if (isAuthenticated) {
