@@ -63,6 +63,7 @@ const Sidebar = ({
             { id: 'modules', icon: Puzzle, label: t.modules, badge: 'חדש' },
             { id: 'mobileApp', icon: Smartphone, label: t.mobileApp, badge: 'PWA' },
             { id: 'providerSystem', icon: Scissors, label: t.providerSystem, badge: '🎯' },
+            { id: 'workflowSystem', icon: Zap, label: t.workflowSystem, badge: '⚡' },
             { id: 'subscription', icon: CreditCard, label: t.subscription, badge: '💳' },
             { id: 'marketplace', icon: ShoppingCart, label: t.marketplace, badge: 'NEW' },
             { id: 'learning', icon: BookOpen, label: t.learning, badge: learningModules.length },
