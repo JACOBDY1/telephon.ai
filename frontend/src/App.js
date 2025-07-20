@@ -459,10 +459,9 @@ const MainApp = () => {
           languages={languages}
         />;
       default: 
-        return <Dashboard 
+        return <AdvancedDashboard 
           t={t} 
-          darkMode={darkMode} 
-          {...mockData}
+          darkMode={darkMode}
         />;
     }
   };
