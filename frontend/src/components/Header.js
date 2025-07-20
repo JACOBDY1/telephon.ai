@@ -169,6 +169,14 @@ const Header = ({
           </div>
         </div>
       </div>
+      
+      {/* Global Search Modal */}
+      <GlobalSearch 
+        isOpen={showGlobalSearch}
+        onClose={() => setShowGlobalSearch(false)}
+        darkMode={darkMode}
+        t={t}
+      />
     </div>
   );
 };
