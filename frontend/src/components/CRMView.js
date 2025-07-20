@@ -1,5 +1,5 @@
-import React from 'react';
-import { Plus, DollarSign, Target, CheckSquare, TrendingUp, Filter, BarChart, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, DollarSign, Target, CheckSquare, TrendingUp, Filter, BarChart, User, Search, Download, SortAsc, SortDesc, Calendar, Phone, Mail, MessageSquare, Edit, Trash2, Eye } from 'lucide-react';
 
 const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, openModal = () => {}, startCall = () => {} }) => {
   return (
