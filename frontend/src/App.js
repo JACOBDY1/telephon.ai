@@ -149,7 +149,10 @@ const MainApp = () => {
       cancel: 'Cancel',
       edit: 'Edit',
       delete: 'Delete',
-      add: 'Add'
+      add: 'Add',
+      loading: 'Loading...',
+      totalCalls: 'Total Calls',
+      averageCallTime: 'Average Call Time'
     }
   };
 
