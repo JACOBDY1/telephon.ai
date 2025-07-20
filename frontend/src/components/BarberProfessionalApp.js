@@ -1036,6 +1036,47 @@ const BarberProfessionalApp = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* שעון פעילות צף */}
+      <FloatingActivityClock 
+        workStatus={workStatus}
+        currentClient={currentClient}
+        onStatusChange={setWorkStatus}
+      />
+      
+      {/* התראות */}
+      {notifications.length > 0 && (
+        <div className="fixed top-4 left-4 z-50 max-w-sm space-y-2">
+          {notifications.slice(0, 3).map((notification) => (
+            <div 
+              key={notification.id}
+              className={`p-4 rounded-lg shadow-lg text-white transform transition-all ${
+                notification.type === 'error' ? 'bg-red-500' : 
+                notification.type === 'warning' ? 'bg-yellow-500' : 
+                notification.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-2">
+                  <Bell className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold">{notification.title}</h4>
+                    <p className="text-sm opacity-90">{notification.message}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setNotifications(prev => 
+                    prev.filter(n => n.id !== notification.id)
+                  )}
+                  className="text-white/80 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      
       {/* Header */}
       <div className="bg-white shadow-sm border-b px-4 py-3">
         <div className="flex items-center justify-between">
@@ -1045,7 +1086,7 @@ const BarberProfessionalApp = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-gray-900">HairPro IL Advanced</h1>
-              <p className="text-xs text-gray-500">מערכת ניהול מתקדמת לסלון</p>
+              <p className="text-xs text-gray-500">מערכת ניהול מתקדמת לסלון שיער</p>
             </div>
           </div>
           
@@ -1066,21 +1107,56 @@ const BarberProfessionalApp = () => {
 
       {/* Main Content */}
       <div className="p-4 pb-20">
-        {activeView === 'dashboard' && <DashboardView />}
+        {activeView === 'dashboard' && <AdvancedDashboard />}
         {activeView === 'appointments' && <AppointmentsView />}
-        {activeView === 'clients' && <div className="text-center py-12"><Users className="w-16 h-16 text-gray-300 mx-auto mb-4" /><p className="text-gray-500">רשימת לקוחות בפיתוח...</p></div>}
-        {activeView === 'stats' && <div className="text-center py-12"><Target className="w-16 h-16 text-gray-300 mx-auto mb-4" /><p className="text-gray-500">סטטיסטיקות בפיתוח...</p></div>}
+        {activeView === 'clients' && <AdvancedClientsView />}
+        {activeView === 'formula' && (
+          <div className="text-center py-12">
+            <Beaker className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">פורמולות חכמות</h3>
+            <p className="text-gray-600">שקילה דיגיטלית מתקדמת בפיתוח...</p>
+          </div>
+        )}
+        {activeView === 'inventory' && (
+          <div className="text-center py-12">
+            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">מלאי חכם</h3>
+            <p className="text-gray-600">ניהול מלאי עם AI בפיתוח...</p>
+          </div>
+        )}
+        {activeView === 'stats' && (
+          <div className="text-center py-12">
+            <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">דוחות מתקדמים</h3>
+            <p className="text-gray-600">אנליטיקה עסקית בפיתוח...</p>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
-      <Navigation />
-      
-      {/* Floating Activity Clock */}
-      <FloatingActivityClock 
-        workStatus={workStatus}
-        currentClient={currentClient}
-        onStatusChange={setWorkStatus}
-      />
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="grid grid-cols-4 py-2">
+          {[
+            { id: 'dashboard', icon: BarChart3, label: 'דשבורד' },
+            { id: 'appointments', icon: Calendar, label: 'יומן' },
+            { id: 'clients', icon: Users, label: 'לקוחות' },
+            { id: 'stats', icon: Target, label: 'דוחות' }
+          ].map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setActiveView(id)}
+              className={`flex flex-col items-center py-3 px-2 ${
+                activeView === id 
+                  ? 'text-blue-600 bg-blue-50' 
+                  : 'text-gray-600'
+              }`}
+            >
+              <Icon className="w-5 h-5 mb-1" />
+              <span className="text-xs font-medium">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
