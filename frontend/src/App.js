@@ -34,13 +34,9 @@ import IntegratedWorkflowSystem from './components/IntegratedWorkflowSystem';
 const MainApp = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState('he');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [notifications, setNotifications] = useState([]);
-  // Add sidebar state  
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState([
     {
