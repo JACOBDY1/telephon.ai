@@ -119,12 +119,18 @@ const FloatingActivityClock = ({ workStatus, currentClient, onStatusChange }) =>
 const BarberProfessionalApp = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [workStatus, setWorkStatus] = useState('ready'); // ready, working, break
+  const [currentClient, setCurrentClient] = useState(null);
+  const [activeView, setActiveView] = useState('dashboard');
+  const [notifications, setNotifications] = useState([]);
+  
+  // נתונים מתקדמים לHairPro IL Advanced
   const [todayStats, setTodayStats] = useState({});
   const [dailyGoals, setDailyGoals] = useState({});
   const [todayAppointments, setTodayAppointments] = useState([]);
-  const [activeView, setActiveView] = useState('dashboard');
-  const [notifications, setNotifications] = useState([]);
-  const [currentClient, setCurrentClient] = useState(null);
+  const [clients, setClients] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [formulas, setFormulas] = useState([]);
+  const [analyticsData, setAnalyticsData] = useState({});
   
   // רכיבים חדשים ל-HairPro Advanced
   const [weeklyCalendar, setWeeklyCalendar] = useState({});
