@@ -228,15 +228,67 @@ const MainApp = () => {
   };
 
   const renderActiveTab = () => {
+    // Mock data for components that expect it
+    const mockData = {
+      loading: false,
+      realtimeAnalytics: {
+        activeCalls: 3,
+        totalCalls: 2847,
+        averageCallDuration: 456,
+        callsToday: 124
+      },
+      realCallData: [],
+      checkcallData: { calls: [] },
+      masterpbxData: { calls: [] },
+      connectionStatus: { checkcall: true, masterpbx: true },
+      loadRealData: () => {}
+    };
+
     switch(activeTab) {
-      case 'dashboard': return <Dashboard t={t} darkMode={darkMode} />;
-      case 'calls': return <CallsView t={t} darkMode={darkMode} />;
-      case 'contacts': return <ContactsView t={t} darkMode={darkMode} />;
+      case 'dashboard': 
+        return <Dashboard 
+          t={t} 
+          darkMode={darkMode} 
+          {...mockData}
+        />;
+      case 'calls': 
+        return <CallsView 
+          t={t} 
+          darkMode={darkMode}
+          calls={[]}
+          totalCalls={mockData.realtimeAnalytics.totalCalls}
+        />;
+      case 'contacts': 
+        return <ContactsView 
+          t={t} 
+          darkMode={darkMode}
+          contacts={[]}
+        />;
       case 'crm': return <CRMManager />;
-      case 'attendance': return <AttendanceView t={t} darkMode={darkMode} />;
-      case 'analytics': return <AnalyticsView t={t} darkMode={darkMode} />;
-      case 'marketplace': return <MarketplaceView t={t} darkMode={darkMode} />;
-      case 'learning': return <div className="p-6 text-center text-gray-600">Learning modules coming soon...</div>;
+      case 'attendance': 
+        return <AttendanceView 
+          t={t} 
+          darkMode={darkMode}
+          attendanceData={attendanceData}
+        />;
+      case 'analytics': 
+        return <AnalyticsView 
+          t={t} 
+          darkMode={darkMode}
+          analytics={mockData.realtimeAnalytics}
+        />;
+      case 'marketplace': 
+        return <MarketplaceView 
+          t={t} 
+          darkMode={darkMode}
+        />;
+      case 'learning': 
+        return (
+          <div className="p-6 text-center text-gray-600 dark:text-gray-400">
+            <div className="text-xl mb-4">📚 מודולי למידה</div>
+            <p>מודולי הלמידה יהיו זמינים בקרוב...</p>
+          </div>
+        );
       case 'automations': return <AutomationCenter darkMode={darkMode} t={t} />;
       case 'callFlows': return <CallFlowCanvas darkMode={darkMode} t={t} />;
       case 'documents': return <DocumentGenerator darkMode={darkMode} t={t} />;
@@ -246,8 +298,21 @@ const MainApp = () => {
       case 'modules': return <ModuleManager darkMode={darkMode} t={t} />;
       case 'subscription': return <SubscriptionManager />;
       case 'profile': return <UserProfile />;
-      case 'settings': return <SettingsView t={t} darkMode={darkMode} />;
-      default: return <Dashboard t={t} darkMode={darkMode} />;
+      case 'settings': 
+        return <SettingsView 
+          t={t} 
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          language={language}
+          setLanguage={setLanguage}
+          languages={languages}
+        />;
+      default: 
+        return <Dashboard 
+          t={t} 
+          darkMode={darkMode} 
+          {...mockData}
+        />;
     }
   };
 
