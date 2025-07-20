@@ -74,7 +74,7 @@ const ProductServiceManager = ({ darkMode = false, t = {}, user }) => {
         revenueThisMonth: 12600,
         seasonality: 'גבוה בחורף',
         clientRetention: 85,
-        upsellOpportunity: 'מסאז' גוף, טיפולים נוספים'
+        upsellOpportunity: 'מסאז גוף, טיפולים נוספים'
       },
       {
         id: 's4',
