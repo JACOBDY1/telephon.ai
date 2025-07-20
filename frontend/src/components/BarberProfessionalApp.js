@@ -1067,7 +1067,7 @@ const BarberProfessionalApp = () => {
       {/* Main Content */}
       <div className="p-4 pb-20">
         {activeView === 'dashboard' && <DashboardView />}
-        {activeView === 'appointments' && <DashboardView />}
+        {activeView === 'appointments' && <AppointmentsView />}
         {activeView === 'clients' && <div className="text-center py-12"><Users className="w-16 h-16 text-gray-300 mx-auto mb-4" /><p className="text-gray-500">רשימת לקוחות בפיתוח...</p></div>}
         {activeView === 'stats' && <div className="text-center py-12"><Target className="w-16 h-16 text-gray-300 mx-auto mb-4" /><p className="text-gray-500">סטטיסטיקות בפיתוח...</p></div>}
       </div>
