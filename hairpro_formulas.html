@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HairPro IL Advanced - פורמולות חכמות עם שקילה דיגיטלית</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Heebo', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .digital-scale { 
+            background: #0f1419; 
+            color: #00ff41; 
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px #00ff41;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i data-lucide="scissors" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h1 class="text-xl font-bold">HairPro IL Advanced</h1>
+                </div>
+                <div class="flex gap-2">
+                    <a href="hairpro_main.html" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">דשבורד</a>
+                    <a href="hairpro_clients.html" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">לקוחות</a>
+                    <a href="hairpro_appointments.html" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">תורים</a>
+                    <a href="hairpro_formulas.html" class="px-4 py-2 bg-indigo-500 text-white rounded-lg">פורמולות</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Header -->
+        <div class="gradient-bg text-white p-6 rounded-2xl mb-6">
+            <h1 class="text-3xl font-bold mb-2">פורמולות חכמות עם שקילה דיגיטלית</h1>
+            <p class="text-blue-100">מערכת מתקדמת לניהול פורמולות צבע עם שקילה מדויקת וחישוב עלויות בזמן אמת</p>
+            <div class="flex items-center gap-4 mt-4 text-sm">
+                <div class="bg-white/20 px-3 py-1 rounded-full">⚖️ דיוק של 0.1 גרם</div>
+                <div class="bg-white/20 px-3 py-1 rounded-full">💰 חישוב עלויות אוטומטי</div>
+                <div class="bg-white/20 px-3 py-1 rounded-full">📊 מעקב בזבוז</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Digital Scale -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold">מד דיגיטלי מתקדם</h3>
+                    <div class="flex items-center gap-2">
+                        <div id="connectionStatus" class="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <button onclick="connectScale()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">
+                            <i data-lucide="wifi" class="w-4 h-4 inline ml-2"></i>
+                            חבר משקל
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Digital Display -->
+                <div class="digital-scale rounded-lg p-8 text-center mb-6">
+                    <div id="weightDisplay" class="text-6xl font-bold mb-2">0.0</div>
+                    <div class="text-lg">גרם</div>
+                </div>
+                
+                <!-- Scale Controls -->
+                <div class="flex justify-center gap-4 mb-6">
+                    <button onclick="startWeighing()" id="startBtn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400" disabled>
+                        <i data-lucide="play" class="w-5 h-5 inline ml-2"></i>
+                        התחל שקילה
+                    </button>
+                    <button onclick="stopWeighing()" id="stopBtn" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 disabled:bg-gray-400" disabled>
+                        <i data-lucide="pause" class="w-5 h-5 inline ml-2"></i>
+                        עצור
+                    </button>
+                    <button onclick="tareScale()" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700">
+                        <i data-lucide="minus" class="w-5 h-5 inline ml-2"></i>
+                        אפס
+                    </button>
+                </div>
+                
+                <!-- Scale Info -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold mb-2">מפרטי מד</h4>
+                    <div class="text-sm space-y-1">
+                        <div>דיוק: <span class="font-medium">0.1 גרם</span></div>
+                        <div>טווח: <span class="font-medium">0-500 גרם</span></div>
+                        <div>חיבור: <span class="font-medium">Bluetooth</span></div>
+                        <div>סטטוס: <span id="scaleStatus" class="font-medium text-red-600">לא מחובר</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formula Builder -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold mb-6">בונה פורמולות חכם</h3>
+                
+                <!-- Client Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">לקוחה</label>
+                    <select class="w-full border rounded-lg p-3" onchange="selectClient(this.value)">
+                        <option value="">בחר לקוחה</option>
+                        <option value="1">שרה כהן</option>
+                        <option value="2">רחל אברהם</option>
+                        <option value="3">מירי לוי</option>
+                    </select>
+                </div>
+
+                <!-- Color Selection -->
+                <div class="space-y-4 mb-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">חברה</label>
+                            <select class="w-full border rounded-lg p-2" onchange="updateSeries(this.value)">
+                                <option value="">בחר חברה</option>
+                                <option value="schwarzkopf">שוורצקוף</option>
+                                <option value="loreal">לוריאל פרופסיונל</option>
+                                <option value="indola">אינדולה</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">סדרה</label>
+                            <select class="w-full border rounded-lg p-2" disabled>
+                                <option value="">בחר סדרה</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">קוד צבע</label>
+                            <select class="w-full border rounded-lg p-2" disabled>
+                                <option value="">בחר צבע</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">משקל מתוכנן (גרם)</label>
+                            <input type="number" class="w-full border rounded-lg p-2" placeholder="60" step="0.1">
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                            משקל נוכחי: <span id="currentWeight" class="font-bold">0.0</span> גרם
+                        </div>
+                        <button onclick="addColor()" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600">
+                            <i data-lucide="plus" class="w-4 h-4 inline ml-2"></i>
+                            הוסף צבע
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Formula Preview -->
+                <div id="formulaPreview" class="border rounded-lg p-4 mb-6 bg-gray-50">
+                    <h4 class="font-semibold mb-2">צבעים בפורמולה:</h4>
+                    <div id="colorList" class="text-sm text-gray-500">
+                        לא נוספו צבעים עדיין...
+                    </div>
+                </div>
+
+                <!-- Developer Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">חמצן</label>
+                    <select class="w-full border rounded-lg p-2">
+                        <option value="">בחר חמצן</option>
+                        <option value="10vol">10vol (3%) - טון על טון</option>
+                        <option value="20vol">20vol (6%) - כיסוי שיער לבן</option>
+                        <option value="30vol">30vol (9%) - הבהרה 2-3 טונים</option>
+                        <option value="40vol">40vol (12%) - הבהרה 3-4 טונים</option>
+                    </select>
+                </div>
+
+                <!-- Processing Time -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">זמן תהליך (דקות)</label>
+                    <input type="number" class="w-full border rounded-lg p-2" placeholder="35" value="35">
+                </div>
+
+                <!-- Cost Calculation -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <h4 class="font-semibold mb-2 text-green-700">חישוב עלויות</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <div>עלות צבעים: <span id="colorCost" class="font-bold">₪0.00</span></div>
+                            <div>עלות חמצן: <span class="font-bold">₪2.50</span></div>
+                        </div>
+                        <div>
+                            <div>בזבוז משוער: <span id="wasteCost" class="font-bold text-red-600">₪0.00</span></div>
+                            <div class="text-lg font-bold text-green-600">
+                                סה"כ: <span id="totalCost">₪2.50</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Formulas -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+            <h3 class="text-xl font-bold mb-6">פורמולות שמורות</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Formula 1 -->
+                <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h4 class="font-semibold">בלונד זהוב קלאסי</h4>
+                            <p class="text-sm text-gray-600">שרה כהן</p>
+                        </div>
+                        <div class="flex gap-1">
+                            <button class="text-blue-500 hover:bg-blue-50 p-1 rounded">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-green-500 hover:bg-green-50 p-1 rounded">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm mb-3">
+                        <div class="flex justify-between">
+                            <span>לוריאל 8.3:</span>
+                            <span class="font-medium">40g</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>לוריאל 9.0:</span>
+                            <span class="font-medium">20g</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>חמצן 20vol:</span>
+                            <span class="font-medium">60ml</span>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-3">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>עלות:</span>
+                            <span class="font-bold text-green-600">₪28.50</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>יעילות:</span>
+                            <span class="font-bold">95%</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>נוצר:</span>
+                            <span>15.01.2024</span>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full mt-3 bg-indigo-500 text-white py-2 rounded-lg hover:bg-indigo-600">
+                        השתמש בפורמולה
+                    </button>
+                </div>
+
+                <!-- Formula 2 -->
+                <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h4 class="font-semibold">חום ערמוני עמוק</h4>
+                            <p class="text-sm text-gray-600">רחל אברהם</p>
+                        </div>
+                        <div class="flex gap-1">
+                            <button class="text-blue-500 hover:bg-blue-50 p-1 rounded">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-green-500 hover:bg-green-50 p-1 rounded">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm mb-3">
+                        <div class="flex justify-between">
+                            <span>שוורצקוף 5-52:</span>
+                            <span class="font-medium">60g</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>חמצן 20vol:</span>
+                            <span class="font-medium">60ml</span>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-3">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>עלות:</span>
+                            <span class="font-bold text-green-600">₪32.50</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>יעילות:</span>
+                            <span class="font-bold">97%</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>נוצר:</span>
+                            <span>20.01.2024</span>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full mt-3 bg-indigo-500 text-white py-2 rounded-lg hover:bg-indigo-600">
+                        השתמש בפורמולה
+                    </button>
+                </div>
+
+                <!-- Add New Formula -->
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center hover:border-indigo-400 transition-colors cursor-pointer">
+                    <div class="text-center">
+                        <i data-lucide="plus" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                        <h4 class="font-semibold text-gray-600">פורמולה חדשה</h4>
+                        <p class="text-sm text-gray-500">צור פורמולה מותאמת</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+            <h3 class="text-xl font-bold mb-6">סטטיסטיקות שקילה</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-600">88%</div>
+                    <div class="text-sm text-gray-600">יעילות כללית</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-600">22%</div>
+                    <div class="text-sm text-gray-600">חיסכון בבזבוז</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600">245</div>
+                    <div class="text-sm text-gray-600">גרם נחסכו השבוע</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-orange-600">₪156</div>
+                    <div class="text-sm text-gray-600">חיסכון כספי</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        let isConnected = false;
+        let isWeighing = false;
+        let currentWeight = 0;
+        let weighingInterval;
+
+        function connectScale() {
+            isConnected = true;
+            document.getElementById('connectionStatus').className = 'w-3 h-3 bg-green-500 rounded-full';
+            document.getElementById('scaleStatus').textContent = 'מחובר';
+            document.getElementById('scaleStatus').className = 'font-medium text-green-600';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = false;
+            
+            // Simulate connection notification
+            showNotification('המשקל חובר בהצלחה', 'success');
+        }
+
+        function startWeighing() {
+            if (!isConnected) return;
+            
+            isWeighing = true;
+            weighingInterval = setInterval(() => {
+                // Simulate weight fluctuation
+                currentWeight += (Math.random() - 0.5) * 2;
+                currentWeight = Math.max(0, currentWeight);
+                
+                const displayWeight = Math.round(currentWeight * 10) / 10;
+                document.getElementById('weightDisplay').textContent = displayWeight.toFixed(1);
+                document.getElementById('currentWeight').textContent = displayWeight.toFixed(1);
+            }, 100);
+        }
+
+        function stopWeighing() {
+            isWeighing = false;
+            if (weighingInterval) {
+                clearInterval(weighingInterval);
+            }
+        }
+
+        function tareScale() {
+            currentWeight = 0;
+            document.getElementById('weightDisplay').textContent = '0.0';
+            document.getElementById('currentWeight').textContent = '0.0';
+        }
+
+        function addColor() {
+            if (currentWeight > 0) {
+                // Add color to formula preview
+                const colorList = document.getElementById('colorList');
+                const weight = Math.round(currentWeight * 10) / 10;
+                
+                if (colorList.textContent.includes('לא נוספו')) {
+                    colorList.innerHTML = '';
+                }
+                
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'flex justify-between items-center p-2 bg-white rounded mb-2';
+                colorDiv.innerHTML = `
+                    <span>צבע נבחר: <strong>${weight}g</strong></span>
+                    <span class="text-green-600 font-bold">₪${(weight * 0.5).toFixed(2)}</span>
+                `;
+                colorList.appendChild(colorDiv);
+                
+                updateCosts();
+                showNotification(`נוסף צבע במשקל ${weight} גרם`, 'success');
+            }
+        }
+
+        function updateCosts() {
+            // Simple cost calculation
+            const colorElements = document.querySelectorAll('#colorList > div');
+            let totalCost = 2.5; // Base developer cost
+            
+            colorElements.forEach(element => {
+                const costText = element.querySelector('.text-green-600').textContent;
+                const cost = parseFloat(costText.replace('₪', ''));
+                totalCost += cost;
+            });
+            
+            document.getElementById('colorCost').textContent = `₪${(totalCost - 2.5).toFixed(2)}`;
+            document.getElementById('totalCost').textContent = `₪${totalCost.toFixed(2)}`;
+            document.getElementById('wasteCost').textContent = `₪${(totalCost * 0.1).toFixed(2)}`;
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 left-4 z-50 p-4 rounded-lg shadow-lg text-white ${
+                type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialize with some sample weight for demo
+        setTimeout(() => {
+            currentWeight = 42.3;
+            document.getElementById('weightDisplay').textContent = '42.3';
+            document.getElementById('currentWeight').textContent = '42.3';
+        }, 2000);
+    </script>
+</body>
+</html>
