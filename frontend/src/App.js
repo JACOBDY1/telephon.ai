@@ -178,7 +178,24 @@ const MainApp = () => {
           });
         } catch (error) {
           console.log('CRM data loading failed, using mock data');
-          setCrmData({ leads: [], deals: [], tasks: [] });
+          // הוספת נתוני CRM דמו אם ה-API לא עובד
+          setCrmData({
+            leads: [
+              { id: 1, name: 'יואב כהן', company: 'סטארט-אפ טכנולוגיה', value: 50000, status: 'חם', source: 'אתר' },
+              { id: 2, name: 'שרה לוי', company: 'חברת שיווק', value: 25000, status: 'חמים', source: 'המלצה' },
+              { id: 3, name: 'דוד אברהם', company: 'חברת בנייה', value: 15000, status: 'קר', source: 'שיחה' }
+            ],
+            deals: [
+              { id: 1, name: 'עסקת סטארט-אפ', client: 'יואב כהן', value: 45000, stage: 'הצעה', probability: 70 },
+              { id: 2, name: 'פתרון שיווק', client: 'שרה לוי', value: 22000, stage: 'משא ומתן', probability: 85 },
+              { id: 3, name: 'מערכת CRM', client: 'דוד אברהם', value: 18000, stage: 'נסגר', probability: 100 }
+            ],
+            tasks: [
+              { id: 1, title: 'התקשרות ליואב', due: '2024-01-16', status: 'pending', priority: 'גבוה' },
+              { id: 2, title: 'שליחת הצעה לשרה', due: '2024-01-17', status: 'completed', priority: 'בינוני' },
+              { id: 3, title: 'מעקב אחרי דוד', due: '2024-01-18', status: 'pending', priority: 'נמוך' }
+            ]
+          });
         }
       };
 
@@ -186,10 +203,10 @@ const MainApp = () => {
 
       // Mock data for other sections - always set regardless of API
       setAttendanceData([
-        { id: 1, name: 'יואב כהן', status: 'present', time: '09:00' },
-        { id: 2, name: 'שרה לוי', status: 'absent', time: '-' },
-        { id: 3, name: 'דוד אברמוביץ', status: 'present', time: '08:45' },
-        { id: 4, name: 'רחל מזרחי', status: 'late', time: '09:30' }
+        { id: 1, name: 'יואב כהן', status: 'present', time: '09:00', department: 'מכירות', checkIn: '09:00' },
+        { id: 2, name: 'שרה לוי', status: 'absent', time: '-', department: 'שיווק', checkIn: null },
+        { id: 3, name: 'דוד אברמוביץ', status: 'present', time: '08:45', department: 'פיתוח', checkIn: '08:45' },
+        { id: 4, name: 'רחל מזרחי', status: 'late', time: '09:30', department: 'מכירות', checkIn: '09:30' }
       ]);
 
       setAutomationRules([
@@ -204,6 +221,16 @@ const MainApp = () => {
         { id: 3, title: 'אוטומציות מתקדמות', completed: false }
       ]);
 
+      // הוספת נתוני marketplace
+      setMarketplaceData([
+        { id: 1, name: 'AI Voice Analytics', category: 'plugins', price: 99, rating: 4.8, installs: 1520 },
+        { id: 2, name: 'WhatsApp Integration', category: 'plugins', price: 79, rating: 4.6, installs: 2340 },
+        { id: 3, name: 'Advanced CRM Tools', category: 'analytics', price: 149, rating: 4.9, installs: 980 },
+        { id: 4, name: 'Call Recording Plus', category: 'analytics', price: 59, rating: 4.7, installs: 3210 },
+        { id: 5, name: 'Smart Routing', category: 'automation', price: 89, rating: 4.5, installs: 1650 },
+        { id: 6, name: 'Real-time Dashboard', category: 'automation', price: 119, rating: 4.4, installs: 1200 }
+      ]);
+
     } catch (error) {
       console.error('Error loading initial data:', error);
       // Ensure we always have some data even on error
@@ -211,6 +238,7 @@ const MainApp = () => {
       setAttendanceData([]);
       setAutomationRules([]);
       setLearningModules([]);
+      setMarketplaceData([]);
     }
   };
 
