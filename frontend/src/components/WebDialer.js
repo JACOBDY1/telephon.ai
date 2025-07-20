@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, PhoneCall, PhoneOff, Mic, MicOff, Volume2, VolumeX, Users, Clock, Settings } from 'lucide-react';
 
-const WebDialer = () => {
+const WebDialer = ({ darkMode = false, t = {} }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [isRinging, setIsRinging] = useState(false);
