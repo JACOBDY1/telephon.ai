@@ -77,7 +77,10 @@ const Header = ({
 
         <div className="flex items-center gap-2 lg:gap-4">
           {/* Mobile search button */}
-          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg md:hidden">
+          <button 
+            onClick={() => setShowGlobalSearch(true)}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg md:hidden"
+          >
             <Search className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
 
