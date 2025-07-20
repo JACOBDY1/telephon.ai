@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Scissors, Calendar, Target, Gift, Users, Clock, 
   DollarSign, Star, TrendingUp, Phone, MessageSquare,
   CheckCircle, Plus, Edit, Camera, Share2, Settings,
-  Coffee, Heart, Award, Zap, Timer, BarChart3
+  Coffee, Heart, Award, Zap, Timer, BarChart3, Search, 
+  User, Package, Scale, Bell, AlertCircle, Check, Activity, 
+  Smartphone, Wifi, X, Edit2, Save, RefreshCw, FileText, 
+  Download, Upload, Printer, Home, Minus, ChevronLeft, 
+  ChevronRight, ChevronUp, ChevronDown, Filter, Calendar as CalendarIcon,
+  Palette, Beaker, Droplets, Weight, PieChart, LineChart,
+  ShoppingCart, CreditCard, UserPlus, MapPin, Mail
 } from 'lucide-react';
 
 const BarberProfessionalApp = () => {
