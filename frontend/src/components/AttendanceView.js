@@ -3,7 +3,7 @@ import {
   UserCheck, UserX, Users2, Activity, User, MoreVertical, 
   Calendar, Clock, MapPin, Phone, MessageSquare, Award,
   TrendingUp, Filter, Search, Download, Bell, Star,
-  CheckCircle, XCircle, AlertTriangle, BookOpen, Target
+  CheckCircle, XCircle, AlertTriangle, BookOpen, Target, Plus
 } from 'lucide-react';
 
 const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
@@ -12,91 +12,145 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showLeadPopup, setShowLeadPopup] = useState(false);
+  
+  // Real data states
+  const [employees, setEmployees] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [leads, setLeads] = useState([]);
-  const [notifications, setNotifications] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Initialize enhanced data
+  // Load real data from API
   useEffect(() => {
-    // Sample bookings data
-    setBookings([
-      {
-        id: 1,
-        employeeId: 1,
-        clientName: 'יואב כהן',
-        clientPhone: '+972-50-123-4567',
-        service: 'ייעוץ עסקי',
-        date: '2024-01-20',
-        time: '14:00',
-        status: 'confirmed',
-        value: 1500,
-        notes: 'לקוח חדש מעוניין בפתרונות טלפוניה'
-      },
-      {
-        id: 2,
-        employeeId: 3,
-        clientName: 'שרה מזרחי',
-        clientPhone: '+972-54-987-6543',
-        service: 'התקנת מערכת',
-        date: '2024-01-20',
-        time: '16:00',
-        status: 'pending',
-        value: 3000,
-        notes: 'דרושה בדיקת אתר לפני ההתקנה'
-      }
-    ]);
-
-    // Sample leads from bookings
-    setLeads([
-      {
-        id: 1,
-        name: 'דוד לוי',
-        phone: '+972-52-555-1234',
-        source: 'booking_followup',
-        interest: 'מערכת CRM מתקדמת',
-        value: 5000,
-        probability: 75,
-        assignedTo: 1,
-        status: 'hot',
-        lastContact: '2024-01-19'
-      },
-      {
-        id: 2,
-        name: 'רחל כהן',
-        phone: '+972-58-777-9999',
-        source: 'website',
-        interest: 'חייגן מתקדם',
-        value: 2500,
-        probability: 50,
-        assignedTo: 3,
-        status: 'warm',
-        lastContact: '2024-01-18'
-      }
-    ]);
-
-    // Sample notifications
-    setNotifications([
-      {
-        id: 1,
-        type: 'booking',
-        title: 'פגישה חדשה נקבעה',
-        message: 'יואב כהן קבע פגישה ל-14:00 היום',
-        time: '10:30',
-        priority: 'high'
-      },
-      {
-        id: 2,
-        type: 'lead',
-        title: 'ליד חם זקוק למעקב',
-        message: 'דוד לוי לא נענה לשיחה אמש',
-        time: '09:15',
-        priority: 'medium'
-      }
-    ]);
+    loadAttendanceData();
   }, []);
 
-  const filterEmployees = (employees) => {
-    let filtered = employees || [];
+  const loadAttendanceData = async () => {
+    try {
+      setLoading(true);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setError('No authentication token found');
+        return;
+      }
+
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+
+      // Fetch employees
+      const employeesResponse = await fetch(`${backendUrl}/attendance/employees`, { headers });
+      const employeesData = await employeesResponse.json();
+      
+      // Fetch bookings for today
+      const today = new Date().toISOString().split('T')[0];
+      const bookingsResponse = await fetch(`${backendUrl}/bookings?date=${today}`, { headers });
+      const bookingsData = await bookingsResponse.json();
+      
+      // Fetch booking leads
+      const leadsResponse = await fetch(`${backendUrl}/booking-leads`, { headers });
+      const leadsData = await leadsResponse.json();
+      
+      // Fetch dashboard data
+      const dashboardResponse = await fetch(`${backendUrl}/attendance/dashboard`, { headers });
+      const dashboardDataResponse = await dashboardResponse.json();
+
+      setEmployees(employeesData);
+      setBookings(bookingsData);
+      setLeads(leadsData);
+      setDashboardData(dashboardDataResponse);
+      
+    } catch (err) {
+      console.error('Error loading attendance data:', err);
+      setError('Failed to load attendance data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheckIn = async (employeeId) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${backendUrl}/attendance/checkin/${employeeId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        await loadAttendanceData(); // Refresh data
+        alert('העובד נרשם בהצלחה!');
+      } else {
+        alert('שגיאה ברישום העובד');
+      }
+    } catch (err) {
+      console.error('Error checking in:', err);
+      alert('שגיאה ברישום העובד');
+    }
+  };
+
+  const handleCheckOut = async (employeeId) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${backendUrl}/attendance/checkout/${employeeId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        await loadAttendanceData(); // Refresh data
+        alert('העובד יצא בהצלחה!');
+      } else {
+        alert('שגיאה ביציאת העובד');
+      }
+    } catch (err) {
+      console.error('Error checking out:', err);
+      alert('שגיאה ביציאת העובד');
+    }
+  };
+
+  const handleBookingCreate = async (bookingData) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${backendUrl}/bookings`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookingData)
+      });
+
+      if (response.ok) {
+        await loadAttendanceData(); // Refresh data
+        setShowBookingModal(false);
+        alert('הבוקינג נוצר בהצלחה!');
+      } else {
+        alert('שגיאה ביצירת הבוקינג');
+      }
+    } catch (err) {
+      console.error('Error creating booking:', err);
+      alert('שגיאה ביצירת הבוקינג');
+    }
+  };
+
+  const filterEmployees = (employeesList) => {
+    let filtered = employeesList || [];
     
     if (searchTerm) {
       filtered = filtered.filter(emp => 
@@ -106,7 +160,7 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
     }
     
     if (selectedFilter !== 'all') {
-      filtered = filtered.filter(emp => emp.status === selectedFilter);
+      filtered = filtered.filter(emp => emp.attendance_status === selectedFilter);
     }
     
     return filtered;
@@ -114,18 +168,13 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
 
   const getTodayBookings = (employeeId) => {
     return bookings.filter(booking => 
-      booking.employeeId === employeeId && 
+      booking.employee_id === employeeId && 
       booking.date === new Date().toISOString().split('T')[0]
     );
   };
 
   const getEmployeeLeads = (employeeId) => {
-    return leads.filter(lead => lead.assignedTo === employeeId);
-  };
-
-  const handleBookingCreate = (employeeId) => {
-    setSelectedEmployee(employeeId);
-    setShowBookingModal(true);
+    return leads.filter(lead => lead.assigned_to === employeeId);
   };
 
   const handleLeadPopup = (lead) => {
@@ -133,7 +182,35 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
     setShowLeadPopup(true);
   };
 
-  const filteredEmployees = filterEmployees(attendanceData);
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">טוען נתוני נוכחות...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600 dark:text-red-400">{error}</p>
+          <button 
+            onClick={loadAttendanceData}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+          >
+            נסה שוב
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredEmployees = filterEmployees(employees);
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
