@@ -609,6 +609,80 @@ const BarberProfessionalApp = () => {
     ]);
   };
 
+  // פונקציות עזר מתקדמות
+  const addNotification = (notification) => {
+    const newNotification = {
+      ...notification,
+      id: Date.now(),
+      time: new Date()
+    };
+    setNotifications(prev => [newNotification, ...prev.slice(0, 9)]);
+
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== newNotification.id));
+    }, 5000);
+  };
+
+  const connectScale = () => {
+    setIsScaleConnected(true);
+    addNotification({
+      type: 'success',
+      title: 'משקל מחובר',
+      message: 'המשקל הדיגיטלי חובר בהצלחה'
+    });
+
+    // סימולציית קריאות משקל
+    const interval = setInterval(() => {
+      setCurrentWeight(prev => {
+        const variation = (Math.random() - 0.5) * 2;
+        return Math.max(0, Math.round((prev + variation) * 10) / 10);
+      });
+    }, 500);
+
+    return () => clearInterval(interval);
+  };
+
+  const calculateColorCost = (formula) => {
+    let totalCost = 0;
+    formula.colors?.forEach(color => {
+      const colorData = colorDatabase[color.brand]?.series[color.series]?.colors?.find(c => c.code === color.code);
+      if (colorData) {
+        totalCost += (color.weight / 60) * colorData.price; // עלות ל-60 גרם
+      }
+    });
+    return totalCost.toFixed(2);
+  };
+
+  const predictInventoryNeeds = (product) => {
+    const dailyUsage = product.usage.daily;
+    const currentStock = product.quantity;
+    const daysUntilEmpty = Math.floor(currentStock / dailyUsage);
+    
+    if (daysUntilEmpty <= 3) {
+      return { urgency: 'critical', message: 'הזמנה דחופה נדרשת' };
+    } else if (daysUntilEmpty <= 7) {
+      return { urgency: 'warning', message: 'מומלץ להזמין בקרוב' };
+    } else {
+      return { urgency: 'good', message: `מספיק ל-${daysUntilEmpty} ימים` };
+    }
+  };
+
+  const generateWeeklyReport = () => {
+    return {
+      totalRevenue: analyticsData.revenue.weekly,
+      totalClients: todayAppointments.length * 5, // הערכה לשבוע
+      colorEfficiency: analyticsData.efficiency,
+      wasteReduction: analyticsData.wasteReduction,
+      topColors: analyticsData.trends.popularColors,
+      clientSatisfaction: analyticsData.clientSatisfaction,
+      recommendations: [
+        'המשך להשתמש בפורמולות הצלחה',
+        'הזמן מלאי צבעים פופולריים',
+        'התמקד בלקוחות VIP לשיפור רווחיות'
+      ]
+    };
+  };
+
   const startAppointment = (appointmentId) => {
     setTodayAppointments(prev => prev.map(apt => 
       apt.id === appointmentId 
