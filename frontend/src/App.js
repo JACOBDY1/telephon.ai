@@ -140,6 +140,7 @@ const MainApp = () => {
       notifications: 'Notifications',
       mobileApp: 'Mobile App',
       providerSystem: 'Provider Management',
+      workflowSystem: 'Integrated Workflow',
       search: 'Search...',
       activeCalls: 'Active Calls',
       recentCalls: 'Recent Calls',
