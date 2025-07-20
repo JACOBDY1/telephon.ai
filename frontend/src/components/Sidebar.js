@@ -73,7 +73,7 @@ const Sidebar = ({
   ];
 
   return (
-    <>
+    <div dir="rtl">
       {/* Mobile Overlay */}
       {isMobile && sidebarOpen && (
         <div 
@@ -82,17 +82,18 @@ const Sidebar = ({
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - RTL Support */}
       <div className={`
         ${isMobile ? 'fixed' : 'relative'} 
         ${isMobile && sidebarOpen ? 'translate-x-0' : ''}
-        ${isMobile && !sidebarOpen ? '-translate-x-full' : ''}
+        ${isMobile && !sidebarOpen ? 'translate-x-full' : ''}
         ${!isMobile ? 'translate-x-0' : ''}
-        top-0 left-0 z-50 w-80 h-full
+        top-0 right-0 z-50 w-80 h-full
         ${darkMode ? 'bg-gray-900' : 'bg-white'} 
-        border-r border-gray-200 dark:border-gray-700 
+        border-l border-gray-200 dark:border-gray-700 
         transition-transform duration-300 ease-in-out
         flex flex-col overflow-hidden
+        shadow-xl
       `}>
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
