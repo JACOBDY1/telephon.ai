@@ -14,6 +14,32 @@ const Sidebar = ({
   learningModules = [],
   connectionStatus = { checkcall: true, masterpbx: true }
 }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarOpen(true); // Always open on desktop
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setSidebarOpen]);
+
+  // Close sidebar when clicking on mobile menu items
+  const handleMenuClick = (tabId) => {
+    setActiveTab(tabId);
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  };
+
   const getStatusIcon = (status) => {
     const icons = {
       'connected': '🟢',
