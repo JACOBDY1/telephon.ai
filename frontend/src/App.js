@@ -44,6 +44,7 @@ const MainApp = () => {
   const [attendanceData, setAttendanceData] = useState([]);
   const [automationRules, setAutomationRules] = useState([]);
   const [learningModules, setLearningModules] = useState([]);
+  const [marketplaceData, setMarketplaceData] = useState([]);
   const [connectionStatus, setConnectionStatus] = useState({ 
     checkcall: true, 
     masterpbx: true 
