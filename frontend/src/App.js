@@ -29,7 +29,7 @@ import MessagingCenter from './components/MessagingCenter';
 import ModuleManager from './components/ModuleManager';
 import MobileApp from './components/MobileApp';
 import ProviderManagementSystem from './components/ProviderManagementSystem';
-import IntegratedWorkflowSystem from './components/IntegratedWorkflowSystem';
+import BarberProfessionalApp from './BarberProfessionalApp';
 import AdvancedDashboard from './components/AdvancedDashboard';
 
 const MainApp = () => {
