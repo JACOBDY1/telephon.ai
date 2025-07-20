@@ -56,7 +56,7 @@ const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, o
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">ערך כולל עסקאות</p>
-              <p className="text-3xl font-bold text-purple-600">₪{crmData?.deals?.reduce((sum, deal) => sum + deal.value, 0).toLocaleString() || '0'}</p>
+              <p className="text-3xl font-bold text-purple-600">₪{((crmData?.deals || []).reduce((sum, deal) => sum + (deal?.value || 0), 0)).toLocaleString()}</p>
             </div>
             <TrendingUp className="w-8 h-8 text-purple-600" />
           </div>
