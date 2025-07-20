@@ -21,6 +21,7 @@ const Header = ({
 }) => {
   const { user, logout } = useAuth();
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const [showAdvancedNotifications, setShowAdvancedNotifications] = useState(false);
 
   // Keyboard shortcut for global search
   useEffect(() => {
