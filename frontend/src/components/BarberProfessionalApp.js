@@ -684,15 +684,25 @@ const BarberProfessionalApp = () => {
   };
 
   const startAppointment = (appointmentId) => {
+    const appointment = todayAppointments.find(apt => apt.id === appointmentId);
     setTodayAppointments(prev => prev.map(apt => 
       apt.id === appointmentId 
         ? { ...apt, status: 'in-progress', actualStartTime: currentTime.toLocaleTimeString() }
         : apt
     ));
     setWorkStatus('working');
+    setCurrentClient(appointment);
+    
+    addNotification({
+      type: 'info',
+      title: 'טיפול החל',
+      message: `התחלת טיפול ל-${appointment?.clientName}`
+    });
   };
 
-  const completeAppointment = (appointmentId, tip = 0, satisfaction = 5) => {
+  const completeAppointment = (appointmentId, tip = 0, satisfaction = 5, formula = null) => {
+    const appointment = todayAppointments.find(apt => apt.id === appointmentId);
+    
     setTodayAppointments(prev => prev.map(apt => 
       apt.id === appointmentId 
         ? { 
@@ -700,19 +710,58 @@ const BarberProfessionalApp = () => {
             status: 'completed', 
             tip, 
             satisfaction,
+            formula,
             actualEndTime: currentTime.toLocaleTimeString()
           }
         : apt
     ));
     setWorkStatus('ready');
+    setCurrentClient(null);
     
-    // Update stats
+    // עדכון סטטיסטיקות
     setTodayStats(prev => ({
       ...prev,
       appointmentsCompleted: prev.appointmentsCompleted + 1,
-      totalRevenue: prev.totalRevenue + (todayAppointments.find(a => a.id === appointmentId)?.price || 0),
+      totalRevenue: prev.totalRevenue + (appointment?.price || 0),
       tips: prev.tips + tip
     }));
+
+    // עדכון נתוני לקוח
+    if (appointment?.clientId && formula) {
+      setClients(prev => prev.map(client => 
+        client.id === appointment.clientId
+          ? {
+              ...client,
+              history: [
+                ...client.history,
+                {
+                  id: client.history.length + 1,
+                  date: new Date().toISOString().split('T')[0],
+                  service: appointment.service,
+                  formula,
+                  duration: appointment.duration,
+                  cost: appointment.price,
+                  tip,
+                  satisfaction,
+                  stylist: 'מיכל לוי' // או הספר הנוכחי
+                }
+              ],
+              metrics: {
+                ...client.metrics,
+                totalVisits: client.metrics.totalVisits + 1,
+                totalSpent: client.metrics.totalSpent + appointment.price,
+                lastVisit: new Date().toISOString().split('T')[0]
+              }
+            }
+          : client
+      ));
+    }
+
+    addNotification({
+      type: 'success',
+      title: 'טיפול הושלם',
+      message: `טיפול ל-${appointment?.clientName} הושלם בהצלחה`
+    });
   };
 
   // Dashboard View
