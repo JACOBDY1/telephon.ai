@@ -5,7 +5,8 @@ import {
   Timer, ShoppingCart, DollarSign, Award, Zap, Bell,
   BookOpen, Coffee, Scissors, Sparkles, Heart, Gift,
   BarChart3, PieChart, Activity, Users, PhoneCall,
-  MapPin, Camera, MessageSquare, ThumbsUp, ArrowRight
+  MapPin, Camera, MessageSquare, ThumbsUp, ArrowRight,
+  Play
 } from 'lucide-react';
 
 const IntegratedWorkflowSystem = ({ darkMode = false, t = {}, user }) => {
