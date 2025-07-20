@@ -88,6 +88,7 @@ const MainApp = () => {
       account: 'חשבון',
       notifications: 'התראות',
       mobileApp: 'אפליקציית מובייל',
+      providerSystem: 'מערכת ספרים/מטפלים',
       search: 'חיפוש...',
       activeCalls: 'שיחות פעילות',
       recentCalls: 'שיחות אחרונות',
