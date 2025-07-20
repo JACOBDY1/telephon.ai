@@ -246,11 +246,11 @@ const ProviderManagementSystem = ({ darkMode = false, t = {}, user }) => {
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div 
                     className={`h-2 rounded-full transition-all ${
-                      goal.percentage >= 100 ? 'bg-green-500' :
-                      goal.percentage >= 80 ? 'bg-blue-500' :
-                      goal.percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                      (goal?.percentage || 0) >= 100 ? 'bg-green-500' :
+                      (goal?.percentage || 0) >= 80 ? 'bg-blue-500' :
+                      (goal?.percentage || 0) >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                     }`}
-                    style={{ width: `${Math.min(goal.percentage, 100)}%` }}
+                    style={{ width: `${Math.min(goal?.percentage || 0, 100)}%` }}
                   ></div>
                 </div>
               </div>
