@@ -101,30 +101,34 @@ const AdvancedDashboard = ({ darkMode = false, t = {} }) => {
     });
   };
 
-  const KPICard = ({ title, value, change, period, icon: Icon, color, format = 'number' }) => (
-    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border hover:shadow-lg transition-all duration-300`}>
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-lg ${color}`}>
-          <Icon className="w-6 h-6 text-white" />
+  const KPICard = ({ title, value, change, period, icon: Icon, color, format = 'number' }) => {
+    if (!value && value !== 0) return null;
+    
+    return (
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border hover:shadow-lg transition-all duration-300`}>
+        <div className="flex items-center justify-between mb-4">
+          <div className={`p-3 rounded-lg ${color}`}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+          <div className={`flex items-center text-sm ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {change >= 0 ? <ArrowUp className="w-4 h-4 ml-1" /> : <ArrowDown className="w-4 h-4 ml-1" />}
+            {Math.abs(change)}%
+          </div>
         </div>
-        <div className={`flex items-center text-sm ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-          {change >= 0 ? <ArrowUp className="w-4 h-4 ml-1" /> : <ArrowDown className="w-4 h-4 ml-1" />}
-          {Math.abs(change)}%
+        <div>
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{title}</h3>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+            {format === 'currency' ? `₪${value.toLocaleString()}` : 
+             format === 'percentage' ? `${value}%` :
+             format === 'rating' ? `${value}⭐` :
+             format === 'duration' ? `${value} דק׳` :
+             value.toLocaleString()}
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{period}</p>
         </div>
       </div>
-      <div>
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{title}</h3>
-        <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-          {format === 'currency' ? `₪${value.toLocaleString()}` : 
-           format === 'percentage' ? `${value}%` :
-           format === 'rating' ? `${value}⭐` :
-           format === 'duration' ? `${value} דק׳` :
-           value.toLocaleString()}
-        </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{period}</p>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const RealTimeWidget = () => (
     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border`}>
