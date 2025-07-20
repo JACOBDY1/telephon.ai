@@ -86,6 +86,7 @@ const MainApp = () => {
       profile: 'פרופיל',
       account: 'חשבון',
       notifications: 'התראות',
+      mobileApp: 'אפליקציית מובייל',
       search: 'חיפוש...',
       activeCalls: 'שיחות פעילות',
       recentCalls: 'שיחות אחרונות',
