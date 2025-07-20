@@ -273,6 +273,199 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="משתמש לא פעיל")
     return current_user
 
+# ===== ATTENDANCE & BOOKING MODELS =====
+
+class Employee(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    department: str
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    status: str = "active"  # active, inactive, on_leave
+    check_in: Optional[str] = None
+    check_out: Optional[str] = None
+    attendance_status: str = "absent"  # present, absent, late
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class EmployeeCreate(BaseModel):
+    name: str
+    department: str
+    phone: Optional[str] = None
+    email: Optional[str] = None
+
+class Booking(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    employee_id: str
+    client_name: str
+    client_phone: str
+    client_email: Optional[str] = None
+    service: str
+    date: str  # YYYY-MM-DD
+    time: str  # HH:MM
+    duration_minutes: int = 60
+    status: str = "confirmed"  # confirmed, pending, cancelled, completed
+    value: Optional[float] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: Optional[str] = None  # user ID
+
+class BookingCreate(BaseModel):
+    employee_id: str
+    client_name: str
+    client_phone: str
+    client_email: Optional[str] = None
+    service: str
+    date: str  # YYYY-MM-DD
+    time: str  # HH:MM
+    duration_minutes: int = 60
+    value: Optional[float] = None
+    notes: Optional[str] = None
+
+class BookingLead(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    phone: str
+    email: Optional[str] = None
+    source: str = "booking_followup"  # booking_followup, website, referral
+    interest: str
+    value: Optional[float] = None
+    probability: int = 50  # 0-100
+    assigned_to: Optional[str] = None  # employee ID
+    status: str = "warm"  # hot, warm, cold
+    last_contact: Optional[str] = None  # YYYY-MM-DD
+    booking_id: Optional[str] = None  # original booking ID
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class BookingLeadCreate(BaseModel):
+    name: str
+    phone: str
+    email: Optional[str] = None
+    interest: str
+    value: Optional[float] = None
+    probability: int = 50
+    assigned_to: Optional[str] = None
+    booking_id: Optional[str] = None
+
+class AttendanceRecord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    employee_id: str
+    date: str  # YYYY-MM-DD
+    check_in: Optional[str] = None  # HH:MM:SS
+    check_out: Optional[str] = None  # HH:MM:SS
+    status: str = "absent"  # present, absent, late, half_day
+    hours_worked: Optional[float] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+# ===== DOCUMENT GENERATION MODELS =====
+
+class DocumentTemplate(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    template_type: str  # quote, contract, invoice, report
+    description: str
+    content: str  # HTML template
+    fields: List[Dict[str, Any]]  # field definitions
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: Optional[str] = None
+
+class GeneratedDocument(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    template_id: str
+    name: str
+    customer_name: str
+    customer_email: Optional[str] = None
+    status: str = "draft"  # draft, sent, signed, archived
+    data: Dict[str, Any]  # form data
+    pdf_content: Optional[str] = None  # base64 encoded PDF
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: Optional[str] = None
+
+class DocumentCreate(BaseModel):
+    template_id: str
+    name: str
+    customer_name: str
+    customer_email: Optional[str] = None
+    data: Dict[str, Any]
+
+class DocumentSend(BaseModel):
+    document_id: str
+    recipient_email: str
+    subject: Optional[str] = None
+    message: Optional[str] = None
+
+# ===== MESSAGING MODELS =====
+
+class MessageTemplate(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    platform: str  # whatsapp, sms, email
+    category: str
+    content: str
+    variables: List[str]  # list of variable names like ['name', 'date', 'time']
+    usage_count: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: Optional[str] = None
+
+class Campaign(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    platform: str  # whatsapp, sms, email
+    template_id: Optional[str] = None
+    status: str = "draft"  # draft, active, scheduled, completed, paused
+    recipients: List[str]  # phone numbers or email addresses
+    sent_count: int = 0
+    delivered_count: int = 0
+    read_count: int = 0
+    reply_count: int = 0
+    schedule_type: str = "immediate"  # immediate, scheduled, recurring
+    schedule_datetime: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: Optional[str] = None
+
+class CampaignCreate(BaseModel):
+    name: str
+    platform: str
+    template_id: Optional[str] = None
+    recipients: List[str]
+    schedule_type: str = "immediate"
+    schedule_datetime: Optional[datetime] = None
+
+class Conversation(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    contact_name: str
+    contact_phone: str
+    contact_email: Optional[str] = None
+    platform: str  # whatsapp, sms, email
+    status: str = "active"  # active, pending, new, closed
+    last_message: Dict[str, Any]  # last message data
+    unread_count: int = 0
+    tags: List[str] = []
+    assigned_to: Optional[str] = None  # agent ID
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class Message(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    conversation_id: str
+    content: str
+    sender: str  # customer, agent
+    platform: str  # whatsapp, sms, email
+    message_type: str = "text"  # text, image, document, audio
+    is_read: bool = False
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+class MessageSend(BaseModel):
+    conversation_id: str
+    content: str
+    message_type: str = "text"
+
 # ===== CRM MODELS =====
 
 class Lead(BaseModel):
