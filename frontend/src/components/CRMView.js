@@ -29,7 +29,7 @@ const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, o
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">לידים פעילים</p>
-              <p className="text-3xl font-bold text-blue-600">{crmData.leads.length}</p>
+              <p className="text-3xl font-bold text-blue-600">{crmData?.leads?.length || 0}</p>
             </div>
             <Target className="w-8 h-8 text-blue-600" />
           </div>
