@@ -30,6 +30,7 @@ import ModuleManager from './components/ModuleManager';
 import MobileApp from './components/MobileApp';
 import ProviderManagementSystem from './components/ProviderManagementSystem';
 import IntegratedWorkflowSystem from './components/IntegratedWorkflowSystem';
+import AdvancedDashboard from './components/AdvancedDashboard';
 
 const MainApp = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
