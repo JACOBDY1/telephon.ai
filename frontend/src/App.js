@@ -113,7 +113,8 @@ const MainApp = () => {
   useEffect(() => {
     if (isAuthenticated) {
       loadInitialData();
-      setupNotifications();
+      const cleanup = setupNotifications();
+      return cleanup;
     }
   }, [isAuthenticated]);
 
