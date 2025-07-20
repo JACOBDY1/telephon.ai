@@ -6,7 +6,7 @@ import {
   Coffee, Heart, Award, Zap, Timer, BarChart3, Search,
   User, Package, Scale, Bell, AlertCircle, Check, Activity,
   PieChart, Droplets, Beaker, Weight, X, ChevronDown,
-  Filter, Mail, MapPin, CreditCard
+  Filter, Mail, MapPin, CreditCard, Palette
 } from 'lucide-react';
 
 // שעון פעילות צף מתקדם
