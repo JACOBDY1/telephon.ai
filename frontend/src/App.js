@@ -86,7 +86,25 @@ const MainApp = () => {
       search: 'חיפוש...',
       activeCalls: 'שיחות פעילות',
       recentCalls: 'שיחות אחרונות',
-      tutorials: 'מדריכים'
+      tutorials: 'מדריכים',
+      // נוספים לCRM
+      newLead: 'ליד חדש',
+      newDeal: 'עסקה חדשה',
+      leads: 'לידים',
+      deals: 'עסקאות',
+      tasks: 'משימות',
+      // נוספים לנוכחות
+      clockIn: 'כניסה',
+      clockOut: 'יציאה',
+      present: 'נוכח',
+      absent: 'נעדר',
+      // נוספים כלליים
+      realTime: 'זמן אמת',
+      save: 'שמור',
+      cancel: 'בטל',
+      edit: 'ערוך',
+      delete: 'מחק',
+      add: 'הוסף'
     },
     en: {
       dashboard: 'Dashboard',
@@ -105,13 +123,29 @@ const MainApp = () => {
       messaging: 'Messaging Center',
       webDialer: 'Web Dialer',
       modules: 'Module Manager',
+      subscription: 'Subscription Manager',
       profile: 'Profile',
       account: 'Account',
       notifications: 'Notifications',
       search: 'Search...',
       activeCalls: 'Active Calls',
       recentCalls: 'Recent Calls',
-      tutorials: 'Tutorials'
+      tutorials: 'Tutorials',
+      newLead: 'New Lead',
+      newDeal: 'New Deal',
+      leads: 'Leads',
+      deals: 'Deals',
+      tasks: 'Tasks',
+      clockIn: 'Clock In',
+      clockOut: 'Clock Out',
+      present: 'Present',
+      absent: 'Absent',
+      realTime: 'Real Time',
+      save: 'Save',
+      cancel: 'Cancel',
+      edit: 'Edit',
+      delete: 'Delete',
+      add: 'Add'
     }
   };
 
