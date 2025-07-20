@@ -226,6 +226,33 @@ const BarberProfessionalApp = () => {
   const [todayAppointments, setTodayAppointments] = useState([]);
   const [activeView, setActiveView] = useState('dashboard');
   const [notifications, setNotifications] = useState([]);
+  const [currentClient, setCurrentClient] = useState(null);
+  
+  // רכיבים חדשים ל-HairPro Advanced
+  const [weeklyCalendar, setWeeklyCalendar] = useState({});
+  const [clients, setClients] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [formulas, setFormulas] = useState([]);
+  const [reports, setReports] = useState({});
+  const [isScaleConnected, setIsScaleConnected] = useState(false);
+  const [currentWeight, setCurrentWeight] = useState(0);
+  const [selectedWeek, setSelectedWeek] = useState(new Date());
+  const [viewMode, setViewMode] = useState('day'); // day, week, month
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
+  
+  // דוחות וניתוחים מתקדמים
+  const [analyticsData, setAnalyticsData] = useState({
+    colorUsage: {},
+    wasteReduction: 0,
+    efficiency: 0,
+    clientSatisfaction: 0,
+    revenue: {
+      daily: 0,
+      weekly: 0,
+      monthly: 0
+    }
+  });
 
   // Update time every second
   useEffect(() => {
