@@ -105,7 +105,10 @@ const MainApp = () => {
       cancel: 'בטל',
       edit: 'ערוך',
       delete: 'מחק',
-      add: 'הוסף'
+      add: 'הוסף',
+      loading: 'טוען...',
+      totalCalls: 'סה״כ שיחות',
+      averageCallTime: 'זמן שיחה ממוצע'
     },
     en: {
       dashboard: 'Dashboard',
