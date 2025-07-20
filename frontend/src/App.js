@@ -90,6 +90,7 @@ const MainApp = () => {
       notifications: 'התראות',
       mobileApp: 'אפליקציית מובייל',
       providerSystem: 'מערכת ספרים/מטפלים',
+      workflowSystem: 'זמן-מוצר-יעדים משולב',
       search: 'חיפוש...',
       activeCalls: 'שיחות פעילות',
       recentCalls: 'שיחות אחרונות',
