@@ -140,7 +140,7 @@ const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, o
       <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border mt-8`}>
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{t.tasks}</h3>
         <div className="space-y-3">
-          {crmData.tasks.map((task) => (
+          {crmData?.tasks?.map((task) => (
             <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
               <div className="flex items-center space-x-3">
                 <input 
