@@ -10,7 +10,7 @@ from datetime import datetime
 import time
 
 # Backend URL from frontend/.env
-BACKEND_URL = "https://d049263f-d848-461f-9be9-362032e6c2b9.preview.emergentagent.com/api"
+BACKEND_URL = "https://0f6cb767-9bb9-4eda-87e4-e9b9078fe593.preview.emergentagent.com/api"
 
 # Demo user credentials for authentication testing
 DEMO_USERS = {
