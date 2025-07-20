@@ -156,6 +156,243 @@ const BarberProfessionalApp = () => {
   }, []);
 
   const loadBarberData = () => {
+    // נתונים סטטיסטיים מתקדמים של HairPro IL Advanced
+    setTodayStats({
+      appointmentsCompleted: 8,
+      totalRevenue: 1420,
+      tips: 180,
+      averageService: 178,
+      workingHours: 6.5,
+      customerSatisfaction: 4.9,
+      newCustomers: 3,
+      repeatCustomers: 5,
+      colorUsed: 245, // גרם
+      wastePercentage: 12,
+      efficiency: 88
+    });
+
+    // יעדים יומיים מתקדמים
+    setDailyGoals({
+      appointments: { current: 8, target: 12, percentage: 67 },
+      revenue: { current: 1420, target: 1800, percentage: 79 },
+      tips: { current: 180, target: 250, percentage: 72 },
+      newCustomers: { current: 3, target: 4, percentage: 75 },
+      satisfaction: { current: 4.9, target: 4.5, percentage: 109 },
+      colorEfficiency: { current: 88, target: 85, percentage: 103 },
+      wasteReduction: { current: 12, target: 15, percentage: 80 }
+    });
+
+    // לקוחות עם כרטיסי כימיה מתקדמים
+    setClients([
+      {
+        id: 1,
+        name: 'שרה כהן',
+        phone: '050-1234567',
+        email: 'sarah@example.com',
+        photo: null,
+        birthDate: '1985-03-15',
+        hairProfile: {
+          naturalColor: 'חום כהה 4',
+          currentColor: 'בלונד בהיר 8.3',
+          hairType: 'חלק, דק',
+          scalpCondition: 'רגיל'
+        },
+        chemistryCard: {
+          allergies: ['PPD - פניל דיאמין'],
+          sensitivities: ['אמוניה חזקה'],
+          skinTest: {
+            date: '2024-01-10',
+            result: 'שלילי'
+          }
+        },
+        history: [
+          {
+            id: 1,
+            date: '2024-01-15',
+            service: 'צביעה + תספורת',
+            cost: 380,
+            satisfaction: 5
+          }
+        ],
+        metrics: {
+          totalVisits: 12,
+          totalSpent: 4250,
+          lastVisit: '2024-01-15',
+          loyaltyScore: 95
+        }
+      }
+    ]);
+
+    // תורים מתקדמים עם פרטי לקוחות
+    setTodayAppointments([
+      {
+        id: 1,
+        time: '09:00',
+        clientId: 1,
+        clientName: 'שרה כהן',
+        service: 'צביעה + תספורת',
+        price: 380,
+        duration: 120,
+        status: 'completed',
+        tip: 50,
+        notes: 'לקוחה VIP, מעדיפה בלונדים',
+        satisfaction: 5,
+        allergies: ['PPD'],
+        lastColor: 'בלונד בהיר 8.3'
+      },
+      {
+        id: 2,
+        time: '11:30',
+        clientName: 'רחל אברהם',
+        service: 'צביעת שורשים',
+        price: 250,
+        duration: 90,
+        status: 'completed',
+        tip: 30,
+        satisfaction: 4
+      },
+      {
+        id: 3,
+        time: '14:00',
+        clientName: 'מירי לוי',
+        service: 'גוונים',
+        price: 280,
+        duration: 75,
+        status: 'in-progress',
+        notes: 'לקוחה חדשה, רוצה שינוי דרמטי'
+      },
+      {
+        id: 4,
+        time: '15:30',
+        clientName: 'יעל כהן',
+        service: 'תספורת + פן',
+        price: 180,
+        duration: 60,
+        status: 'upcoming',
+        notes: 'תספורת לאירוע מיוחד'
+      }
+    ]);
+
+    // מלאי חכם
+    setInventory([
+      {
+        id: 1,
+        product: 'שוורצקוף איגורא 6-0',
+        quantity: 12,
+        minStock: 5,
+        pricePerUnit: 28,
+        dailyUsage: 2.5,
+        daysLeft: Math.floor(12 / 2.5)
+      },
+      {
+        id: 2,
+        product: 'לוריאל מג\'ירל 8.3',
+        quantity: 8,
+        minStock: 5,
+        pricePerUnit: 32,
+        dailyUsage: 1.8,
+        daysLeft: Math.floor(8 / 1.8)
+      }
+    ]);
+
+    // נתוני אנליטיקה
+    setAnalyticsData({
+      colorUsage: {
+        'בלונדים': 45,
+        'חומים': 35,
+        'שחורים': 12,
+        'אדומים': 8
+      },
+      wasteReduction: 22,
+      efficiency: 88,
+      revenue: {
+        daily: 1420,
+        weekly: 8640,
+        monthly: 36800
+      },
+      trends: {
+        popularColors: ['8.3', '7.0', '6.0', '5.52'],
+        peakHours: ['10:00-12:00', '14:00-16:00']
+      }
+    });
+
+    // התראות
+    setNotifications([
+      {
+        id: 1,
+        type: 'warning',
+        title: 'מלאי נמוך',
+        message: 'לוריאל מג\'ירל 8.3 - נותרו 3 שפופרות'
+      },
+      {
+        id: 2,
+        type: 'success', 
+        title: 'לקוחה מרוצה',
+        message: 'שרה כהן נתנה דירוג 5 כוכבים'
+      }
+    ]);
+  };
+
+  const addNotification = (notification) => {
+    const newNotification = {
+      ...notification,
+      id: Date.now()
+    };
+    setNotifications(prev => [newNotification, ...prev.slice(0, 9)]);
+    
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== newNotification.id));
+    }, 5000);
+  };
+
+  const startAppointment = (appointmentId) => {
+    const appointment = todayAppointments.find(apt => apt.id === appointmentId);
+    setTodayAppointments(prev => prev.map(apt => 
+      apt.id === appointmentId 
+        ? { ...apt, status: 'in-progress', actualStartTime: currentTime.toLocaleTimeString() }
+        : apt
+    ));
+    setWorkStatus('working');
+    setCurrentClient(appointment);
+    
+    addNotification({
+      type: 'info',
+      title: 'טיפול החל',
+      message: `התחלת טיפול ל-${appointment?.clientName}`
+    });
+  };
+
+  const completeAppointment = (appointmentId, tip = 0, satisfaction = 5) => {
+    const appointment = todayAppointments.find(apt => apt.id === appointmentId);
+    
+    setTodayAppointments(prev => prev.map(apt => 
+      apt.id === appointmentId 
+        ? { 
+            ...apt, 
+            status: 'completed', 
+            tip, 
+            satisfaction,
+            actualEndTime: currentTime.toLocaleTimeString()
+          }
+        : apt
+    ));
+    setWorkStatus('ready');
+    setCurrentClient(null);
+    
+    // עדכון סטטיסטיקות
+    setTodayStats(prev => ({
+      ...prev,
+      appointmentsCompleted: prev.appointmentsCompleted + 1,
+      totalRevenue: prev.totalRevenue + (appointment?.price || 0),
+      tips: prev.tips + tip
+    }));
+
+    addNotification({
+      type: 'success',
+      title: 'טיפול הושלם',
+      message: `טיפול ל-${appointment?.clientName} הושלם בהצלחה`
+    });
+  };
     // נתונים סטטיסטיים מתקדמים
     setTodayStats({
       appointmentsCompleted: 8,
