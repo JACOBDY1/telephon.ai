@@ -229,14 +229,14 @@ const MainApp = () => {
 
   const renderActiveTab = () => {
     switch(activeTab) {
-      case 'dashboard': return <Dashboard />;
-      case 'calls': return <CallsView />;
-      case 'contacts': return <ContactsView />;
+      case 'dashboard': return <Dashboard t={t} darkMode={darkMode} />;
+      case 'calls': return <CallsView t={t} darkMode={darkMode} />;
+      case 'contacts': return <ContactsView t={t} darkMode={darkMode} />;
       case 'crm': return <CRMManager />;
-      case 'attendance': return <AttendanceView />;
-      case 'analytics': return <AnalyticsView />;
-      case 'marketplace': return <MarketplaceView />;
-      case 'learning': return <div>Learning modules coming soon...</div>;
+      case 'attendance': return <AttendanceView t={t} darkMode={darkMode} />;
+      case 'analytics': return <AnalyticsView t={t} darkMode={darkMode} />;
+      case 'marketplace': return <MarketplaceView t={t} darkMode={darkMode} />;
+      case 'learning': return <div className="p-6 text-center text-gray-600">Learning modules coming soon...</div>;
       case 'automations': return <AutomationCenter darkMode={darkMode} t={t} />;
       case 'callFlows': return <CallFlowCanvas darkMode={darkMode} t={t} />;
       case 'documents': return <DocumentGenerator darkMode={darkMode} t={t} />;
@@ -246,8 +246,8 @@ const MainApp = () => {
       case 'modules': return <ModuleManager darkMode={darkMode} t={t} />;
       case 'subscription': return <SubscriptionManager />;
       case 'profile': return <UserProfile />;
-      case 'settings': return <SettingsView />;
-      default: return <Dashboard />;
+      case 'settings': return <SettingsView t={t} darkMode={darkMode} />;
+      default: return <Dashboard t={t} darkMode={darkMode} />;
     }
   };
 
