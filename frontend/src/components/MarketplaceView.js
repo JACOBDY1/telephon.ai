@@ -32,34 +32,42 @@ const MarketplaceView = ({ darkMode, t, marketplaceItems = [] }) => {
       </div>
 
       {/* Featured Items */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {marketplaceItems.map((item) => (
-          <div key={item.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border hover:shadow-lg transition-shadow`}>
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                {item.category === 'plugins' && <Bot className="w-6 h-6 text-blue-600" />}
-                {item.category === 'analytics' && <BarChart className="w-6 h-6 text-blue-600" />}
-                {item.category === 'automation' && <Workflow className="w-6 h-6 text-blue-600" />}
+      {marketplaceItems.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {marketplaceItems.map((item) => (
+            <div key={item.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border hover:shadow-lg transition-shadow`}>
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  {item.category === 'plugins' && <Bot className="w-6 h-6 text-blue-600" />}
+                  {item.category === 'analytics' && <BarChart className="w-6 h-6 text-blue-600" />}
+                  {item.category === 'automation' && <Workflow className="w-6 h-6 text-blue-600" />}
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                  <span className="text-sm text-gray-600 dark:text-gray-300">{item.rating}</span>
+                </div>
               </div>
-              <div className="flex items-center space-x-1">
-                <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                <span className="text-sm text-gray-600 dark:text-gray-300">{item.rating}</span>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{item.name}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                תוסף מתקדם לשיפור הפונקציונליות של המערכת
+              </p>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-2xl font-bold text-green-600">${item.price}</span>
+                <span className="text-sm text-gray-500">{item.installs?.toLocaleString() || '0'} התקנות</span>
               </div>
+              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
+                התקן עכשיו
+              </button>
             </div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{item.name}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              תוסף מתקדם לשיפור הפונקציונליות של המערכת
-            </p>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-2xl font-bold text-green-600">${item.price}</span>
-              <span className="text-sm text-gray-500">{item.installs.toLocaleString()} התקנות</span>
-            </div>
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
-              התקן עכשיו
-            </button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 shadow-sm border text-center`}>
+          <Bot className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+          <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">מרקטפלייס בבנייה</h3>
+          <p className="text-gray-500 dark:text-gray-500">פלאגינים ותוספים יהיו זמינים בקרוב</p>
+        </div>
+      )}
 
       {/* Categories */}
       <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border mt-8`}>
