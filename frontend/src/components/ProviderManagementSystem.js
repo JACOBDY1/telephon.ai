@@ -240,7 +240,7 @@ const ProviderManagementSystem = ({ darkMode = false, t = {}, user }) => {
                      key === 'satisfaction' ? 'שביעות רצון' : key}
                   </span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {goal.current}/{goal.target}
+                    {goal?.current || 0}/{goal?.target || 0}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
