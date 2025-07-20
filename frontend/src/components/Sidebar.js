@@ -61,6 +61,8 @@ const Sidebar = ({
             { id: 'callFlows', icon: Palette, label: t.callFlows, badge: 'מתקדם' },
             { id: 'documents', icon: FileText, label: t.documents, badge: 'חדש' },
             { id: 'modules', icon: Puzzle, label: t.modules, badge: 'חדש' },
+            { id: 'mobileApp', icon: Smartphone, label: t.mobileApp, badge: 'PWA' },
+            { id: 'providerSystem', icon: Scissors, label: t.providerSystem, badge: '🎯' },
             { id: 'subscription', icon: CreditCard, label: t.subscription, badge: '💳' },
             { id: 'marketplace', icon: ShoppingCart, label: t.marketplace, badge: 'NEW' },
             { id: 'learning', icon: BookOpen, label: t.learning, badge: learningModules.length },
