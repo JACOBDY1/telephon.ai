@@ -2,6 +2,79 @@ import React, { useState, useEffect } from 'react';
 import { Plus, DollarSign, Target, CheckSquare, TrendingUp, Filter, BarChart, User, Search, Download, SortAsc, SortDesc, Calendar, Phone, Mail, MessageSquare, Edit, Trash2, Eye } from 'lucide-react';
 
 const CRMView = ({ darkMode, t, crmData = { leads: [], deals: [], tasks: [] }, openModal = () => {}, startCall = () => {} }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [activeView, setActiveView] = useState('grid');
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  // Enhanced filtering and searching
+  const filterLeads = (leads) => {
+    let filtered = leads || [];
+    
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(lead => 
+        lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.source?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Status filter
+    if (selectedFilter !== 'all') {
+      filtered = filtered.filter(lead => lead.status === selectedFilter);
+    }
+    
+    // Sorting
+    filtered.sort((a, b) => {
+      let aValue = a[sortBy] || '';
+      let bValue = b[sortBy] || '';
+      
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+      
+      if (sortDirection === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+    
+    return filtered;
+  };
+
+  const exportData = (type, data) => {
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `${type}_data_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const handleBulkAction = (action) => {
+    console.log(`Bulk ${action} on:`, selectedItems);
+    // In real app, this would call API endpoints
+    setSelectedItems([]);
+  };
+
+  const toggleItemSelection = (id, type) => {
+    const itemId = `${type}_${id}`;
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(item => item !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  const filteredLeads = filterLeads(crmData?.leads || []);
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
