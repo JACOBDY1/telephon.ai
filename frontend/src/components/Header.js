@@ -60,7 +60,11 @@ const Header = ({
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg lg:hidden"
         >
-          <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          {sidebarOpen ? (
+            <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          ) : (
+            <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          )}
         </button>
 
         {/* Search - hidden on mobile, shown on tablet+ */}
