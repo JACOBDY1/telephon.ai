@@ -280,7 +280,7 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">רשימת עובדים</h3>
         </div>
         <div className="divide-y">
-          {attendanceData.map((employee) => (
+          {filteredEmployees.map((employee) => (
             <div key={employee.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -290,26 +290,114 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white">{employee.name}</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-300">{employee.department}</p>
+                    {employee.phone && (
+                      <p className="text-xs text-gray-500">{employee.phone}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {employee.checkIn || 'לא נכנס'}
+                      {employee.check_in ? `נכנס: ${employee.check_in}` : 'לא נכנס'}
                     </p>
+                    {employee.check_out && (
+                      <p className="text-xs text-gray-500">יצא: {employee.check_out}</p>
+                    )}
                     <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                      employee.status === 'present' 
+                      employee.attendance_status === 'present' 
                         ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                         : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                     }`}>
-                      {employee.status === 'present' ? t.present : t.absent}
+                      {employee.attendance_status === 'present' ? 'נוכח' : 'חסר'}
                     </span>
                   </div>
-                  <button className="text-blue-600 hover:text-blue-800">
-                    <MoreVertical className="w-5 h-5" />
-                  </button>
+                  
+                  <div className="flex space-x-1">
+                    {employee.attendance_status === 'absent' && (
+                      <button 
+                        onClick={() => handleCheckIn(employee.id)}
+                        className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"
+                        title="רישום כניסה"
+                      >
+                        <UserCheck className="w-4 h-4" />
+                      </button>
+                    )}
+                    
+                    {employee.attendance_status === 'present' && !employee.check_out && (
+                      <button 
+                        onClick={() => handleCheckOut(employee.id)}
+                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                        title="רישום יציאה"
+                      >
+                        <UserX className="w-4 h-4" />
+                      </button>
+                    )}
+                    
+                    <button 
+                      onClick={() => {
+                        setSelectedEmployee(employee);
+                        setShowBookingModal(true);
+                      }}
+                      className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
+                      title="צור בוקינג"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
+              
+              {/* Show today's bookings for this employee */}
+              {getTodayBookings(employee.id).length > 0 && (
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">פגישות היום:</p>
+                  {getTodayBookings(employee.id).map((booking) => (
+                    <div key={booking.id} className="text-xs bg-blue-50 dark:bg-blue-900 p-2 rounded mb-1">
+                      <div className="flex justify-between items-center">
+                        <span>{booking.time} - {booking.client_name}</span>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          booking.status === 'confirmed' 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {booking.status === 'confirmed' ? 'מאושר' : 'ממתין'}
+                        </span>
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-300">{booking.service}</div>
+                      {booking.value && <div className="font-medium">₪{booking.value.toLocaleString()}</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Show leads for this employee */}
+              {getEmployeeLeads(employee.id).length > 0 && (
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">לידים פעילים:</p>
+                  {getEmployeeLeads(employee.id).slice(0, 2).map((lead) => (
+                    <div 
+                      key={lead.id} 
+                      className="text-xs bg-orange-50 dark:bg-orange-900 p-2 rounded mb-1 cursor-pointer hover:bg-orange-100"
+                      onClick={() => handleLeadPopup(lead)}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span>{lead.name}</span>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          lead.status === 'hot' 
+                            ? 'bg-red-100 text-red-700' 
+                            : lead.status === 'warm'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {lead.status === 'hot' ? 'חם' : lead.status === 'warm' ? 'חמים' : 'קר'}
+                        </span>
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-300">{lead.interest}</div>
+                      {lead.value && <div className="font-medium">₪{lead.value.toLocaleString()} ({lead.probability}%)</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
