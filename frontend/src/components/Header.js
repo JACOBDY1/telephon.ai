@@ -4,18 +4,18 @@ import NotificationCenter from './NotificationCenter';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header = ({ 
-  darkMode, 
-  setDarkMode, 
-  searchTerm, 
-  setSearchTerm, 
-  language, 
-  setLanguage, 
-  languages, 
-  t,
+  darkMode = false, 
+  setDarkMode = () => {}, 
+  searchTerm = '', 
+  setSearchTerm = () => {}, 
+  language = 'he', 
+  setLanguage = () => {}, 
+  languages = { he: { name: 'עברית', flag: '🇮🇱' } }, 
+  t = { search: 'חיפוש...' },
   notifications = [],
-  setNotifications,
-  sidebarOpen,
-  setSidebarOpen
+  setNotifications = () => {},
+  sidebarOpen = true,
+  setSidebarOpen = () => {}
 }) => {
   const { user, logout } = useAuth();
 
