@@ -232,7 +232,9 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">נוכחים היום</p>
-              <p className="text-3xl font-bold text-green-600">{attendanceData.filter(a => a.status === 'present').length}</p>
+              <p className="text-3xl font-bold text-green-600">
+                {dashboardData?.attendance?.present || 0}
+              </p>
             </div>
             <UserCheck className="w-8 h-8 text-green-600" />
           </div>
@@ -241,7 +243,9 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">חסרים היום</p>
-              <p className="text-3xl font-bold text-red-600">{attendanceData.filter(a => a.status === 'absent').length}</p>
+              <p className="text-3xl font-bold text-red-600">
+                {dashboardData?.attendance?.absent || 0}
+              </p>
             </div>
             <UserX className="w-8 h-8 text-red-600" />
           </div>
@@ -250,7 +254,9 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">סה״כ עובדים</p>
-              <p className="text-3xl font-bold text-blue-600">{attendanceData.length}</p>
+              <p className="text-3xl font-bold text-blue-600">
+                {dashboardData?.attendance?.total_employees || 0}
+              </p>
             </div>
             <Users2 className="w-8 h-8 text-blue-600" />
           </div>
@@ -259,7 +265,9 @@ const AttendanceView = ({ darkMode = false, t = {}, attendanceData = [] }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">אחוז נוכחות</p>
-              <p className="text-3xl font-bold text-purple-600">{Math.round((attendanceData.filter(a => a.status === 'present').length / attendanceData.length) * 100)}%</p>
+              <p className="text-3xl font-bold text-purple-600">
+                {dashboardData?.attendance?.percentage || 0}%
+              </p>
             </div>
             <Activity className="w-8 h-8 text-purple-600" />
           </div>
