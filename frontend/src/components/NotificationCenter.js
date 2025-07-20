@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, AlertCircle, Info, CheckCircle, Clock } from 'lucide-react';
 
-const NotificationCenter = ({ notifications, onMarkAsRead, onMarkAllAsRead, onClearAll }) => {
+const NotificationCenter = ({ 
+  notifications = [], 
+  onMarkAsRead = () => {}, 
+  onMarkAllAsRead = () => {}, 
+  onClearAll = () => {} 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
