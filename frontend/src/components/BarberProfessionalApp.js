@@ -1080,6 +1080,13 @@ const BarberProfessionalApp = () => {
 
       {/* Navigation */}
       <Navigation />
+      
+      {/* Floating Activity Clock */}
+      <FloatingActivityClock 
+        workStatus={workStatus}
+        currentClient={currentClient}
+        onStatusChange={setWorkStatus}
+      />
     </div>
   );
 };
