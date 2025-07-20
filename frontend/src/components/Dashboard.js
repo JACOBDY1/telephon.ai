@@ -2,15 +2,15 @@ import React from 'react';
 import { RefreshCw, Phone, PhoneCall, Clock, BarChart3, CheckCircle, XCircle, AlertCircle, User } from 'lucide-react';
 
 const Dashboard = ({ 
-  loading, 
-  realtimeAnalytics, 
-  realCallData, 
-  checkcallData, 
-  masterpbxData, 
-  connectionStatus, 
-  loadRealData, 
-  darkMode, 
-  t 
+  loading = false, 
+  realtimeAnalytics = {}, 
+  realCallData = [], 
+  checkcallData = { calls: [] }, 
+  masterpbxData = { calls: [] }, 
+  connectionStatus = { checkcall: true, masterpbx: true }, 
+  loadRealData = () => {}, 
+  darkMode = false, 
+  t = { dashboard: 'דשבורד' }
 }) => {
   const getStatusIcon = (status) => {
     switch (status) {
