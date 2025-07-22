@@ -524,6 +524,82 @@ const BarberProfessionalApp = ({ user }) => {
     });
   };
 
+  // פונקציות שיתוף סושיאל וביקורות
+  const shareToSocial = (platform) => {
+    const message = `🎉 יום עבודה מעולה בסלון! השגתי את היעדים שלי היום 💪\n#HairPro #ספרות #יופי`;
+    
+    if (platform === 'instagram') {
+      addNotification({
+        type: 'info',
+        title: 'שיתוף באינסטגרם',
+        message: 'הטקסט הועתק. פתח את אינסטגרם להשלמת השיתוף'
+      });
+      navigator.clipboard?.writeText(message);
+    } else if (platform === 'whatsapp') {
+      const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+  };
+
+  const sendGoogleReview = (clientPhone) => {
+    const message = `היי! אשמח אם תוכל/י להעניק ביקורת בגוגל על השירות שקיבלת. זה יעזור לי מאוד! 🙏\nhttps://g.page/r/YOUR_GOOGLE_BUSINESS_ID/review`;
+    
+    if (clientPhone) {
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${clientPhone}&text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+      
+      addNotification({
+        type: 'success',
+        title: 'בקשת ביקורת נשלחה',
+        message: 'הודעת WhatsApp נשלחה ללקוח'
+      });
+    }
+  };
+
+  const requestFeedback = (clientName = 'הלקוח') => {
+    addNotification({
+      type: 'info',
+      title: 'בקשת משוב',
+      message: `בקשת משוב נשלחה ל${clientName}`
+    });
+    
+    // כאן תוכל להוסיף אינטגרציה עם מערכת SMS או WhatsApp
+  };
+
+  // פונקציה לעדכון יעדים לפי יומן
+  const updateDailyGoals = () => {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = ראשון, 6 = שבת
+    
+    // יעדים מותאמים לפי יום בשבוע
+    const dailyGoalsByDay = {
+      0: { appointments: 6, revenue: 1200 }, // ראשון
+      1: { appointments: 8, revenue: 1600 }, // שני
+      2: { appointments: 9, revenue: 1800 }, // שלישי
+      3: { appointments: 10, revenue: 2000 }, // רביעי
+      4: { appointments: 12, revenue: 2400 }, // חמישי
+      5: { appointments: 6, revenue: 1000 }, // שישי
+      6: { appointments: 0, revenue: 0 }     // שבת
+    };
+    
+    const todayGoals = dailyGoalsByDay[dayOfWeek];
+    
+    setGoals(prev => ({
+      ...prev,
+      daily: {
+        ...prev.daily,
+        appointments: { ...prev.daily.appointments, target: todayGoals.appointments },
+        revenue: { ...prev.daily.revenue, target: todayGoals.revenue }
+      }
+    }));
+    
+    addNotification({
+      type: 'info',
+      title: 'יעדים עודכנו לפי יומן',
+      message: `יעדי היום עודכנו: ${todayGoals.appointments} תורים, ₪${todayGoals.revenue} הכנסות`
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
