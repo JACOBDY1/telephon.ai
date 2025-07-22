@@ -2772,9 +2772,9 @@ class APITester:
         test_sections = [
             ("HAIRPRO IL ADVANCED REVIEW REQUEST TESTS", [
                 self.test_professional_attendance_system,
-                self.test_professional_existing_endpoints,
-                self.test_professional_authentication_system,
-                self.test_system_data_integrity
+                self.test_professional_goals_get_endpoint,
+                self.test_existing_professional_endpoints,
+                self.test_hairpro_system_data_integrity
             ]),
             ("USER PROFILE & SUBSCRIPTION SYSTEM TESTS", [
                 self.test_professional_user_login,
