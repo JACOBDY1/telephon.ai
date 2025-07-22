@@ -447,7 +447,12 @@ const MainApp = () => {
       case 'webDialer': return <WebDialer darkMode={darkMode} t={t} />;
       case 'modules': return <ModuleManager darkMode={darkMode} t={t} />;
       case 'mobileApp': return <MobileApp darkMode={darkMode} t={t} user={user} />;
-      case 'providerSystem': return <ProviderManagementSystem darkMode={darkMode} t={t} user={user} />;
+      case 'providerSystem': 
+        // עבור משתמשים מקצועיים - הפניה ישירה ל-HairPro IL Advanced
+        if (user?.user_type === 'professional' || user?.user_type === 'barber') {
+          return <BarberProfessionalApp darkMode={darkMode} t={t} user={user} />;
+        }
+        return <ProviderManagementSystem darkMode={darkMode} t={t} user={user} />;
       case 'workflowSystem': return <BarberProfessionalApp darkMode={darkMode} t={t} user={user} />;
       case 'subscription': return <SubscriptionManager />;
       case 'profile': return <UserProfileManager />;
