@@ -30,7 +30,7 @@ const AdvancedFormulaManager = ({ user, colorDatabase }) => {
   });
 
   const [measurements, setMeasurements] = useState({});
-  const [costAnalysis, setCostAnalysis] = useState(null);
+  const [liveCostAnalysis, setLiveCostAnalysis] = useState(null);
 
   useEffect(() => {
     loadData();
