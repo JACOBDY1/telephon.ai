@@ -176,19 +176,19 @@ const AdvancedFormulaManager = ({ user, colorDatabase }) => {
   const saveFormula = async () => {
     try {
       const token = localStorage.getItem('token');
-      const costAnalysis = calculateRealTimeCost();
+      const formulaCostAnalysis = calculateRealTimeCost();
       
       const formulaData = {
         ...formula,
         cost_breakdown: {
-          color_cost: parseFloat(costAnalysis.colorCost),
-          developer_cost: parseFloat(costAnalysis.developerCost),
-          total_material_cost: parseFloat(costAnalysis.totalMaterialCost),
+          color_cost: parseFloat(formulaCostAnalysis.colorCost),
+          developer_cost: parseFloat(formulaCostAnalysis.developerCost),
+          total_material_cost: parseFloat(formulaCostAnalysis.totalMaterialCost),
           waste_cost: 0
         },
-        waste_percentage: parseFloat(costAnalysis.wastePercentage),
-        efficiency_score: parseFloat(costAnalysis.efficiencyScore),
-        profit_margin: parseFloat(costAnalysis.profitMargin)
+        waste_percentage: parseFloat(formulaCostAnalysis.wastePercentage),
+        efficiency_score: parseFloat(formulaCostAnalysis.efficiencyScore),
+        profit_margin: parseFloat(formulaCostAnalysis.profitMargin)
       };
 
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/formulas`, {
