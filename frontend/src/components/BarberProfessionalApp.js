@@ -1075,14 +1075,6 @@ const BarberProfessionalApp = ({ user }) => {
                 </div>
               </div>
             </div>
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <Users className="w-8 h-8" />
-                  <h3 className="text-xl font-bold">ניהול לקוחות VIP</h3>
-                </div>
-                <p className="text-blue-100">כרטיסי כימיה והיסטוריית טיפולים מפורטת</p>
-              </button>
-            </div>
           </div>
         )}
         {activeView === 'appointments' && (
