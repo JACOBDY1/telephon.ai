@@ -174,10 +174,12 @@ class UserInDB(BaseModel):
     full_name: str
     phone: Optional[str] = None
     role: str = "user"
+    user_type: str = "client"  # client, professional, therapist, consultant, barber
     is_active: bool = True
     created_at: datetime
     last_login: Optional[datetime] = None
     preferences: Dict[str, Any] = {}
+    subscription: Dict[str, Any] = {}
 
 # ===== AUTHENTICATION FUNCTIONS =====
 
