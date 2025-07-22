@@ -2259,8 +2259,8 @@ class APITester:
     def run_all_tests(self):
         """Run all tests"""
         print("=" * 80)
-        print("BACKEND API COMPREHENSIVE TESTS")
-        print("Authentication System + CRM System + API Integrations")
+        print("HAIRPRO IL ADVANCED BACKEND COMPREHENSIVE TESTS")
+        print("Authentication + Professional APIs + CRM System + API Integrations")
         print("=" * 80)
         print(f"Testing backend at: {BACKEND_URL}")
         print(f"Test started at: {datetime.now().isoformat()}")
