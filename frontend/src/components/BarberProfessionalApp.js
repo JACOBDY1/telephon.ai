@@ -967,7 +967,114 @@ const BarberProfessionalApp = ({ user }) => {
 
               <button 
                 onClick={() => setActiveView('clients')}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:shadow-lg transition-all"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3 mb-2">
+                  <Users className="w-8 h-8" />
+                  <h3 className="text-xl font-bold">ניהול לקוחות</h3>
+                </div>
+                <p className="text-blue-100">מערכת CRM מתקדמת לניהול לקוחות וליד</p>
+              </button>
+            </div>
+            
+            {/* כרטיסי ליד ולקוחות פוטנציאליים */}
+            <div className="bg-white rounded-xl p-6 shadow-lg border">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <Users className="w-6 h-6 text-blue-500" />
+                  לקוחות פוטנציאליים
+                </h3>
+                <button
+                  onClick={() => openLeadModal()}
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  הוסף ליד
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* ליד פוטנציאלי 1 */}
+                <div 
+                  className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200 cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => openLeadModal({ id: 1, name: 'שרה כהן', phone: '050-123-4567', source: 'פייסבוק', interest: 'צבע שיער' })}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">שרה כהן</h4>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">חדש</span>
+                  </div>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <div className="flex items-center gap-1">
+                      <Phone className="w-3 h-3" />
+                      <span>050-123-4567</span>
+                    </div>
+                    <div>עניין: צבע שיער</div>
+                    <div>מקור: פייסבוק</div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button className="flex-1 bg-green-500 text-white text-xs py-2 px-3 rounded hover:bg-green-600">
+                      התקשר
+                    </button>
+                    <button className="flex-1 bg-blue-500 text-white text-xs py-2 px-3 rounded hover:bg-blue-600">
+                      WhatsApp
+                    </button>
+                  </div>
+                </div>
+                
+                {/* ליד פוטנציאלי 2 */}
+                <div 
+                  className="bg-gradient-to-r from-yellow-50 to-amber-50 p-4 rounded-lg border border-yellow-200 cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => openLeadModal({ id: 2, name: 'רחל אברהם', phone: '052-987-6543', source: 'המלצה', interest: 'תספורת + צבע' })}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">רחל אברהם</h4>
+                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">בטיפול</span>
+                  </div>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <div className="flex items-center gap-1">
+                      <Phone className="w-3 h-3" />
+                      <span>052-987-6543</span>
+                    </div>
+                    <div>עניין: תספורת + צבע</div>
+                    <div>מקור: המלצה</div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button className="flex-1 bg-green-500 text-white text-xs py-2 px-3 rounded hover:bg-green-600">
+                      התקשר
+                    </button>
+                    <button className="flex-1 bg-blue-500 text-white text-xs py-2 px-3 rounded hover:bg-blue-600">
+                      קבע תור
+                    </button>
+                  </div>
+                </div>
+                
+                {/* ליד פוטנציאלי 3 */}
+                <div 
+                  className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200 cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => openLeadModal({ id: 3, name: 'מיכל לוי', phone: '054-555-7777', source: 'Google', interest: 'טיפולי שיער' })}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">מיכל לוי</h4>
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">עקוב</span>
+                  </div>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <div className="flex items-center gap-1">
+                      <Phone className="w-3 h-3" />
+                      <span>054-555-7777</span>
+                    </div>
+                    <div>עניין: טיפולי שיער</div>
+                    <div>מקור: Google</div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button className="flex-1 bg-purple-500 text-white text-xs py-2 px-3 rounded hover:bg-purple-600">
+                      פגישת ייעוץ
+                    </button>
+                    <button className="flex-1 bg-orange-500 text-white text-xs py-2 px-3 rounded hover:bg-orange-600">
+                      שלח הצעה
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
               >
                 <div className="flex items-center gap-3 mb-2">
                   <Users className="w-8 h-8" />
