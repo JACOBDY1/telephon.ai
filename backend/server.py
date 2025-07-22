@@ -2693,6 +2693,329 @@ async def get_professional_dashboard(
         logger.error(f"Error getting dashboard data: {str(e)}")
         raise HTTPException(status_code=500, detail="שגיאה בקבלת נתוני דשבורד")
 
+# ===== DEMO DATA POPULATION FOR PROFESSIONAL SYSTEM =====
+
+@api_router.post("/professional/populate-demo-data")
+async def populate_professional_demo_data(
+    current_user: User = Depends(get_current_active_user)
+):
+    """יצירת נתוני דמו מקיפים למערכת מקצועית"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        professional_id = current_user.id
+        
+        # יצירת לקוחות דמו
+        demo_clients = [
+            {
+                "id": str(uuid.uuid4()),
+                "professional_id": professional_id,
+                "personal_info": {
+                    "full_name": "שרה כהן",
+                    "phone": "050-1234567",
+                    "email": "sarah.cohen@gmail.com",
+                    "birth_date": "1985-03-15",
+                    "address": "תל אביב",
+                    "emergency_contact": "יעל כהן - 052-7654321"
+                },
+                "hair_profile": {
+                    "natural_color": "חום כהה 4",
+                    "current_color": "בלונד בהיר 8.3",
+                    "hair_type": "חלק",
+                    "hair_thickness": "דק",
+                    "scalp_condition": "רגיל",
+                    "hair_length": "כתפיים",
+                    "previous_treatments": []
+                },
+                "chemistry_card": {
+                    "allergies": ["PPD - פניל דיאמין"],
+                    "sensitivities": ["אמוניה חזקה"],
+                    "patch_test_date": "2024-01-10",
+                    "patch_test_result": "שלילי",
+                    "notes": "לקוחה VIP - מעדיפה בלונדים",
+                    "restrictions": []
+                },
+                "preferences": {
+                    "preferred_time_slots": ["10:00-12:00", "14:00-16:00"],
+                    "preferred_services": ["צביעה", "גוונים", "תספורת"],
+                    "communication_preference": "whatsapp",
+                    "language": "he",
+                    "special_requests": "אוהבת שינויים דרמטיים"
+                },
+                "created_at": datetime.utcnow() - timedelta(days=90),
+                "updated_at": datetime.utcnow(),
+                "is_active": True
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "professional_id": professional_id,
+                "personal_info": {
+                    "full_name": "רחל אברהם",
+                    "phone": "053-9876543",
+                    "email": "rachel.abraham@hotmail.com",
+                    "birth_date": "1978-08-22",
+                    "address": "רמת גן",
+                    "emergency_contact": ""
+                },
+                "hair_profile": {
+                    "natural_color": "חום בינוני 5",
+                    "current_color": "חום עם גוונים 5.52",
+                    "hair_type": "גלי",
+                    "hair_thickness": "עבה",
+                    "scalp_condition": "יבש",
+                    "hair_length": "קצר",
+                    "previous_treatments": []
+                },
+                "chemistry_card": {
+                    "allergies": [],
+                    "sensitivities": ["ריחות חזקים"],
+                    "patch_test_date": "2024-02-05",
+                    "patch_test_result": "שלילי",
+                    "notes": "לקוחה קבועה - מגיעה כל חודש",
+                    "restrictions": []
+                },
+                "preferences": {
+                    "preferred_time_slots": ["09:00-11:00"],
+                    "preferred_services": ["צביעת שורשים", "טיפולי שיער"],
+                    "communication_preference": "phone",
+                    "language": "he",
+                    "special_requests": "מעדיפה שקט"
+                },
+                "created_at": datetime.utcnow() - timedelta(days=60),
+                "updated_at": datetime.utcnow(),
+                "is_active": True
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "professional_id": professional_id,
+                "personal_info": {
+                    "full_name": "מירי לוי",
+                    "phone": "052-5555555",
+                    "email": "miri.levi@walla.com",
+                    "birth_date": "1990-12-03",
+                    "address": "חיפה",
+                    "emergency_contact": "דני לוי - 050-1111111"
+                },
+                "hair_profile": {
+                    "natural_color": "שחור 2",
+                    "current_color": "שחור טבעי",
+                    "hair_type": "מתולתל",
+                    "hair_thickness": "בינוני",
+                    "scalp_condition": "שמן",
+                    "hair_length": "ארוך",
+                    "previous_treatments": []
+                },
+                "chemistry_card": {
+                    "allergies": [],
+                    "sensitivities": [],
+                    "patch_test_date": None,
+                    "patch_test_result": "",
+                    "notes": "לקוחה חדשה - רוצה שינוי דרמטי",
+                    "restrictions": []
+                },
+                "preferences": {
+                    "preferred_time_slots": ["16:00-18:00"],
+                    "preferred_services": ["צביעה", "החלקות", "תספורת"],
+                    "communication_preference": "email",
+                    "language": "he",
+                    "special_requests": ""
+                },
+                "created_at": datetime.utcnow() - timedelta(days=5),
+                "updated_at": datetime.utcnow(),
+                "is_active": True
+            }
+        ]
+        
+        # הכנסת לקוחות למסד נתונים
+        clients_collection.insert_many(demo_clients)
+        
+        # יצירת רשומות טיפולים
+        demo_treatments = []
+        for i, client in enumerate(demo_clients[:2]):  # רק לשני הראשונים
+            treatment = {
+                "id": str(uuid.uuid4()),
+                "client_id": client["id"],
+                "professional_id": professional_id,
+                "service_type": "צביעה + תספורת" if i == 0 else "צביעת שורשים",
+                "service_details": {
+                    "service_name": "צביעה מלאה + תספורת" if i == 0 else "צביעת שורשים",
+                    "duration_minutes": 120 if i == 0 else 90,
+                    "base_price": 350 if i == 0 else 250,
+                    "final_price": 380 if i == 0 else 250,
+                    "discount": 0
+                },
+                "color_formula": {
+                    "brand": "שוורצקוף" if i == 0 else "לוריאל",
+                    "series": "IGORA ROYAL" if i == 0 else "MAJIREL",
+                    "colors_used": [
+                        {"code": "8-3" if i == 0 else "5-52", "amount": "60g", "price": 28}
+                    ],
+                    "developer": {"vol": "20vol", "amount": "90ml", "price": 12},
+                    "mixing_ratio": "1:1.5",
+                    "processing_time": "35 דקות",
+                    "final_result": "בלונד זהוב מושלם" if i == 0 else "חום מהגוני יפה"
+                },
+                "before_photos": [],
+                "after_photos": [],
+                "treatment_notes": "הלקוחה מאוד מרוצה מהתוצאה" if i == 0 else "צבע יפה ואחיד",
+                "client_satisfaction": 5 if i == 0 else 4,
+                "next_treatment_date": datetime.utcnow() + timedelta(days=45),
+                "recommendations": ["טיפול קרטין", "מסכת לחות"] if i == 0 else ["צביעה חוזרת בעוד חודש"],
+                "products_sold": [
+                    {"name": "שמפו מיוחד לשיער צבוע", "price": 45, "quantity": 1}
+                ] if i == 0 else [],
+                "created_at": datetime.utcnow() - timedelta(days=30 if i == 0 else 15),
+                "completed_at": datetime.utcnow() - timedelta(days=30 if i == 0 else 15)
+            }
+            demo_treatments.append(treatment)
+            
+        treatments_collection.insert_many(demo_treatments)
+        
+        # יצירת תורים עתידיים
+        demo_appointments = []
+        for i, client in enumerate(demo_clients):
+            appointment = {
+                "id": str(uuid.uuid4()),
+                "client_id": client["id"],
+                "professional_id": professional_id,
+                "scheduled_datetime": datetime.utcnow() + timedelta(days=i+1, hours=10+i*2),
+                "duration_minutes": 90,
+                "service_type": ["גוונים", "צביעת שורשים", "צביעה מלאה"][i],
+                "service_details": {
+                    "estimated_price": [280, 250, 380][i],
+                    "notes": ["גוונים עדינים", "שורשים בלבד", "שינוי צבע דרמטי"][i]
+                },
+                "status": "confirmed",
+                "notes": "לקוחה קבועה" if i < 2 else "לקוחה חדשה - זקוקה לייעוץ",
+                "reminder_sent": False,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+            demo_appointments.append(appointment)
+            
+        appointments_collection.insert_many(demo_appointments)
+        
+        # יצירת מלאי דמו
+        demo_inventory = [
+            {
+                "id": str(uuid.uuid4()),
+                "professional_id": professional_id,
+                "product_category": "color",
+                "product_details": {
+                    "brand": "שוורצקוף",
+                    "name": "IGORA ROYAL 6-0",
+                    "code": "6-0",
+                    "size": "60ml",
+                    "unit_price": 28,
+                    "supplier": "יבואן רשמי"
+                },
+                "current_stock": 15,
+                "minimum_stock": 5,
+                "last_restocked": datetime.utcnow() - timedelta(days=10),
+                "usage_tracking": [
+                    {
+                        "date": datetime.utcnow() - timedelta(days=2),
+                        "amount_used": 30,
+                        "treatment_id": demo_treatments[0]["id"] if demo_treatments else None,
+                        "notes": "טיפול מלא"
+                    }
+                ],
+                "created_at": datetime.utcnow() - timedelta(days=30)
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "professional_id": professional_id,
+                "product_category": "color",
+                "product_details": {
+                    "brand": "לוריאל",
+                    "name": "MAJIREL 8.3",
+                    "code": "8.3",
+                    "size": "50ml",
+                    "unit_price": 32,
+                    "supplier": "יבואן רשמי"
+                },
+                "current_stock": 3,  # מלאי נמוך!
+                "minimum_stock": 5,
+                "last_restocked": datetime.utcnow() - timedelta(days=20),
+                "usage_tracking": [],
+                "created_at": datetime.utcnow() - timedelta(days=45)
+            }
+        ]
+        
+        inventory_collection.insert_many(demo_inventory)
+        
+        # יצירת יעדים
+        demo_goals = {
+            "id": str(uuid.uuid4()),
+            "professional_id": professional_id,
+            "goal_type": "monthly",
+            "target_date": (datetime.utcnow() + timedelta(days=30)).date(),
+            "goals": {
+                "revenue_target": 15000,
+                "clients_target": 50,
+                "new_clients_target": 10,
+                "satisfaction_target": 4.5,
+                "services_target": {"צביעה": 20, "תספורת": 30, "טיפולים": 15}
+            },
+            "current_progress": {
+                "revenue_current": 8500,
+                "clients_current": 28,
+                "new_clients_current": 6,
+                "satisfaction_current": 4.7
+            },
+            "is_achieved": False,
+            "created_at": datetime.utcnow()
+        }
+        
+        goals_collection.insert_one(demo_goals)
+        
+        # יצירת תקשורת דמו
+        demo_communications = [
+            {
+                "id": str(uuid.uuid4()),
+                "client_id": demo_clients[0]["id"],
+                "professional_id": professional_id,
+                "communication_type": "whatsapp",
+                "direction": "outgoing",
+                "content": "היי שרה! תזכורת לתור שלך מחר בשעה 10:00. נשמח לראות אותך!",
+                "timestamp": datetime.utcnow() - timedelta(hours=12),
+                "status": "delivered",
+                "metadata": {"reminder_type": "appointment"}
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "client_id": demo_clients[1]["id"],
+                "professional_id": professional_id,
+                "communication_type": "phone",
+                "direction": "incoming",
+                "content": "שיחת טלפון - רוצה לקבוע תור לשבוע הבא",
+                "timestamp": datetime.utcnow() - timedelta(days=2),
+                "status": "completed",
+                "metadata": {"call_duration": "5 minutes"}
+            }
+        ]
+        
+        communications_collection.insert_many(demo_communications)
+        
+        return {
+            "message": "נתוני דמו נוצרו בהצלחה!",
+            "data_created": {
+                "clients": len(demo_clients),
+                "treatments": len(demo_treatments),
+                "appointments": len(demo_appointments),
+                "inventory_items": len(demo_inventory),
+                "goals": 1,
+                "communications": len(demo_communications)
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating demo data: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה ביצירת נתוני דמו")
+
 @api_router.post("/setup/demo-data")
 async def create_demo_data():
     """Create demo users and data - Development only"""
