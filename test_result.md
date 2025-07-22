@@ -380,12 +380,7 @@ test_plan:
   current_focus:
     - "AdvancedFormulaManager Component"
     - "HairPro Advanced Backend Models & APIs"
-    - "User Profile & Subscription System - Authentication"
-    - "User Profile Management Endpoints"
-  stuck_tasks:
-    - "User Profile & Subscription System - Authentication"
-    - "Professional User Features"
-    - "User Type System Implementation"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
