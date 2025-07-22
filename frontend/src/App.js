@@ -32,6 +32,7 @@ import ProviderManagementSystem from './components/ProviderManagementSystem';
 import BarberProfessionalApp from './components/BarberProfessionalApp';
 import AdvancedDashboard from './components/AdvancedDashboard';
 import UserProfileManager from './components/UserProfileManager';
+import TestPage from './components/TestPage';
 
 const MainApp = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
