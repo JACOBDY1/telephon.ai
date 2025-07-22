@@ -405,8 +405,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "AdvancedFormulaManager Component"
-    - "HairPro Advanced Backend Models & APIs"
+    - "Professional Attendance System - New Feature"
+    - "Professional Goals GET Endpoint"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
