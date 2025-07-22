@@ -217,12 +217,45 @@ const BarberProfessionalApp = ({ user }) => {
   const [activeView, setActiveView] = useState('dashboard');
   const [notifications, setNotifications] = useState([]);
   
+  // מערכת פופ-אפים
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [showLeadModal, setShowLeadModal] = useState(false);
+  const [showGoalsModal, setShowGoalsModal] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedLead, setSelectedLead] = useState(null);
+  
   // מערכת נתונים מקיפה
   const [clients, setClients] = useState([]);
   const [treatments, setTreatments] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [inventory, setInventory] = useState([]);
-  const [goals, setGoals] = useState(null);
+  const [goals, setGoals] = useState({
+    daily: {
+      appointments: { target: 8, current: 0 },
+      revenue: { target: 1500, current: 0 },
+      efficiency: { target: 90, current: 0 },
+      satisfaction: { target: 4.5, current: 0 }
+    },
+    weekly: {
+      appointments: { target: 40, current: 0 },
+      revenue: { target: 7500, current: 0 },
+      newClients: { target: 5, current: 0 }
+    },
+    monthly: {
+      appointments: { target: 160, current: 0 },
+      revenue: { target: 30000, current: 0 },
+      retention: { target: 85, current: 0 }
+    }
+  });
+  
+  // מערכת זמן ונוכחות
+  const [workTime, setWorkTime] = useState({
+    startTime: null,
+    endTime: null,
+    totalHours: 0,
+    breakTime: 0,
+    isActive: false
+  });
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   
