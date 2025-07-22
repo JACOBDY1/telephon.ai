@@ -836,7 +836,7 @@ const BarberProfessionalApp = () => {
         <div className="grid grid-cols-4 py-2">
           {[
             { id: 'dashboard', icon: BarChart3, label: 'דשבורד' },
-            { id: 'appointments', icon: Calendar, label: 'יומן' },
+            { id: 'colors', icon: Palette, label: 'צבעים' },
             { id: 'clients', icon: Users, label: 'לקוחות' },
             { id: 'stats', icon: Target, label: 'דוחות' }
           ].map(({ id, icon: Icon, label }) => (
