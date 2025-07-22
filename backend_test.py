@@ -34,7 +34,8 @@ DEMO_USERS = {
     "manager": {"username": "manager", "password": "manager123", "role": "manager"},
     "demo": {"username": "demo", "password": "demo123", "role": "user"},
     "agent1": {"username": "agent1", "password": "agent123", "role": "user"},
-    "agent2": {"username": "agent2", "password": "agent123", "role": "user"}
+    "agent2": {"username": "agent2", "password": "agent123", "role": "user"},
+    "professional": {"username": "professional", "password": "pro123", "role": "user", "user_type": "professional"}
 }
 
 class APITester:
