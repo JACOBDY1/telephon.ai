@@ -1857,8 +1857,8 @@ const BarberProfessionalApp = ({ user }) => {
         </div>
       )}
 
-      {/* Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+      {/* Navigation - תוקן עבור RTL */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200" dir="rtl">
         <div className="grid grid-cols-5 py-2">
           {[
             { id: 'dashboard', icon: BarChart3, label: 'דשבורד' },
@@ -1870,10 +1870,10 @@ const BarberProfessionalApp = ({ user }) => {
             <button
               key={id}
               onClick={() => setActiveView(id)}
-              className={`flex flex-col items-center py-3 px-2 ${
+              className={`flex flex-col items-center py-3 px-2 transition-all ${
                 activeView === id 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600'
+                  ? 'text-blue-600 bg-blue-50 border-t-2 border-blue-600' 
+                  : 'text-gray-600 hover:text-blue-500'
               }`}
             >
               <Icon className="w-5 h-5 mb-1" />
