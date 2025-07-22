@@ -1511,9 +1511,11 @@ async def register_user(user_data: UserCreate):
             full_name=user_data.full_name,
             phone=user_data.phone,
             role="user",
+            user_type=user_data.user_type or "client",
             is_active=True,
             created_at=datetime.utcnow(),
-            preferences=user_doc["preferences"]
+            preferences=user_doc["preferences"],
+            subscription=user_doc["subscription"]
         )
         
         return Token(access_token=access_token, token_type="bearer", user=user)
