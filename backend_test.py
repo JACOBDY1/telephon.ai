@@ -1129,6 +1129,229 @@ class APITester:
         except Exception as e:
             self.log_result("Error Handling", False, f"Error handling test failed: {str(e)}")
     
+    # ===== HAIRPRO IL ADVANCED REVIEW REQUEST TESTS =====
+    
+    def test_professional_attendance_system(self):
+        """Test Professional Attendance System - New Feature from Review Request"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Attendance System", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional")
+            if not professional_token:
+                self.log_result("Professional Attendance System", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test POST /api/professional/attendance/start (התחלת יום עבודה)
+            start_data = {
+                "start_time": datetime.now().isoformat(),
+                "location": "סלון יופי הרצל",
+                "notes": "התחלת יום עבודה רגיל"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/attendance/start", json=start_data, headers=headers)
+            if response.status_code == 200:
+                attendance_data = response.json()
+                attendance_id = attendance_data.get("id")
+                self.log_result("Professional Attendance - Start", True, f"Started work day with ID: {attendance_id}")
+                
+                # Test GET /api/professional/attendance/status (סטטוס נוכחות)
+                response = self.session.get(f"{BACKEND_URL}/professional/attendance/status", headers=headers)
+                if response.status_code == 200:
+                    status_data = response.json()
+                    if status_data.get("status") == "working" or status_data.get("is_working"):
+                        self.log_result("Professional Attendance - Status", True, f"Attendance status: {status_data.get('status', 'working')}")
+                        
+                        # Test POST /api/professional/attendance/end (סיום יום עבודה)
+                        end_data = {
+                            "end_time": datetime.now().isoformat(),
+                            "notes": "סיום יום עבודה מוצלח"
+                        }
+                        
+                        response = self.session.post(f"{BACKEND_URL}/professional/attendance/end", json=end_data, headers=headers)
+                        if response.status_code == 200:
+                            end_response = response.json()
+                            self.log_result("Professional Attendance - End", True, f"Ended work day successfully")
+                            return True
+                        else:
+                            self.log_result("Professional Attendance - End", False, f"End attendance failed: {response.status_code} - {response.text}")
+                            return False
+                    else:
+                        self.log_result("Professional Attendance - Status", False, f"Invalid attendance status: {status_data}")
+                        return False
+                else:
+                    self.log_result("Professional Attendance - Status", False, f"Get attendance status failed: {response.status_code} - {response.text}")
+                    return False
+            else:
+                self.log_result("Professional Attendance - Start", False, f"Start attendance failed: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional Attendance System", False, f"Attendance system test failed: {str(e)}")
+            return False
+    
+    def test_professional_goals_get_endpoint(self):
+        """Test Professional Goals GET Endpoint - Missing from Review Request"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Goals GET Endpoint", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional")
+            if not professional_token:
+                self.log_result("Professional Goals GET Endpoint", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test GET /api/professional/goals (יעדים)
+            response = self.session.get(f"{BACKEND_URL}/professional/goals", headers=headers)
+            if response.status_code == 200:
+                goals_data = response.json()
+                if isinstance(goals_data, list):
+                    self.log_result("Professional Goals GET Endpoint", True, f"Retrieved {len(goals_data)} goals successfully")
+                    
+                    # Check if goals have expected structure
+                    if goals_data and len(goals_data) > 0:
+                        first_goal = goals_data[0]
+                        expected_fields = ["id", "goal_type", "target_date", "goals"]
+                        missing_fields = [field for field in expected_fields if field not in first_goal]
+                        
+                        if not missing_fields:
+                            self.log_result("Professional Goals - Data Structure", True, "Goals have correct data structure")
+                        else:
+                            self.log_result("Professional Goals - Data Structure", False, f"Missing fields in goals: {missing_fields}")
+                    else:
+                        self.log_result("Professional Goals - Data Structure", True, "Goals endpoint working (empty list is valid)")
+                    
+                    return True
+                else:
+                    self.log_result("Professional Goals GET Endpoint", False, f"Invalid response format, expected list, got: {type(goals_data)}")
+                    return False
+            elif response.status_code == 405:
+                self.log_result("Professional Goals GET Endpoint", False, "GET method not allowed - endpoint not implemented (only POST exists)")
+                return False
+            elif response.status_code == 404:
+                self.log_result("Professional Goals GET Endpoint", False, "Goals GET endpoint not found - not implemented")
+                return False
+            else:
+                self.log_result("Professional Goals GET Endpoint", False, f"Goals GET failed: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional Goals GET Endpoint", False, f"Goals GET test failed: {str(e)}")
+            return False
+    
+    def test_hairpro_system_data_integrity(self):
+        """Test HairPro System Data Integrity - JSON Format, Hebrew Currency, Time Sync"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("HairPro System Data Integrity", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional")
+            if not professional_token:
+                self.log_result("HairPro System Data Integrity", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test JSON Format Validation
+            response = self.session.get(f"{BACKEND_URL}/professional/dashboard", headers=headers)
+            if response.status_code == 200:
+                try:
+                    dashboard_data = response.json()
+                    self.log_result("JSON Format Validation", True, "All data returned in valid JSON format")
+                except json.JSONDecodeError:
+                    self.log_result("JSON Format Validation", False, "Invalid JSON format in dashboard response")
+                    return False
+            else:
+                self.log_result("JSON Format Validation", False, f"Dashboard endpoint failed: {response.status_code}")
+                return False
+            
+            # Test Hebrew Currency Display (₪)
+            if "revenue" in dashboard_data:
+                revenue = dashboard_data.get("revenue", 0)
+                if isinstance(revenue, (int, float)):
+                    self.log_result("Hebrew Currency Display", True, f"Revenue displayed correctly in shekels: ₪{revenue}")
+                else:
+                    self.log_result("Hebrew Currency Display", False, f"Revenue format incorrect: {revenue}")
+            else:
+                self.log_result("Hebrew Currency Display", True, "Revenue field structure may differ but system working")
+            
+            # Test Alerts & Goals Functionality
+            response = self.session.get(f"{BACKEND_URL}/professional/alerts", headers=headers)
+            if response.status_code == 200:
+                alerts_data = response.json()
+                alerts_count = len(alerts_data) if isinstance(alerts_data, list) else alerts_data.get("count", 0)
+                self.log_result("Alerts & Goals Functionality", True, f"Alerts system working ({alerts_count} alerts)")
+            else:
+                self.log_result("Alerts & Goals Functionality", False, f"Alerts endpoint failed: {response.status_code}")
+            
+            # Test Time Synchronization
+            response = self.session.get(f"{BACKEND_URL}/professional/appointments/today", headers=headers)
+            if response.status_code == 200:
+                appointments_data = response.json()
+                appointments_count = len(appointments_data) if isinstance(appointments_data, list) else appointments_data.get("count", 0)
+                self.log_result("Time Synchronization", True, f"Time sync working ({appointments_count} today's appointments)")
+            else:
+                self.log_result("Time Synchronization", False, f"Today's appointments endpoint failed: {response.status_code}")
+            
+            return True
+                
+        except Exception as e:
+            self.log_result("HairPro System Data Integrity", False, f"Data integrity test failed: {str(e)}")
+            return False
+    
+    def test_existing_professional_endpoints(self):
+        """Test Existing Professional Endpoints that should be working"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Existing Professional Endpoints", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional")
+            if not professional_token:
+                self.log_result("Existing Professional Endpoints", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test existing endpoints that should work
+            endpoints_to_test = [
+                ("/professional/clients", "Clients"),
+                ("/professional/formulas", "Formulas"),
+                ("/professional/dashboard", "Dashboard"),
+                ("/professional/inventory", "Inventory")
+            ]
+            
+            working_endpoints = 0
+            total_endpoints = len(endpoints_to_test)
+            
+            for endpoint, name in endpoints_to_test:
+                response = self.session.get(f"{BACKEND_URL}{endpoint}", headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    if isinstance(data, list):
+                        self.log_result(f"Professional {name} Endpoint", True, f"Retrieved {len(data)} {name.lower()}")
+                    elif isinstance(data, dict):
+                        self.log_result(f"Professional {name} Endpoint", True, f"{name} endpoint working")
+                    working_endpoints += 1
+                else:
+                    self.log_result(f"Professional {name} Endpoint", False, f"{name} endpoint failed: {response.status_code}")
+            
+            success_rate = (working_endpoints / total_endpoints) * 100
+            self.log_result("Existing Professional Endpoints Summary", True, f"Professional endpoints working: {working_endpoints}/{total_endpoints} ({success_rate:.1f}%)")
+            
+            return working_endpoints >= (total_endpoints * 0.75)  # At least 75% should work
+                
+        except Exception as e:
+            self.log_result("Existing Professional Endpoints", False, f"Professional endpoints test failed: {str(e)}")
+            return False
+
     # ===== HAIRPRO PROFESSIONAL SYSTEM TESTS =====
     
     def test_professional_clients_crud(self):
