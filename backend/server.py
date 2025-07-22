@@ -2453,6 +2453,246 @@ async def get_professional_analytics(
         logger.error(f"Error getting analytics: {str(e)}")
         raise HTTPException(status_code=500, detail="שגיאה בקבלת אנליטיקה")
 
+# ===== INVENTORY MANAGEMENT =====
+
+@api_router.post("/professional/inventory")
+async def add_product_to_inventory(
+    product_data: ProductInventory,
+    current_user: User = Depends(get_current_active_user)
+):
+    """הוספת מוצר למלאי"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        product_data.professional_id = current_user.id
+        product_dict = product_data.dict()
+        
+        result = inventory_collection.insert_one(product_dict)
+        product_dict["id"] = str(result.inserted_id)
+        
+        return {"message": "מוצר נוסף למלאי בהצלחה", "product": product_dict}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error adding product to inventory: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בהוספת מוצר למלאי")
+
+@api_router.get("/professional/inventory")
+async def get_inventory(
+    category: Optional[str] = None,
+    low_stock_only: bool = False,
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת מלאי"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        query = {"professional_id": current_user.id}
+        
+        if category:
+            query["product_category"] = category
+            
+        if low_stock_only:
+            query["$expr"] = {"$lte": ["$current_stock", "$minimum_stock"]}
+            
+        products = list(inventory_collection.find(query))
+        
+        for product in products:
+            product["id"] = str(product.pop("_id"))
+            
+        return {"inventory": products, "total": len(products)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting inventory: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת מלאי")
+
+@api_router.put("/professional/inventory/{product_id}/stock")
+async def update_product_stock(
+    product_id: str,
+    stock_data: Dict[str, Any],
+    current_user: User = Depends(get_current_active_user)
+):
+    """עדכון מלאי מוצר"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        update_data = {
+            "current_stock": stock_data.get("new_stock", 0),
+            "last_restocked": datetime.utcnow()
+        }
+        
+        if "usage" in stock_data:
+            update_data["$push"] = {
+                "usage_tracking": {
+                    "date": datetime.utcnow(),
+                    "amount_used": stock_data["usage"],
+                    "treatment_id": stock_data.get("treatment_id"),
+                    "notes": stock_data.get("notes", "")
+                }
+            }
+        
+        result = inventory_collection.update_one(
+            {"id": product_id, "professional_id": current_user.id},
+            {"$set" if "usage" not in stock_data else "$set": update_data} if "usage" not in stock_data else update_data
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="מוצר לא נמצא")
+            
+        return {"message": "מלאי המוצר עודכן בהצלחה"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating product stock: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בעדכון מלאי מוצר")
+
+# ===== COMMUNICATION TRACKING =====
+
+@api_router.post("/professional/communications")
+async def log_communication(
+    comm_data: ClientCommunication,
+    current_user: User = Depends(get_current_active_user)
+):
+    """תיעוד תקשורת עם לקוח"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        comm_data.professional_id = current_user.id
+        comm_dict = comm_data.dict()
+        
+        result = communications_collection.insert_one(comm_dict)
+        comm_dict["id"] = str(result.inserted_id)
+        
+        return {"message": "תקשורת תועדה בהצלחה", "communication": comm_dict}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error logging communication: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בתיעוד תקשורת")
+
+@api_router.get("/professional/communications/{client_id}")
+async def get_client_communications(
+    client_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת היסטוריית תקשורת עם לקוח"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        communications = list(communications_collection.find({
+            "client_id": client_id,
+            "professional_id": current_user.id
+        }).sort("timestamp", -1).limit(50))
+        
+        for comm in communications:
+            comm["id"] = str(comm.pop("_id"))
+            
+        return {"communications": communications, "total": len(communications)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting communications: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת תקשורת")
+
+# ===== COMPREHENSIVE DASHBOARD DATA =====
+
+@api_router.get("/professional/dashboard")
+async def get_professional_dashboard(
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת נתוני דשבורד מקיפים"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        tomorrow = today + timedelta(days=1)
+        
+        # תורים היום
+        today_appointments = list(appointments_collection.find({
+            "professional_id": current_user.id,
+            "scheduled_datetime": {"$gte": today, "$lt": tomorrow}
+        }).sort("scheduled_datetime", 1))
+        
+        for apt in today_appointments:
+            apt["id"] = str(apt.pop("_id"))
+            
+        # סטטיסטיקות היום
+        today_treatments = treatments_collection.count_documents({
+            "professional_id": current_user.id,
+            "created_at": {"$gte": today}
+        })
+        
+        today_revenue = list(treatments_collection.aggregate([
+            {"$match": {
+                "professional_id": current_user.id,
+                "created_at": {"$gte": today}
+            }},
+            {"$group": {
+                "_id": None,
+                "total": {"$sum": "$service_details.final_price"}
+            }}
+        ]))
+        
+        # לקוחות חדשים השבוע
+        week_ago = today - timedelta(days=7)
+        new_clients_week = clients_collection.count_documents({
+            "professional_id": current_user.id,
+            "created_at": {"$gte": week_ago}
+        })
+        
+        # מלאי נמוך
+        low_stock = list(inventory_collection.find({
+            "professional_id": current_user.id,
+            "$expr": {"$lte": ["$current_stock", "$minimum_stock"]}
+        }))
+        
+        for item in low_stock:
+            item["id"] = str(item.pop("_id"))
+            
+        # יעדים נוכחיים
+        current_goals = list(goals_collection.find({
+            "professional_id": current_user.id,
+            "target_date": {"$gte": today.date()}
+        }).sort("target_date", 1).limit(3))
+        
+        for goal in current_goals:
+            goal["id"] = str(goal.pop("_id"))
+        
+        return {
+            "today_appointments": today_appointments,
+            "today_stats": {
+                "treatments_completed": today_treatments,
+                "revenue": today_revenue[0]["total"] if today_revenue else 0,
+                "appointments_scheduled": len(today_appointments)
+            },
+            "weekly_stats": {
+                "new_clients": new_clients_week
+            },
+            "alerts": {
+                "low_stock_items": low_stock,
+                "low_stock_count": len(low_stock)
+            },
+            "current_goals": current_goals
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting dashboard data: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת נתוני דשבורד")
+
 @api_router.post("/setup/demo-data")
 async def create_demo_data():
     """Create demo users and data - Development only"""
