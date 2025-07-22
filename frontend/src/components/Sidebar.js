@@ -69,6 +69,7 @@ const Sidebar = ({
     { id: 'notifications', icon: Palette, label: t.notifications || 'התראות', badge: '' },
     { id: 'mobileApp', icon: Smartphone, label: t.mobileApp || 'אפליקציית מובייל', badge: '📱' },
     { id: 'providerSystem', icon: Scissors, label: t.providerSystem || 'מערכת ספרים/מטפלים', badge: '✂️' },
+    { id: 'hairpro', icon: Scissors, label: 'HairPro IL Advanced', badge: '🔥 Pro' },
     { id: 'workflowSystem', icon: Zap, label: t.workflowSystem || 'זמן-מוצר-יעדים משולב', badge: '⚡' },
     { id: 'settings', icon: Settings, label: t.settings || 'הגדרות', badge: '' }
   ];
