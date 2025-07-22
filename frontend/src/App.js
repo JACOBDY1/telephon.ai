@@ -449,7 +449,7 @@ const MainApp = () => {
       case 'providerSystem': return <ProviderManagementSystem darkMode={darkMode} t={t} user={user} />;
       case 'workflowSystem': return <BarberProfessionalApp darkMode={darkMode} t={t} user={user} />;
       case 'subscription': return <SubscriptionManager />;
-      case 'profile': return <UserProfile />;
+      case 'profile': return <UserProfileManager />;
       case 'settings': 
         return <SettingsView 
           t={t} 
