@@ -294,10 +294,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         full_name=user.full_name,
         phone=user.phone,
         role=user.role,
+        user_type=user.user_type or "client",
         is_active=user.is_active,
         created_at=user.created_at,
         last_login=user.last_login,
-        preferences=user.preferences
+        preferences=user.preferences or {},
+        subscription=user.subscription or {}
     )
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
