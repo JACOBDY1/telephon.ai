@@ -717,7 +717,94 @@ const BarberProfessionalApp = () => {
 
       {/* Main Content */}
       <div className="p-4 pb-20">
-        {activeView === 'dashboard' && <AdvancedDashboard />}
+        {activeView === 'dashboard' && (
+          <div className="space-y-6">
+            {/* כותרת HairPro */}
+            <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white p-6 rounded-2xl">
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Scissors className="w-8 h-8" />
+                HairPro IL Advanced 💇‍♀️
+              </h1>
+              <p className="text-blue-100 mt-1">מערכת ניהול מתקדמת לסלון שיער עם מאגר צבעים מקצועי</p>
+            </div>
+
+            {/* כרטיסי מידע מהיר */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Users className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">לקוחות היום</div>
+                    <div className="text-xl font-bold">8</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">הכנסות היום</div>
+                    <div className="text-xl font-bold">₪2,340</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Palette className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">צבעים בשימוש</div>
+                    <div className="text-xl font-bold">12</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <Star className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">דירוג</div>
+                    <div className="text-xl font-bold">4.9⭐</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* גישה מהירה לתכונות */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button 
+                onClick={() => setActiveView('colors')}
+                className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:shadow-lg transition-all"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Palette className="w-8 h-8" />
+                  <h3 className="text-xl font-bold">מאגר צבעים מקצועי</h3>
+                </div>
+                <p className="text-purple-100">גישה למאגר הצבעים המלא עם מחירים ופרטי ערבוב</p>
+              </button>
+
+              <button 
+                onClick={() => setActiveView('clients')}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:shadow-lg transition-all"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Users className="w-8 h-8" />
+                  <h3 className="text-xl font-bold">ניהול לקוחות VIP</h3>
+                </div>
+                <p className="text-blue-100">כרטיסי כימיה והיסטוריית טיפולים מפורטת</p>
+              </button>
+            </div>
+          </div>
+        )}
         {activeView === 'appointments' && (
           <div className="bg-white rounded-lg p-6 text-center">
             <Calendar className="w-12 h-12 text-blue-500 mx-auto mb-4" />
