@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
-import { Home, Package, Users, BarChart3, Settings, DollarSign, Activity } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Home, Package, Users, BarChart3, Settings, DollarSign, Activity,
+  Scissors, Timer, Star, Gift, Target, Calendar, Plus, Search, User,
+  Phone, Mail, Palette, AlertCircle, Edit, CheckCircle, Bell, X,
+  Droplets, TrendingUp, PieChart, Beaker
+} from 'lucide-react';
 
 // מאגר צבעים מורחב
 const colorDatabase = {
