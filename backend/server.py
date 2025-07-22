@@ -2303,6 +2303,7 @@ schedules_collection = db.schedules
 communications_collection = db.communications
 goals_collection = db.goals
 inventory_collection = db.inventory
+attendance_collection = db.attendance
 
 # ===== CLIENT MANAGEMENT ENDPOINTS =====
 
