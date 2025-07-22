@@ -141,11 +141,13 @@ class User(BaseModel):
     email: EmailStr
     full_name: str
     phone: Optional[str] = None
-    role: str = "user"  # user, admin, manager
+    role: str = "user"  # user, admin, manager, professional
+    user_type: str = "client"  # client, professional, therapist, consultant, barber
     is_active: bool = True
     created_at: Optional[datetime] = None
     last_login: Optional[datetime] = None
     preferences: Dict[str, Any] = {}
+    subscription: Dict[str, Any] = {}
 
 class UserCreate(BaseModel):
     username: str
