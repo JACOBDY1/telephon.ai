@@ -111,15 +111,117 @@ const colorDatabase = {
   }
 };
 
-// רכיב שעון פעילות צף
-const FloatingActivityClock = ({ workStatus, currentClient, onStatusChange }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+// שעון פעילות צף מעוצב חדש
+const CompactFloatingClock = ({ workStatus, workTime, onStatusChange, onStartDay, onEndDay, onTakeBreak, onResumeWork }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const getStatusColor = () => {
+    if (workTime.isActive && workStatus === 'working') return 'bg-green-500 animate-pulse';
+    if (workStatus === 'break') return 'bg-yellow-500';
+    return 'bg-gray-500';
+  };
+
+  const getStatusText = () => {
+    if (workTime.isActive && workStatus === 'working') return 'עובד';
+    if (workStatus === 'break') return 'הפסקה';
+    return 'מוכן';
+  };
+
+  const getWorkingTime = () => {
+    if (!workTime.startTime || !workTime.isActive) return '00:00';
+    const now = new Date();
+    const diff = now - workTime.startTime;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="fixed bottom-20 right-4 z-40">
+      <div className={`bg-white rounded-xl shadow-lg transition-all duration-300 ${
+        isExpanded ? 'w-64 p-4' : 'w-14 h-14 flex items-center justify-center cursor-pointer'
+      }`}>
+        {!isExpanded ? (
+          <div 
+            onClick={() => setIsExpanded(true)}
+            className={`w-10 h-10 rounded-full flex items-center justify-center ${getStatusColor()}`}
+          >
+            <Timer className="w-5 h-5 text-white" />
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-800">נוכחות</h3>
+              <button 
+                onClick={() => setIsExpanded(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="text-center mb-3">
+              <div className="text-lg font-mono text-gray-800">
+                {currentTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+              <div className={`text-xs px-2 py-1 rounded-full text-white ${getStatusColor()}`}>
+                {getStatusText()}
+              </div>
+            </div>
+            
+            {workTime.isActive && (
+              <div className="text-center mb-3">
+                <div className="text-sm text-gray-600">זמן עבודה</div>
+                <div className="text-md font-mono text-green-600">{getWorkingTime()}</div>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              {!workTime.isActive ? (
+                <button
+                  onClick={onStartDay}
+                  className="w-full bg-green-500 text-white px-3 py-2 rounded-lg text-xs hover:bg-green-600"
+                >
+                  התחל יום עבודה
+                </button>
+              ) : (
+                <>
+                  {workStatus === 'working' ? (
+                    <button
+                      onClick={onTakeBreak}
+                      className="w-full bg-yellow-500 text-white px-3 py-2 rounded-lg text-xs hover:bg-yellow-600"
+                    >
+                      הפסקה
+                    </button>
+                  ) : (
+                    <button
+                      onClick={onResumeWork}
+                      className="w-full bg-green-500 text-white px-3 py-2 rounded-lg text-xs hover:bg-green-600"
+                    >
+                      חזור לעבודה
+                    </button>
+                  )}
+                  <button
+                    onClick={onEndDay}
+                    className="w-full bg-red-500 text-white px-3 py-2 rounded-lg text-xs hover:bg-red-600"
+                  >
+                    סיים יום עבודה
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
   return (
     <div className="fixed top-4 right-4 z-50">
