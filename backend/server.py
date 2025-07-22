@@ -2664,11 +2664,14 @@ async def get_professional_dashboard(
         # יעדים נוכחיים
         current_goals = list(goals_collection.find({
             "professional_id": current_user.id,
-            "target_date": {"$gte": today.date()}
+            "target_date": {"$gte": today.date().isoformat()}
         }).sort("target_date", 1).limit(3))
         
         for goal in current_goals:
             goal["id"] = str(goal.pop("_id"))
+            # Convert date to string for JSON serialization
+            if "target_date" in goal:
+                goal["target_date"] = goal["target_date"] if isinstance(goal["target_date"], str) else goal["target_date"].isoformat()
         
         return {
             "today_appointments": today_appointments,
