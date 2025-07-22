@@ -2348,16 +2348,27 @@ class APITester:
         
         # Categorize results
         profile_results = [r for r in self.results if any(keyword in r["test"].lower() 
-                          for keyword in ["profile", "subscription", "professional", "user_type"])]
+                          for keyword in ["profile", "subscription", "professional_user", "user_type"])]
+        professional_results = [r for r in self.results if any(keyword in r["test"].lower() 
+                               for keyword in ["professional_clients", "professional_formulas", "professional_inventory", 
+                                             "professional_appointments", "professional_scale", "professional_analytics", 
+                                             "professional_chemistry", "professional_demo"])]
         auth_results = [r for r in self.results if any(keyword in r["test"].lower() 
-                       for keyword in ["auth", "login", "register", "jwt", "protected", "password", "demo"]) and r not in profile_results]
+                       for keyword in ["auth", "login", "register", "jwt", "protected", "password", "demo"]) 
+                       and r not in profile_results and r not in professional_results]
         crm_results = [r for r in self.results if any(keyword in r["test"].lower() 
-                      for keyword in ["crm", "leads", "deals", "tasks", "contacts", "calls", "analytics"])]
-        api_results = [r for r in self.results if r not in auth_results and r not in crm_results and r not in profile_results]
+                      for keyword in ["crm", "leads", "deals", "tasks", "contacts", "calls", "analytics"]) 
+                      and r not in professional_results]
+        api_results = [r for r in self.results if r not in auth_results and r not in crm_results 
+                      and r not in profile_results and r not in professional_results]
         
         print(f"\nUser Profile & Subscription Tests: {len(profile_results)} total")
         profile_passed = sum(1 for r in profile_results if r["success"])
         print(f"  Passed: {profile_passed}, Failed: {len(profile_results) - profile_passed}")
+        
+        print(f"\nHairPro Professional System Tests: {len(professional_results)} total")
+        professional_passed = sum(1 for r in professional_results if r["success"])
+        print(f"  Passed: {professional_passed}, Failed: {len(professional_results) - professional_passed}")
         
         print(f"\nAuthentication Tests: {len(auth_results)} total")
         auth_passed = sum(1 for r in auth_results if r["success"])
