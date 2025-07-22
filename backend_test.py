@@ -1737,11 +1737,17 @@ class APITester:
         print(f"Success Rate: {(passed/total)*100:.1f}%")
         
         # Categorize results
+        profile_results = [r for r in self.results if any(keyword in r["test"].lower() 
+                          for keyword in ["profile", "subscription", "professional", "user_type"])]
         auth_results = [r for r in self.results if any(keyword in r["test"].lower() 
-                       for keyword in ["auth", "login", "register", "jwt", "protected", "profile", "password", "demo"])]
+                       for keyword in ["auth", "login", "register", "jwt", "protected", "password", "demo"]) and r not in profile_results]
         crm_results = [r for r in self.results if any(keyword in r["test"].lower() 
                       for keyword in ["crm", "leads", "deals", "tasks", "contacts", "calls", "analytics"])]
-        api_results = [r for r in self.results if r not in auth_results and r not in crm_results]
+        api_results = [r for r in self.results if r not in auth_results and r not in crm_results and r not in profile_results]
+        
+        print(f"\nUser Profile & Subscription Tests: {len(profile_results)} total")
+        profile_passed = sum(1 for r in profile_results if r["success"])
+        print(f"  Passed: {profile_passed}, Failed: {len(profile_results) - profile_passed}")
         
         print(f"\nAuthentication Tests: {len(auth_results)} total")
         auth_passed = sum(1 for r in auth_results if r["success"])
