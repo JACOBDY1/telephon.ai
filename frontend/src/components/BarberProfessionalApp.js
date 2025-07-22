@@ -1138,7 +1138,7 @@ const BarberProfessionalApp = ({ user }) => {
 
       {/* Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="grid grid-cols-4 py-2">
+        <div className="grid grid-cols-5 py-2">
           {[
             { id: 'dashboard', icon: BarChart3, label: 'דשבורד' },
             { id: 'formulas', icon: Beaker, label: 'פורמולות' },
