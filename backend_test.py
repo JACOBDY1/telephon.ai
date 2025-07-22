@@ -2547,6 +2547,12 @@ class APITester:
         # Run tests in order of importance
         # Authentication tests first (high priority)
         test_sections = [
+            ("HAIRPRO IL ADVANCED REVIEW REQUEST TESTS", [
+                self.test_professional_attendance_system,
+                self.test_professional_existing_endpoints,
+                self.test_professional_authentication_system,
+                self.test_system_data_integrity
+            ]),
             ("USER PROFILE & SUBSCRIPTION SYSTEM TESTS", [
                 self.test_professional_user_login,
                 self.test_user_profile_me_endpoint,
