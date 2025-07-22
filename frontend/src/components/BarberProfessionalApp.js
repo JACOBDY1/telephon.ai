@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, User, Package, Scale, Camera, Clock, Home, Settings, ChevronRight, Plus, Minus, AlertCircle, Check, TrendingUp, DollarSign, Users, Calendar, Bell, BarChart3, Activity, Smartphone, Wifi, X, Edit2, Save, RefreshCw, FileText, Download, Upload, Share2, Printer } from 'lucide-react';
+import React, { useState } from 'react';
+import { Home, Package, Users, BarChart3, Settings, DollarSign, Activity } from 'lucide-react';
 
 // מאגר צבעים מורחב
 const colorDatabase = {
@@ -104,54 +104,13 @@ const colorDatabase = {
   }
 };
 
-// אפליקציה ראשית משודרגת
 export default function BarberProfessionalApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   
-  return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
-      {/* Header */}
-      <header className="bg-white shadow-md">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-800">HairPro IL Advanced 💇‍♀️</h1>
-              <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Pro</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-600">
-                {new Date().toLocaleDateString('he-IL')} | {new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-      
-      {/* Navigation */}
-      <nav className="bg-gray-800 text-white">
-        <div className="container mx-auto px-4">
-          <div className="flex space-x-reverse space-x-1 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`px-4 py-3 flex items-center gap-2 ${activeTab === 'dashboard' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
-            >
-              <Home className="w-4 h-4" />
-              לוח בקרה
-            </button>
-            <button
-              onClick={() => setActiveTab('colors')}
-              className={`px-4 py-3 flex items-center gap-2 ${activeTab === 'colors' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
-            >
-              <Package className="w-4 h-4" />
-              מאגר צבעים
-            </button>
-          </div>
-        </div>
-      </nav>
-      
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        {activeTab === 'dashboard' && (
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-lg p-6">
               <div className="flex items-center justify-between">
@@ -193,9 +152,10 @@ export default function BarberProfessionalApp() {
               </div>
             </div>
           </div>
-        )}
+        );
 
-        {activeTab === 'colors' && (
+      case 'colors':
+        return (
           <div className="space-y-8">
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-2xl font-bold mb-6 text-gray-800">מאגר צבעים מקצועי</h2>
@@ -284,7 +244,82 @@ export default function BarberProfessionalApp() {
               ))}
             </div>
           </div>
-        )}
+        );
+
+      default:
+        return (
+          <div className="text-center py-8">
+            <h3 className="text-xl text-gray-600">מודול בפיתוח...</h3>
+          </div>
+        );
+    }
+  };
+  
+  return (
+    <div className="min-h-screen bg-gray-50" dir="rtl">
+      {/* Header */}
+      <header className="bg-white shadow-md">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold text-gray-800">HairPro IL Advanced 💇‍♀️</h1>
+              <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Pro</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-600">
+                {new Date().toLocaleDateString('he-IL')} | {new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      {/* Navigation */}
+      <nav className="bg-gray-800 text-white">
+        <div className="container mx-auto px-4">
+          <div className="flex space-x-reverse space-x-1 overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-4 py-3 flex items-center gap-2 ${activeTab === 'dashboard' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+            >
+              <Home className="w-4 h-4" />
+              לוח בקרה
+            </button>
+            <button
+              onClick={() => setActiveTab('colors')}
+              className={`px-4 py-3 flex items-center gap-2 ${activeTab === 'colors' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+            >
+              <Package className="w-4 h-4" />
+              מאגר צבעים
+            </button>
+            <button
+              onClick={() => setActiveTab('clients')}
+              className={`px-4 py-3 flex items-center gap-2 ${activeTab === 'clients' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+            >
+              <Users className="w-4 h-4" />
+              לקוחות
+            </button>
+            <button
+              onClick={() => setActiveTab('reports')}
+              className={`px-4 py-3 flex items-center gap-2 ${activeTab === 'reports' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              דוחות
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`px-4 py-3 flex items-center gap-2 ${activeTab === 'settings' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+            >
+              <Settings className="w-4 h-4" />
+              הגדרות
+            </button>
+          </div>
+        </div>
+      </nav>
+      
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6">
+        {renderContent()}
       </main>
       
       {/* Footer */}
@@ -293,7 +328,7 @@ export default function BarberProfessionalApp() {
           <div className="text-center">
             <h4 className="font-bold mb-2">HairPro IL Advanced</h4>
             <p className="text-sm text-gray-300">
-              מערכת ניהול מתקדמת לסלון שיער עם מאגר צבעים מקצועי
+              מערכת ניהול מתקדמת לסלון שיער עם מאגר צבעים מקצועי מלא
             </p>
             <div className="text-center mt-4 text-sm text-gray-400">
               © 2024 HairPro IL Advanced - כולל {
@@ -302,8 +337,8 @@ export default function BarberProfessionalApp() {
                     seriesTotal + series.colors.length, 0
                   ), 0
                 )
-              } צבעים מקצועיים
-            </div>
+              } צבעים מקצועיים מ-3 חברות מובילות
+            </p>
           </div>
         </div>
       </footer>
