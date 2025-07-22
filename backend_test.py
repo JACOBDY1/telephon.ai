@@ -1669,6 +1669,17 @@ class APITester:
         # Run tests in order of importance
         # Authentication tests first (high priority)
         test_sections = [
+            ("USER PROFILE & SUBSCRIPTION SYSTEM TESTS", [
+                self.test_professional_user_login,
+                self.test_user_profile_me_endpoint,
+                self.test_user_profile_advanced_update,
+                self.test_subscription_plans_endpoint,
+                self.test_current_subscription_endpoint,
+                self.test_professional_user_subscription,
+                self.test_subscription_upgrade_endpoint,
+                self.test_users_professional_endpoint,
+                self.test_user_type_system
+            ]),
             ("AUTHENTICATION SYSTEM TESTS", [
                 self.test_demo_data_creation,
                 self.test_user_registration,
