@@ -388,7 +388,7 @@ const MainApp = () => {
 
     switch(activeTab) {
       case 'dashboard': 
-        return <Dashboard 
+        return <TestPage 
           t={t} 
           darkMode={darkMode} 
           {...mockData}
