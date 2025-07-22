@@ -1648,6 +1648,224 @@ async def change_password(
         logger.error(f"Error changing password: {str(e)}")
         raise HTTPException(status_code=500, detail="שגיאה בשינוי סיסמה")
 
+# ===== USER PROFILE & SUBSCRIPTION MANAGEMENT =====
+
+@api_router.put("/auth/profile/advanced", response_model=User)
+async def update_user_profile_advanced(
+    profile_data: UserProfileUpdate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Advanced user profile update"""
+    try:
+        update_data = {}
+        if profile_data.full_name is not None:
+            update_data["full_name"] = profile_data.full_name
+        if profile_data.phone is not None:
+            update_data["phone"] = profile_data.phone
+        if profile_data.email is not None:
+            # Check if email already exists (excluding current user)
+            existing_email = users_collection.find_one({
+                "email": str(profile_data.email),
+                "username": {"$ne": current_user.username}
+            })
+            if existing_email:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="כתובת אימייל כבר בשימוש"
+                )
+            update_data["email"] = str(profile_data.email)
+        if profile_data.preferences is not None:
+            # Merge with existing preferences
+            existing_preferences = current_user.preferences or {}
+            existing_preferences.update(profile_data.preferences)
+            update_data["preferences"] = existing_preferences
+            
+        if update_data:
+            # Update in database
+            users_collection.update_one(
+                {"username": current_user.username},
+                {"$set": update_data}
+            )
+            
+            # Update current user object
+            for key, value in update_data.items():
+                setattr(current_user, key, value)
+        
+        return current_user
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating user profile: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בעדכון פרופיל")
+
+@api_router.get("/subscription/plans")
+async def get_subscription_plans():
+    """Get available subscription plans"""
+    try:
+        plans = [
+            SubscriptionPlan(
+                id="free_trial",
+                name="ניסיון חינם",
+                description="7 ימים חינם לכל התכונות",
+                price=0,
+                features=["עד 50 שיחות", "CRM בסיסי", "חייגן דיגיטלי", "תמיכה בצ'אט"],
+                max_users=1,
+                max_calls=50,
+                billing_period="trial"
+            ),
+            SubscriptionPlan(
+                id="basic",
+                name="תכנית בסיסית",
+                description="מושלמת לעסקים קטנים",
+                price=99,
+                features=["עד 500 שיחות", "CRM מתקדם", "חייגן דיגיטלי", "ניתוחי AI", "תמיכה בטלפון"],
+                max_users=3,
+                max_calls=500,
+                billing_period="monthly"
+            ),
+            SubscriptionPlan(
+                id="professional",
+                name="תכנית מקצועית - HairPro",
+                description="מיועדת לספרים ומטפלים מקצועיים",
+                price=199,
+                features=[
+                    "שיחות ללא הגבלה", "HairPro IL Advanced", "מאגר צבעים מקצועי", 
+                    "כרטיסי כימיה", "ניהול תורים מתקדם", "שקילה דיגיטלית", 
+                    "ניתוחי AI מתקדמים", "תמיכה VIP"
+                ],
+                max_users=5,
+                max_calls=-1,  # unlimited
+                billing_period="monthly"
+            ),
+            SubscriptionPlan(
+                id="enterprise",
+                name="תכנית עסקית",
+                description="לעסקים גדולים עם צרכים מתקדמים",
+                price=499,
+                features=[
+                    "כל התכונות", "משתמשים ללא הגבלה", "אינטגרציות מותאמות אישית",
+                    "ניתוחי BI מתקדמים", "תמיכה 24/7", "הכשרת צוות", "API פתוח"
+                ],
+                max_users=-1,  # unlimited
+                max_calls=-1,  # unlimited
+                billing_period="monthly"
+            )
+        ]
+        return {"plans": plans}
+        
+    except Exception as e:
+        logger.error(f"Error getting subscription plans: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת תכניות מנוי")
+
+@api_router.get("/subscription/current")
+async def get_current_subscription(current_user: User = Depends(get_current_active_user)):
+    """Get current user subscription"""
+    try:
+        user_in_db = users_collection.find_one({"username": current_user.username})
+        if not user_in_db:
+            raise HTTPException(status_code=404, detail="משתמש לא נמצא")
+        
+        subscription = user_in_db.get("subscription", {})
+        if not subscription:
+            # Set default trial subscription if none exists
+            subscription = {
+                "plan_id": "free_trial",
+                "plan_name": "ניסיון חינם",
+                "status": "trial",
+                "start_date": datetime.utcnow(),
+                "end_date": datetime.utcnow() + timedelta(days=7),
+                "trial_end_date": datetime.utcnow() + timedelta(days=7),
+                "auto_renew": False,
+                "features": ["basic_calls", "basic_crm", "web_dialer"]
+            }
+            # Update user with default subscription
+            users_collection.update_one(
+                {"username": current_user.username},
+                {"$set": {"subscription": subscription}}
+            )
+        
+        return {"subscription": subscription}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting current subscription: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת מנוי נוכחי")
+
+@api_router.post("/subscription/upgrade")
+async def upgrade_subscription(
+    plan_id: str,
+    payment_method: Optional[str] = "credit_card",
+    current_user: User = Depends(get_current_active_user)
+):
+    """Upgrade user subscription"""
+    try:
+        # Get plan details (in real app, this would come from database)
+        plan_mapping = {
+            "basic": {"name": "תכנית בסיסית", "price": 99},
+            "professional": {"name": "תכנית מקצועית - HairPro", "price": 199},
+            "enterprise": {"name": "תכנית עסקית", "price": 499}
+        }
+        
+        if plan_id not in plan_mapping:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="תכנית מנוי לא קיימת"
+            )
+        
+        plan_info = plan_mapping[plan_id]
+        
+        # Create new subscription
+        new_subscription = {
+            "plan_id": plan_id,
+            "plan_name": plan_info["name"],
+            "status": "active",
+            "start_date": datetime.utcnow(),
+            "end_date": datetime.utcnow() + timedelta(days=30),  # Monthly
+            "trial_end_date": None,
+            "auto_renew": True,
+            "payment_method": payment_method,
+            "last_payment_date": datetime.utcnow(),
+            "next_payment_date": datetime.utcnow() + timedelta(days=30)
+        }
+        
+        # Update user subscription
+        users_collection.update_one(
+            {"username": current_user.username},
+            {"$set": {"subscription": new_subscription}}
+        )
+        
+        return {
+            "message": "מנוי שודרג בהצלחה",
+            "subscription": new_subscription
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error upgrading subscription: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בשדרוג מנוי")
+
+@api_router.get("/users/professional")
+async def get_professional_users():
+    """Get all professional users (for demo purposes)"""
+    try:
+        professionals = list(users_collection.find({
+            "user_type": {"$in": ["professional", "therapist", "consultant", "barber"]}
+        }))
+        
+        # Convert ObjectId to string and remove sensitive data
+        for user in professionals:
+            user["id"] = str(user.pop("_id", ""))
+            user.pop("hashed_password", None)
+        
+        return {"professionals": professionals}
+        
+    except Exception as e:
+        logger.error(f"Error getting professional users: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת משתמשים מקצועיים")
+
 @api_router.post("/setup/demo-data")
 async def create_demo_data():
     """Create demo users and data - Development only"""
