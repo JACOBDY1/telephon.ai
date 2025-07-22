@@ -2953,7 +2953,7 @@ async def populate_professional_demo_data(
             "id": str(uuid.uuid4()),
             "professional_id": professional_id,
             "goal_type": "monthly",
-            "target_date": (datetime.utcnow() + timedelta(days=30)).date(),
+            "target_date": (datetime.utcnow() + timedelta(days=30)).date().isoformat(),
             "goals": {
                 "revenue_target": 15000,
                 "clients_target": 50,
