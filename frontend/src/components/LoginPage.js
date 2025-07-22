@@ -91,6 +91,15 @@ const LoginPage = () => {
             {isLogin ? 'התחבר לחשבון שלך' : 'צור חשבון חדש'}
           </p>
         </div>
+        
+        {/* עדכון חשוב - הודעה למשתמש */}
+        <div className="p-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-center">
+          <div className="text-lg font-bold">🎉 עדכון מערכת - השינויים זמינים!</div>
+          <div className="text-sm mt-1">מערכת משתמשים מקצועיים עם HairPro IL Advanced פעילה</div>
+          <div className="text-xs mt-2 bg-white bg-opacity-20 rounded-full px-3 py-1 inline-block">
+            משתמש מקצועי: professional / pro123
+          </div>
+        </div>
 
         {/* Demo Users - Only show on login */}
         {isLogin && (
