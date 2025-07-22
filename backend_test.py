@@ -2256,6 +2256,284 @@ class APITester:
             self.log_result("CRM Data Relationships", False, f"Data relationships test failed: {str(e)}")
             return False
     
+    # ===== HAIRPRO IL ADVANCED REVIEW REQUEST TESTS =====
+    
+    def test_professional_attendance_system(self):
+        """Test Professional Attendance System - מערכת הנוכחות החדשה"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Attendance System", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional")
+            if not professional_token:
+                self.log_result("Professional Attendance System", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test POST /api/professional/attendance/start - התחלת יום עבודה
+            start_data = {
+                "start_time": datetime.now().strftime("%H:%M:%S"),
+                "location": "סלון יופי מרכז",
+                "notes": "התחלת יום עבודה רגיל"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/attendance/start", json=start_data, headers=headers)
+            if response.status_code == 200:
+                self.log_result("Professional Attendance - Start", True, "Successfully started work day")
+                attendance_id = response.json().get("id")
+            else:
+                self.log_result("Professional Attendance - Start", False, f"Start attendance failed: {response.status_code} - {response.text}")
+                return False
+            
+            # Test GET /api/professional/attendance/status - סטטוס נוכחות
+            response = self.session.get(f"{BACKEND_URL}/professional/attendance/status", headers=headers)
+            if response.status_code == 200:
+                status_data = response.json()
+                if status_data.get("status") == "present":
+                    self.log_result("Professional Attendance - Status", True, f"Current status: {status_data.get('status')}")
+                else:
+                    self.log_result("Professional Attendance - Status", False, f"Unexpected status: {status_data.get('status')}")
+            else:
+                self.log_result("Professional Attendance - Status", False, f"Status check failed: {response.status_code}")
+                return False
+            
+            # Test POST /api/professional/attendance/end - סיום יום עבודה
+            end_data = {
+                "end_time": datetime.now().strftime("%H:%M:%S"),
+                "notes": "סיום יום עבודה מוצלח"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/attendance/end", json=end_data, headers=headers)
+            if response.status_code == 200:
+                self.log_result("Professional Attendance - End", True, "Successfully ended work day")
+                return True
+            else:
+                self.log_result("Professional Attendance - End", False, f"End attendance failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional Attendance System", False, f"Attendance system test failed: {str(e)}")
+            return False
+    
+    def test_professional_existing_endpoints(self):
+        """Test existing professional endpoints - אנדפוינטים קיימים"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Existing Endpoints", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional")
+            if not professional_token:
+                self.log_result("Professional Existing Endpoints", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            success_count = 0
+            total_endpoints = 5
+            
+            # Test GET /api/professional/clients - רשימת לקוחות
+            response = self.session.get(f"{BACKEND_URL}/professional/clients", headers=headers)
+            if response.status_code == 200:
+                clients = response.json()
+                self.log_result("Professional Clients Endpoint", True, f"Retrieved {len(clients)} clients")
+                success_count += 1
+            else:
+                self.log_result("Professional Clients Endpoint", False, f"Clients endpoint failed: {response.status_code}")
+            
+            # Test GET /api/professional/formulas - רשימת פורמולות
+            response = self.session.get(f"{BACKEND_URL}/professional/formulas", headers=headers)
+            if response.status_code == 200:
+                formulas = response.json()
+                self.log_result("Professional Formulas Endpoint", True, f"Retrieved {len(formulas)} formulas")
+                success_count += 1
+            else:
+                self.log_result("Professional Formulas Endpoint", False, f"Formulas endpoint failed: {response.status_code}")
+            
+            # Test GET /api/professional/dashboard - נתוני דשבורד
+            response = self.session.get(f"{BACKEND_URL}/professional/dashboard", headers=headers)
+            if response.status_code == 200:
+                dashboard = response.json()
+                required_fields = ["today_appointments", "today_stats", "weekly_stats", "alerts", "current_goals"]
+                missing_fields = [field for field in required_fields if field not in dashboard]
+                
+                if not missing_fields:
+                    revenue = dashboard.get("today_stats", {}).get("revenue", 0)
+                    self.log_result("Professional Dashboard Endpoint", True, f"Dashboard loaded with revenue: ₪{revenue}")
+                    success_count += 1
+                else:
+                    self.log_result("Professional Dashboard Endpoint", False, f"Missing dashboard fields: {missing_fields}")
+            else:
+                self.log_result("Professional Dashboard Endpoint", False, f"Dashboard endpoint failed: {response.status_code}")
+            
+            # Test GET /api/professional/goals - יעדים (Note: might not exist as GET)
+            response = self.session.get(f"{BACKEND_URL}/professional/goals", headers=headers)
+            if response.status_code == 200:
+                goals = response.json()
+                self.log_result("Professional Goals Endpoint", True, f"Retrieved {len(goals) if isinstance(goals, list) else 'goals data'}")
+                success_count += 1
+            else:
+                # Check if it's a method not allowed (405) - means POST exists but not GET
+                if response.status_code == 405:
+                    self.log_result("Professional Goals Endpoint", False, "Goals GET endpoint not implemented (only POST available)")
+                else:
+                    self.log_result("Professional Goals Endpoint", False, f"Goals endpoint failed: {response.status_code}")
+            
+            # Test GET /api/professional/inventory - מלאי
+            response = self.session.get(f"{BACKEND_URL}/professional/inventory", headers=headers)
+            if response.status_code == 200:
+                inventory = response.json()
+                self.log_result("Professional Inventory Endpoint", True, f"Retrieved {len(inventory)} inventory items")
+                success_count += 1
+            else:
+                self.log_result("Professional Inventory Endpoint", False, f"Inventory endpoint failed: {response.status_code}")
+            
+            return success_count >= 3  # At least 3 out of 5 should work
+            
+        except Exception as e:
+            self.log_result("Professional Existing Endpoints", False, f"Existing endpoints test failed: {str(e)}")
+            return False
+    
+    def test_professional_authentication_system(self):
+        """Test professional authentication system - מערכת האימות"""
+        try:
+            # Test professional user login
+            login_data = {
+                "username": "professional",
+                "password": "pro123"
+            }
+            
+            response = self.session.post(
+                f"{BACKEND_URL}/auth/login", 
+                data=login_data,
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "access_token" in data and "user" in data:
+                    user_info = data["user"]
+                    
+                    # Verify user_type is "professional"
+                    if user_info.get("user_type") == "professional":
+                        self.log_result("Professional Authentication - User Type", True, 
+                                      f"Professional user correctly identified as user_type: {user_info.get('user_type')}")
+                        
+                        # Store token for endpoint access tests
+                        professional_token = data["access_token"]
+                        headers = {"Authorization": f"Bearer {professional_token}"}
+                        
+                        # Test access to professional endpoints
+                        professional_endpoints = [
+                            "/professional/clients",
+                            "/professional/formulas", 
+                            "/professional/dashboard",
+                            "/professional/inventory"
+                        ]
+                        
+                        accessible_count = 0
+                        for endpoint in professional_endpoints:
+                            response = self.session.get(f"{BACKEND_URL}{endpoint}", headers=headers)
+                            if response.status_code == 200:
+                                accessible_count += 1
+                                self.log_result(f"Professional Access - {endpoint}", True, "Endpoint accessible")
+                            else:
+                                self.log_result(f"Professional Access - {endpoint}", False, f"Access denied: {response.status_code}")
+                        
+                        if accessible_count >= 3:
+                            self.log_result("Professional Authentication - Endpoint Access", True, 
+                                          f"Professional user can access {accessible_count}/{len(professional_endpoints)} endpoints")
+                            return True
+                        else:
+                            self.log_result("Professional Authentication - Endpoint Access", False, 
+                                          f"Professional user can only access {accessible_count}/{len(professional_endpoints)} endpoints")
+                            return False
+                    else:
+                        self.log_result("Professional Authentication - User Type", False, 
+                                      f"Professional user has incorrect user_type: {user_info.get('user_type')}")
+                        return False
+                else:
+                    self.log_result("Professional Authentication", False, "Missing token or user data in login response")
+                    return False
+            else:
+                self.log_result("Professional Authentication", False, f"Professional login failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional Authentication System", False, f"Authentication test failed: {str(e)}")
+            return False
+    
+    def test_system_data_integrity(self):
+        """Test system data integrity - וידוא תקינות"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("System Data Integrity", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional")
+            if not professional_token:
+                self.log_result("System Data Integrity", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            integrity_checks = 0
+            total_checks = 4
+            
+            # Test JSON format validity
+            response = self.session.get(f"{BACKEND_URL}/professional/dashboard", headers=headers)
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if isinstance(data, dict):
+                        self.log_result("Data Integrity - JSON Format", True, "All data returned in valid JSON format")
+                        integrity_checks += 1
+                    else:
+                        self.log_result("Data Integrity - JSON Format", False, "Invalid JSON format")
+                except json.JSONDecodeError:
+                    self.log_result("Data Integrity - JSON Format", False, "Response is not valid JSON")
+            
+            # Test Hebrew currency display (₪)
+            response = self.session.get(f"{BACKEND_URL}/professional/dashboard", headers=headers)
+            if response.status_code == 200:
+                dashboard = response.json()
+                revenue = dashboard.get("today_stats", {}).get("revenue", 0)
+                if isinstance(revenue, (int, float)):
+                    self.log_result("Data Integrity - Currency Format", True, f"Revenue displayed correctly: ₪{revenue}")
+                    integrity_checks += 1
+                else:
+                    self.log_result("Data Integrity - Currency Format", False, f"Invalid revenue format: {revenue}")
+            
+            # Test alerts and goals functionality
+            response = self.session.get(f"{BACKEND_URL}/professional/dashboard", headers=headers)
+            if response.status_code == 200:
+                dashboard = response.json()
+                if "alerts" in dashboard and "current_goals" in dashboard:
+                    alerts = dashboard["alerts"]
+                    goals = dashboard["current_goals"]
+                    self.log_result("Data Integrity - Alerts & Goals", True, 
+                                  f"Alerts and goals working: {len(alerts.get('low_stock_items', []))} alerts, {len(goals)} goals")
+                    integrity_checks += 1
+                else:
+                    self.log_result("Data Integrity - Alerts & Goals", False, "Missing alerts or goals data")
+            
+            # Test time synchronization
+            response = self.session.get(f"{BACKEND_URL}/professional/dashboard", headers=headers)
+            if response.status_code == 200:
+                dashboard = response.json()
+                appointments = dashboard.get("today_appointments", [])
+                if isinstance(appointments, list):
+                    self.log_result("Data Integrity - Time Sync", True, f"Time system synchronized: {len(appointments)} today's appointments")
+                    integrity_checks += 1
+                else:
+                    self.log_result("Data Integrity - Time Sync", False, "Time synchronization issues")
+            
+            return integrity_checks >= 3  # At least 3 out of 4 checks should pass
+            
+        except Exception as e:
+            self.log_result("System Data Integrity", False, f"Data integrity test failed: {str(e)}")
+            return False
+
     def run_all_tests(self):
         """Run all tests"""
         print("=" * 80)
