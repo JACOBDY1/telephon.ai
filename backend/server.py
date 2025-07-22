@@ -199,15 +199,150 @@ class SubscriptionPlan(BaseModel):
     billing_period: str = "monthly"  # monthly, yearly
     is_active: bool = True
 
-class UserSubscription(BaseModel):
-    plan_id: str
-    plan_name: str
-    status: str = "active"  # active, inactive, trial, expired
-    start_date: datetime = Field(default_factory=datetime.utcnow)
-    end_date: Optional[datetime] = None
-    trial_end_date: Optional[datetime] = None
-    auto_renew: bool = True
-    payment_method: Optional[str] = None
+# ===== COMPREHENSIVE BARBER/PROFESSIONAL MODELS =====
+
+class ClientProfile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    professional_id: str  # ID של הספר/בעל המקצוע
+    personal_info: Dict[str, Any] = {
+        "full_name": "",
+        "phone": "",
+        "email": "",
+        "birth_date": None,
+        "address": "",
+        "emergency_contact": ""
+    }
+    hair_profile: Dict[str, Any] = {
+        "natural_color": "",
+        "current_color": "",
+        "hair_type": "",  # חלק, מתולתל, גלי
+        "hair_thickness": "",  # דק, בינוני, עבה
+        "scalp_condition": "",  # רגיל, יבש, שמן, רגיש
+        "hair_length": "",
+        "previous_treatments": []
+    }
+    chemistry_card: Dict[str, Any] = {
+        "allergies": [],
+        "sensitivities": [],
+        "patch_test_date": None,
+        "patch_test_result": "",
+        "notes": "",
+        "restrictions": []
+    }
+    preferences: Dict[str, Any] = {
+        "preferred_time_slots": [],
+        "preferred_services": [],
+        "communication_preference": "phone",  # phone, email, whatsapp
+        "language": "he",
+        "special_requests": ""
+    }
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    is_active: bool = True
+
+class TreatmentRecord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_id: str
+    professional_id: str
+    appointment_id: Optional[str] = None
+    service_type: str
+    service_details: Dict[str, Any] = {
+        "service_name": "",
+        "duration_minutes": 0,
+        "base_price": 0,
+        "final_price": 0,
+        "discount": 0
+    }
+    color_formula: Dict[str, Any] = {
+        "brand": "",
+        "series": "",
+        "colors_used": [],  # [{"code": "6-0", "amount": "30g", "price": 28}]
+        "developer": {"vol": "", "amount": "", "price": 0},
+        "mixing_ratio": "",
+        "processing_time": "",
+        "final_result": ""
+    }
+    before_photos: List[str] = []
+    after_photos: List[str] = []
+    treatment_notes: str = ""
+    client_satisfaction: Optional[int] = None  # 1-5 scale
+    next_treatment_date: Optional[datetime] = None
+    recommendations: List[str] = []
+    products_sold: List[Dict[str, Any]] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    completed_at: Optional[datetime] = None
+
+class Appointment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_id: str
+    professional_id: str
+    scheduled_datetime: datetime
+    duration_minutes: int = 60
+    service_type: str
+    service_details: Dict[str, Any] = {}
+    status: str = "scheduled"  # scheduled, confirmed, in_progress, completed, cancelled, no_show
+    notes: str = ""
+    reminder_sent: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ProfessionalSchedule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    professional_id: str
+    date: date
+    work_hours: Dict[str, Any] = {
+        "start_time": "09:00",
+        "end_time": "18:00",
+        "break_times": [{"start": "13:00", "end": "14:00"}]
+    }
+    availability_slots: List[Dict[str, Any]] = []
+    status: str = "available"  # available, busy, off, vacation
+    notes: str = ""
+
+class ClientCommunication(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_id: str
+    professional_id: str
+    communication_type: str  # call, sms, whatsapp, email
+    direction: str  # incoming, outgoing
+    content: str
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    status: str = "sent"  # sent, delivered, read, failed
+    metadata: Dict[str, Any] = {}
+
+class ProfessionalGoals(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    professional_id: str
+    goal_type: str  # daily, weekly, monthly, yearly
+    target_date: date
+    goals: Dict[str, Any] = {
+        "revenue_target": 0,
+        "clients_target": 0,
+        "new_clients_target": 0,
+        "satisfaction_target": 4.5,
+        "services_target": {}
+    }
+    current_progress: Dict[str, Any] = {}
+    is_achieved: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ProductInventory(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    professional_id: str
+    product_category: str  # color, shampoo, conditioner, styling, tools
+    product_details: Dict[str, Any] = {
+        "brand": "",
+        "name": "",
+        "code": "",
+        "size": "",
+        "unit_price": 0,
+        "supplier": ""
+    }
+    current_stock: int = 0
+    minimum_stock: int = 5
+    last_restocked: Optional[datetime] = None
+    usage_tracking: List[Dict[str, Any]] = []  # כמה נוצל בכל טיפול
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 # ===== AUTHENTICATION FUNCTIONS =====
 
