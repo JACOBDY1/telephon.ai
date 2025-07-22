@@ -1910,7 +1910,17 @@ async def create_demo_data():
                 "password": "demo123",
                 "full_name": "משתמש דמו",
                 "phone": "+972-50-567-8901", 
-                "role": "user"
+                "role": "user",
+                "user_type": "client"
+            },
+            {
+                "username": "professional",
+                "email": "professional@hairpro.il",
+                "password": "pro123",
+                "full_name": "בעל מקצוע - ספר מקצועי",
+                "phone": "+972-50-678-9012",
+                "role": "user",
+                "user_type": "professional"
             }
         ]
         
