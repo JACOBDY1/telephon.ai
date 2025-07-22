@@ -105,6 +105,66 @@
 user_problem_statement: "Create a crazy MVP with comprehensive CRM CRUD operations, Web Dialer, Module Manager with plugin system, and full responsive design for mobile/tablet. Transform the green screen UI into a fully functional telephony platform with real data operations."
 
 backend:
+  - task: "User Profile & Subscription System - Authentication"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL ISSUE: Professional user login works but user_type field is incorrect ('client' instead of 'professional'). Authentication tokens not properly stored for profile endpoint testing. User type persistence not working after login."
+        
+  - task: "User Profile Management Endpoints"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ FAILED: GET /api/auth/me and PUT /api/auth/profile/advanced endpoints cannot be tested due to authentication token issues. Token management preventing proper profile access testing."
+        
+  - task: "Subscription Management System"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ WORKING: GET /api/subscription/plans endpoint working perfectly - retrieved 4 subscription plans including HairPro plan (199 ILS). Professional user has correct HairPro subscription. Core subscription infrastructure functional."
+        
+  - task: "Professional User Features"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ FAILED: Professional user exists and can login with professional/pro123, but has incorrect user_type='client' instead of 'professional'. GET /api/users/professional endpoint cannot be tested due to admin token issues."
+        
+  - task: "User Type System Implementation"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ FAILED: User registration with user_type works correctly, but user type persistence fails after login. User type not preserved in login response. System needs fix for user_type field handling."
+
   - task: "CRM CRUD Operations (Leads, Deals, Tasks)"
     implemented: true
     working: true
