@@ -155,6 +155,7 @@ class UserCreate(BaseModel):
     password: str
     full_name: str
     phone: Optional[str] = None
+    user_type: Optional[str] = "client"  # client, professional, therapist, consultant, barber
 
 class UserLogin(BaseModel):
     username: str
