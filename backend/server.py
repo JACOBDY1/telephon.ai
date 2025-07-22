@@ -438,7 +438,7 @@ class TreatmentSession(BaseModel):
 class ProfessionalMetrics(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     professional_id: str
-    date: date = Field(default_factory=lambda: datetime.utcnow().date())
+    metrics_date: date = Field(default_factory=lambda: datetime.utcnow().date())
     clients_served: int = 0
     total_revenue: float = 0
     total_tips: float = 0
