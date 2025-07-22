@@ -181,6 +181,34 @@ class UserInDB(BaseModel):
     preferences: Dict[str, Any] = {}
     subscription: Dict[str, Any] = {}
 
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[EmailStr] = None
+    preferences: Optional[Dict[str, Any]] = None
+
+class SubscriptionPlan(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    price: float
+    currency: str = "ILS"  # Israeli Shekel
+    features: List[str]
+    max_users: int
+    max_calls: int
+    billing_period: str = "monthly"  # monthly, yearly
+    is_active: bool = True
+
+class UserSubscription(BaseModel):
+    plan_id: str
+    plan_name: str
+    status: str = "active"  # active, inactive, trial, expired
+    start_date: datetime = Field(default_factory=datetime.utcnow)
+    end_date: Optional[datetime] = None
+    trial_end_date: Optional[datetime] = None
+    auto_renew: bool = True
+    payment_method: Optional[str] = None
+
 # ===== AUTHENTICATION FUNCTIONS =====
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
