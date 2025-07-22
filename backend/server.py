@@ -3298,6 +3298,404 @@ async def populate_professional_demo_data(
         logger.error(f"Error creating demo data: {str(e)}")
         raise HTTPException(status_code=500, detail="שגיאה ביצירת נתוני דמו")
 
+# ===== ADVANCED PROFESSIONAL SYSTEM API ENDPOINTS =====
+
+# Initialize professional calculation engines
+formula_calculator = None
+inventory_manager = SmartInventoryManager()
+scale_manager = BluetoothScaleManager()
+
+# New collections for advanced features
+formulas_collection = db.formulas
+chemistry_cards_collection = db.chemistry_cards
+treatment_sessions_collection = db.treatment_sessions
+scale_readings_collection = db.scale_readings
+metrics_collection = db.professional_metrics
+
+# ===== COLOR FORMULA MANAGEMENT =====
+
+@api_router.post("/professional/formulas", response_model=ColorFormula)
+async def create_color_formula(
+    formula_data: ColorFormula,
+    current_user: User = Depends(get_current_active_user)
+):
+    """יצירת פורמולת צבע עם חישובי עלות מדויקים"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        formula_data.professional_id = current_user.id
+        
+        # Initialize formula calculator with color database
+        from .color_database import color_database  # This should be your color database
+        global formula_calculator
+        if not formula_calculator:
+            formula_calculator = FormulaCalculator(color_database)
+        
+        # Calculate costs and efficiency
+        cost_analysis = formula_calculator.calculate_formula_cost({
+            'colors_used': formula_data.colors_used,
+            'developer': formula_data.developer
+        })
+        
+        # Update formula with calculations
+        formula_data.cost_breakdown = cost_analysis
+        formula_data.waste_grams = cost_analysis['waste_grams']
+        formula_data.waste_percentage = cost_analysis['waste_percentage']
+        formula_data.efficiency_score = cost_analysis['efficiency_score']
+        
+        if formula_data.service_price > 0:
+            formula_data.profit_margin = formula_calculator.calculate_profit_margin(
+                cost_analysis['total_material_cost'],
+                formula_data.service_price
+            )
+        
+        formula_dict = formula_data.dict()
+        result = formulas_collection.insert_one(formula_dict)
+        formula_dict["id"] = str(result.inserted_id)
+        
+        # Update inventory usage
+        await update_inventory_usage(formula_data.colors_used, formula_data.developer, current_user.id)
+        
+        return ColorFormula(**formula_dict)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating formula: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה ביצירת פורמולה")
+
+@api_router.get("/professional/formulas")
+async def get_formulas(
+    client_id: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    limit: int = 20,
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת פורמולות צבע עם סינון"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        query = {"professional_id": current_user.id}
+        
+        if client_id:
+            query["client_id"] = client_id
+        
+        if date_from or date_to:
+            date_query = {}
+            if date_from:
+                date_query["$gte"] = datetime.fromisoformat(date_from.replace('Z', '+00:00'))
+            if date_to:
+                date_query["$lte"] = datetime.fromisoformat(date_to.replace('Z', '+00:00'))
+            query["created_at"] = date_query
+        
+        formulas = list(formulas_collection.find(query)
+                       .sort("created_at", -1)
+                       .limit(limit))
+        
+        for formula in formulas:
+            formula["id"] = str(formula.pop("_id"))
+            
+        return {"formulas": formulas, "total": len(formulas)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting formulas: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת פורמולות")
+
+@api_router.get("/professional/formulas/{formula_id}/cost-analysis")
+async def get_formula_cost_analysis(
+    formula_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """ניתוח עלויות מפורט לפורמולה"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        formula = formulas_collection.find_one({
+            "id": formula_id,
+            "professional_id": current_user.id
+        })
+        
+        if not formula:
+            raise HTTPException(status_code=404, detail="פורמולה לא נמצאה")
+        
+        # Enhanced cost analysis
+        analysis = {
+            "formula_id": formula_id,
+            "cost_breakdown": formula.get("cost_breakdown", {}),
+            "efficiency_metrics": {
+                "waste_percentage": formula.get("waste_percentage", 0),
+                "efficiency_score": formula.get("efficiency_score", 0),
+                "profit_margin": formula.get("profit_margin", 0)
+            },
+            "recommendations": []
+        }
+        
+        # Add recommendations based on analysis
+        if formula.get("waste_percentage", 0) > 10:
+            analysis["recommendations"].append({
+                "type": "waste_reduction",
+                "message": "אחוז בזבוז גבוה - שקול למדוד בדקדוק רב יותר",
+                "priority": "high"
+            })
+        
+        if formula.get("efficiency_score", 0) > 95:
+            analysis["recommendations"].append({
+                "type": "excellent_work",
+                "message": "עבודה מעולה! יעילות גבוהה מאוד",
+                "priority": "info"
+            })
+        
+        return analysis
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting cost analysis: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בניתוח עלויות")
+
+# ===== BLUETOOTH SCALE INTEGRATION =====
+
+@api_router.post("/professional/scale/connect")
+async def connect_bluetooth_scale(
+    current_user: User = Depends(get_current_active_user)
+):
+    """חיבור למשקל בלוטות'"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        connection_result = scale_manager.connect_scale()
+        return connection_result
+        
+    except Exception as e:
+        logger.error(f"Error connecting scale: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בחיבור למשקל")
+
+@api_router.get("/professional/scale/reading")
+async def get_scale_reading(
+    formula_id: Optional[str] = None,
+    component_type: Optional[str] = None,
+    component_code: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """קריאת משקל נוכחי"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        current_weight = scale_manager.get_weight_reading()
+        
+        reading = {
+            "weight": current_weight,
+            "timestamp": datetime.utcnow().isoformat(),
+            "scale_connected": scale_manager.connected,
+            "reading_stable": True
+        }
+        
+        # Save reading if formula context provided
+        if formula_id and component_type and component_code:
+            scale_reading = BluetoothScaleReading(
+                formula_id=formula_id,
+                component_type=component_type,
+                component_code=component_code,
+                planned_weight=0,  # To be updated
+                actual_weight=current_weight,
+                variance=0  # To be calculated
+            )
+            
+            reading_dict = scale_reading.dict()
+            result = scale_readings_collection.insert_one(reading_dict)
+            reading["reading_id"] = str(result.inserted_id)
+        
+        return reading
+        
+    except Exception as e:
+        logger.error(f"Error getting scale reading: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקריאת משקל")
+
+@api_router.post("/professional/scale/validate")
+async def validate_measurement(
+    expected_weight: float,
+    actual_weight: float,
+    current_user: User = Depends(get_current_active_user)
+):
+    """אימות מדידה מול משקל מתוכנן"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        validation = scale_manager.validate_measurement(expected_weight, actual_weight)
+        return validation
+        
+    except Exception as e:
+        logger.error(f"Error validating measurement: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה באימות מדידה")
+
+# ===== CHEMISTRY CARDS MANAGEMENT =====
+
+@api_router.post("/professional/chemistry-cards", response_model=ClientChemistryCard)
+async def create_chemistry_card(
+    card_data: ClientChemistryCard,
+    current_user: User = Depends(get_current_active_user)
+):
+    """יצירת כרטיס כימיה ללקוח"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        card_data.professional_id = current_user.id
+        card_dict = card_data.dict()
+        
+        result = chemistry_cards_collection.insert_one(card_dict)
+        card_dict["id"] = str(result.inserted_id)
+        
+        return ClientChemistryCard(**card_dict)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating chemistry card: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה ביצירת כרטיס כימיה")
+
+@api_router.get("/professional/chemistry-cards/{client_id}")
+async def get_client_chemistry_card(
+    client_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת כרטיס כימיה של לקוח"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        card = chemistry_cards_collection.find_one({
+            "client_id": client_id,
+            "professional_id": current_user.id
+        })
+        
+        if not card:
+            raise HTTPException(status_code=404, detail="כרטיס כימיה לא נמצא")
+        
+        card["id"] = str(card.pop("_id"))
+        return card
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting chemistry card: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת כרטיס כימיה")
+
+# ===== SMART INVENTORY WITH ADVANCED CALCULATIONS =====
+
+@api_router.get("/professional/inventory/smart-analysis")
+async def get_smart_inventory_analysis(
+    current_user: User = Depends(get_current_active_user)
+):
+    """ניתוח מלאי חכם עם המלצות"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        inventory_items = list(inventory_collection.find({
+            "professional_id": current_user.id
+        }))
+        
+        analysis = {
+            "total_items": len(inventory_items),
+            "low_stock_items": [],
+            "reorder_recommendations": [],
+            "critical_alerts": [],
+            "cost_analysis": {
+                "total_inventory_value": 0,
+                "low_stock_value": 0
+            }
+        }
+        
+        for item in inventory_items:
+            item["id"] = str(item.pop("_id"))
+            
+            # Calculate days until empty and recommendations
+            recommendation = inventory_manager.get_reorder_recommendation(
+                SmartInventoryItem(**item)
+            )
+            
+            item["days_until_empty"] = recommendation["days_until_empty"]
+            item["reorder_recommendation"] = recommendation
+            
+            analysis["cost_analysis"]["total_inventory_value"] += item["current_stock"] * item.get("cost_per_unit", 0)
+            
+            if recommendation["urgency"] in ["CRITICAL", "HIGH"]:
+                analysis["low_stock_items"].append(item)
+                analysis["cost_analysis"]["low_stock_value"] += item["current_stock"] * item.get("cost_per_unit", 0)
+                
+                if recommendation["urgency"] == "CRITICAL":
+                    analysis["critical_alerts"].append({
+                        "item_name": f"{item['brand']} {item['product_name']}",
+                        "message": recommendation["message"],
+                        "urgency": "CRITICAL"
+                    })
+            
+            if recommendation["days_until_empty"] <= 14:
+                analysis["reorder_recommendations"].append({
+                    "item": item,
+                    "recommendation": recommendation
+                })
+        
+        return analysis
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting smart inventory analysis: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בניתוח מלאי חכם")
+
+async def update_inventory_usage(colors_used, developer, professional_id):
+    """עדכון שימוש במלאי בעקבות פורמולה"""
+    try:
+        # Update color usage
+        for color in colors_used:
+            inventory_collection.update_one(
+                {
+                    "professional_id": professional_id,
+                    "product_code": color.get("code"),
+                    "brand": color.get("brand")
+                },
+                {
+                    "$inc": {"current_stock": -color.get("actual_weight", 0)},
+                    "$push": {
+                        "usage_history": inventory_manager.update_usage_history(
+                            None, color.get("actual_weight", 0)
+                        )
+                    }
+                }
+            )
+        
+        # Update developer usage
+        developer_amount = developer.get("actual_amount_ml", 0)
+        if developer_amount > 0:
+            inventory_collection.update_one(
+                {
+                    "professional_id": professional_id,
+                    "category": "developer",
+                    "product_code": developer.get("vol", "20vol")
+                },
+                {
+                    "$inc": {"current_stock": -developer_amount},
+                    "$push": {
+                        "usage_history": inventory_manager.update_usage_history(
+                            None, developer_amount
+                        )
+                    }
+                }
+            )
+    except Exception as e:
+        logger.error(f"Error updating inventory usage: {str(e)}")
+
 @api_router.post("/setup/demo-data")
 async def create_demo_data():
     """Create demo users and data - Development only"""
