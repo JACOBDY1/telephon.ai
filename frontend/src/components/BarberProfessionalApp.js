@@ -404,8 +404,8 @@ const BarberProfessionalApp = ({ user }) => {
     });
   };
 
-  // פונקציות ניהול זמן ונוכחות
-  const startWorkDay = () => {
+  // פונקציות ניהול זמן ונוכחות עם סינכרון לבקאנד
+  const startWorkDay = async () => {
     const now = new Date();
     setWorkTime(prev => ({
       ...prev,
@@ -414,6 +414,24 @@ const BarberProfessionalApp = ({ user }) => {
     }));
     setWorkStatus('working');
     
+    // שליחה לבקאנד
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/attendance/start`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          start_time: now.toISOString(),
+          date: now.toISOString().split('T')[0]
+        })
+      });
+    } catch (error) {
+      console.error('Failed to sync work start with backend:', error);
+    }
+    
     addNotification({
       type: 'success',
       title: 'יום עבודה החל',
@@ -421,7 +439,7 @@ const BarberProfessionalApp = ({ user }) => {
     });
   };
 
-  const endWorkDay = () => {
+  const endWorkDay = async () => {
     const now = new Date();
     setWorkTime(prev => {
       const totalMs = now - (prev.startTime || now);
@@ -436,10 +454,29 @@ const BarberProfessionalApp = ({ user }) => {
     });
     setWorkStatus('ready');
     
+    // שליחה לבקאנד
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/attendance/end`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          end_time: now.toISOString(),
+          date: now.toISOString().split('T')[0],
+          total_hours: workTime.totalHours
+        })
+      });
+    } catch (error) {
+      console.error('Failed to sync work end with backend:', error);
+    }
+    
     addNotification({
       type: 'info',
       title: 'יום עבודה הסתיים',
-      message: `יום העבודה הסתיים בשעה ${now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}`
+      message: `יום העבודה הסתיים בשעה ${now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })} - סה"כ ${workTime.totalHours?.toFixed(1)} שעות`
     });
   };
 
