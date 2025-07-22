@@ -289,7 +289,7 @@ class Appointment(BaseModel):
 class ProfessionalSchedule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     professional_id: str
-    date: date
+    schedule_date: date
     work_hours: Dict[str, Any] = {
         "start_time": "09:00",
         "end_time": "18:00",
