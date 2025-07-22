@@ -326,23 +326,134 @@ class ProfessionalGoals(BaseModel):
     is_achieved: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-class ProductInventory(BaseModel):
+# ===== PROFESSIONAL HAIR SALON MODELS - COMPLETE SYSTEM =====
+
+class ColorFormula(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_id: str
+    professional_id: str
+    formula_name: str
+    colors_used: List[Dict[str, Any]] = []  # [{"brand": "schwarzkopf", "code": "8-0", "planned_weight": 60, "actual_weight": 58}]
+    developer: Dict[str, Any] = {
+        "vol": "20vol",
+        "amount_ml": 60,
+        "actual_amount_ml": 58
+    }
+    total_planned_weight: float = 0
+    total_actual_weight: float = 0
+    waste_grams: float = 0
+    waste_percentage: float = 0
+    mixing_ratio: str = "1:1"
+    processing_time_minutes: int = 35
+    cost_breakdown: Dict[str, float] = {
+        "color_cost": 0,
+        "developer_cost": 0,
+        "total_material_cost": 0,
+        "waste_cost": 0
+    }
+    service_price: float = 0
+    profit_margin: float = 0
+    efficiency_score: float = 0
+    client_satisfaction: Optional[int] = None  # 1-5
+    before_photo_base64: Optional[str] = None
+    after_photo_base64: Optional[str] = None
+    notes: str = ""
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class SmartInventoryItem(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     professional_id: str
-    product_category: str  # color, shampoo, conditioner, styling, tools
-    product_details: Dict[str, Any] = {
-        "brand": "",
-        "name": "",
-        "code": "",
-        "size": "",
-        "unit_price": 0,
-        "supplier": ""
-    }
-    current_stock: int = 0
-    minimum_stock: int = 5
+    brand: str
+    product_name: str
+    product_code: str
+    category: str  # color, developer, shampoo, conditioner, tools
+    unit_type: str  # grams, ml, pieces
+    current_stock: float
+    minimum_stock: float
+    maximum_stock: float
+    reorder_point: float
+    cost_per_unit: float  # cost per gram/ml/piece
+    selling_price_per_unit: float
+    supplier: str
+    average_daily_usage: float
+    days_until_empty: int = 0
     last_restocked: Optional[datetime] = None
-    usage_tracking: List[Dict[str, Any]] = []  # כמה נוצל בכל טיפול
+    expiry_date: Optional[datetime] = None
+    usage_history: List[Dict[str, Any]] = []  # [{"date": "2024-01-01", "amount_used": 60, "client_id": "123", "formula_id": "456"}]
+    reorder_alerts: List[Dict[str, Any]] = []
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class BluetoothScaleReading(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    formula_id: str
+    component_type: str  # color, developer
+    component_code: str  # 8-0, 20vol
+    planned_weight: float
+    actual_weight: float
+    variance: float
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+class ClientChemistryCard(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_id: str
+    professional_id: str
+    allergies: List[str] = []  # ["PPD", "Ammonia", "Parabens"]
+    sensitivities: List[str] = []  # ["Strong fragrances", "Peroxide over 20vol"]
+    skin_test_results: List[Dict[str, Any]] = []  # [{"date": "2024-01-01", "product": "IGORA ROYAL", "result": "negative", "patch_location": "behind_ear"}]
+    hair_analysis: Dict[str, Any] = {
+        "porosity": "medium",  # low, medium, high
+        "elasticity": "good",  # poor, fair, good, excellent
+        "density": "medium",  # low, medium, high
+        "texture": "medium",  # fine, medium, coarse
+        "natural_color_level": 6,  # 1-10 scale
+        "grey_percentage": 10,
+        "previous_chemical_treatments": []
+    }
+    contraindications: List[str] = []
+    recommended_products: List[str] = []
+    notes: str = ""
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+
+class TreatmentSession(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_id: str
+    professional_id: str
+    appointment_id: Optional[str] = None
+    session_date: datetime = Field(default_factory=datetime.utcnow)
+    services_performed: List[str] = []  # ["hair_color", "cut", "blow_dry"]
+    formulas_used: List[str] = []  # List of formula IDs
+    total_time_minutes: int
+    service_cost: float
+    tip_amount: float = 0
+    total_amount: float
+    payment_method: str = "cash"  # cash, card, transfer
+    client_satisfaction_rating: Optional[int] = None
+    follow_up_notes: str = ""
+    next_appointment_recommended: Optional[datetime] = None
+    before_photos: List[str] = []
+    after_photos: List[str] = []
+    products_sold: List[Dict[str, Any]] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ProfessionalMetrics(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    professional_id: str
+    date: date = Field(default_factory=lambda: datetime.utcnow().date())
+    clients_served: int = 0
+    total_revenue: float = 0
+    total_tips: float = 0
+    formulas_created: int = 0
+    average_formula_efficiency: float = 0
+    color_waste_percentage: float = 0
+    client_satisfaction_average: float = 0
+    new_clients_acquired: int = 0
+    repeat_clients_served: int = 0
+    average_service_time: float = 0
+    most_used_colors: List[str] = []
+    inventory_alerts: int = 0
+
+# Legacy model for backward compatibility
+ProductInventory = SmartInventoryItem
 
 # ===== AUTHENTICATION FUNCTIONS =====
 
