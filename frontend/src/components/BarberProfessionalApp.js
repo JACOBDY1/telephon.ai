@@ -1097,19 +1097,37 @@ const BarberProfessionalApp = ({ user }) => {
                 </h3>
                 
                 <div className="space-y-4">
-                  <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => shareToSocial('instagram')}
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
                     <Share2 className="w-4 h-4" />
                     שתף באינסטגרם
                   </button>
                   
-                  <button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => sendGoogleReview('050-123-4567')}
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
                     <MessageCircle className="w-4 h-4" />
                     שלח לביקורת Google
                   </button>
                   
-                  <button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => requestFeedback('הלקוח האחרון')}
+                    className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
                     <Star className="w-4 h-4" />
                     בקש משוב
+                  </button>
+                  
+                  {/* כפתור עדכון יעדים לפי יומן */}
+                  <button 
+                    onClick={updateDailyGoals}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    עדכן יעדים לפי יומן
                   </button>
                   
                   <div className="bg-gray-50 p-3 rounded-lg">
