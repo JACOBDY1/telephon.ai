@@ -717,7 +717,118 @@ const BarberProfessionalApp = () => {
 
       {/* Main Content */}
       <div className="p-4 pb-20">
-        <AdvancedDashboard />
+        {activeView === 'dashboard' && <AdvancedDashboard />}
+        {activeView === 'appointments' && (
+          <div className="bg-white rounded-lg p-6 text-center">
+            <Calendar className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-2">ניהול תורים מתקדם</h3>
+            <p className="text-gray-600">מערכת תורים מתקדמת עם התראות והזכרות</p>
+          </div>
+        )}
+        {activeView === 'clients' && (
+          <div className="bg-white rounded-lg p-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Users className="w-6 h-6" />
+              ניהול לקוחות מתקדם
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">💳 כרטיסי כימיה</h4>
+                <p className="text-sm text-blue-600">מעקב אחר רגישויות ואלרגיות של לקוחות</p>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-green-800 mb-2">📝 היסטוריית טיפולים</h4>
+                <p className="text-sm text-green-600">תיעוד מלא של כל הטיפולים הקודמים</p>
+              </div>
+            </div>
+          </div>
+        )}
+        {activeView === 'colors' && (
+          <div className="space-y-6">
+            {/* מאגר הצבעים המלא */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+                <Palette className="w-6 h-6 text-purple-500" />
+                מאגר צבעים מקצועי - HairPro IL
+              </h2>
+              
+              {Object.entries(colorDatabase).map(([brandKey, brand]) => (
+                <div key={brandKey} className="mb-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">{brand.logo}</span>
+                    <h3 className="text-xl font-bold text-gray-800">{brand.name}</h3>
+                  </div>
+                  
+                  {Object.entries(brand.series).map(([seriesKey, series]) => (
+                    <div key={seriesKey} className="mb-6 bg-gray-50 rounded-lg p-4">
+                      <div className="mb-4">
+                        <h4 className="text-lg font-semibold text-gray-700">{series.name}</h4>
+                        <p className="text-sm text-gray-600">{series.description}</p>
+                        
+                        {series.features && (
+                          <div className="mt-2">
+                            <p className="text-sm font-medium text-gray-600">תכונות מיוחדות:</p>
+                            <ul className="text-xs text-gray-500 list-disc list-inside">
+                              {series.features.map((feature, index) => (
+                                <li key={index}>{feature}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        <div className="mt-2 text-sm text-gray-600">
+                          <span className="font-medium">ערבוב:</span> {series.mixing} | 
+                          <span className="font-medium"> זמן פעולה:</span> {series.timing}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {series.colors.map((color, colorIndex) => (
+                          <div 
+                            key={colorIndex} 
+                            className="bg-white rounded-lg border p-3 hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-center gap-3 mb-2">
+                              <div 
+                                className="w-8 h-8 rounded-full border-2 border-gray-300"
+                                style={{ backgroundColor: color.hex }}
+                                title={color.name}
+                              />
+                              <div className="flex-1">
+                                <div className="font-semibold text-sm">{color.code}</div>
+                                <div className="text-xs text-gray-600 truncate">{color.name}</div>
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              <span className="text-sm font-bold text-green-600">₪{color.price}</span>
+                            </div>
+                            
+                            {color.base && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                בסיס: {color.base}
+                                {color.primary !== undefined && (
+                                  <span> | רפלקס: {color.primary}{color.secondary !== undefined && `.${color.secondary}`}</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {activeView === 'stats' && (
+          <div className="bg-white rounded-lg p-6 text-center">
+            <Target className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-2">דוחות ואנליטיקה</h3>
+            <p className="text-gray-600">מעקב אחר ביצועים ויעדים עסקיים</p>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
