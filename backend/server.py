@@ -1937,6 +1937,35 @@ async def create_demo_data():
             hashed_password = get_password_hash(user_data["password"])
             
             # Create user document
+            user_type = user_data.get("user_type", "client")
+            
+            # Set subscription based on user type
+            if user_type == "professional":
+                subscription = {
+                    "plan_id": "professional",
+                    "plan_name": "תכנית מקצועית - HairPro",
+                    "status": "active",
+                    "start_date": datetime.utcnow(),
+                    "end_date": datetime.utcnow() + timedelta(days=365),  # 1 year for demo
+                    "trial_end_date": None,
+                    "auto_renew": True,
+                    "features": [
+                        "hairpro_advanced", "color_database", "chemistry_cards", 
+                        "digital_weighing", "appointment_management", "unlimited_calls"
+                    ]
+                }
+            else:
+                subscription = {
+                    "plan_id": "basic",
+                    "plan_name": "תכנית בסיסית",
+                    "status": "active",
+                    "start_date": datetime.utcnow(),
+                    "end_date": datetime.utcnow() + timedelta(days=30),
+                    "trial_end_date": None,
+                    "auto_renew": True,
+                    "features": ["basic_calls", "basic_crm", "web_dialer"]
+                }
+            
             user_doc = {
                 "username": user_data["username"],
                 "email": user_data["email"],
@@ -1944,6 +1973,7 @@ async def create_demo_data():
                 "full_name": user_data["full_name"], 
                 "phone": user_data["phone"],
                 "role": user_data["role"],
+                "user_type": user_type,
                 "is_active": True,
                 "created_at": datetime.utcnow(),
                 "last_login": None,
@@ -1951,7 +1981,8 @@ async def create_demo_data():
                     "language": "he",
                     "theme": "light",
                     "notifications": True
-                }
+                },
+                "subscription": subscription
             }
             
             # Insert to database
