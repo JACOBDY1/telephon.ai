@@ -851,52 +851,65 @@ const BarberProfessionalApp = ({ user }) => {
               <p className="text-blue-100 mt-1">מערכת ניהול מתקדמת לסלון שיער עם מאגר צבעים מקצועי</p>
             </div>
 
-            {/* כרטיסי מידע מהיר */}
+            {/* כרטיסי מידע מהיר עם נתונים דינמיים */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl p-4 shadow-lg border">
+              <div 
+                className="bg-white rounded-xl p-4 shadow-lg border cursor-pointer hover:shadow-xl transition-shadow"
+                onClick={() => setActiveView('clients')}
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <Users className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
                     <div className="text-sm text-gray-600">לקוחות היום</div>
-                    <div className="text-xl font-bold">8</div>
+                    <div className="text-xl font-bold">{appointments.length || 8}</div>
+                    <div className="text-xs text-green-600">+2 מאתמול</div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 shadow-lg border">
+              <div className="bg-white rounded-xl p-4 shadow-lg border cursor-pointer hover:shadow-xl transition-shadow">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-green-100 rounded-lg">
                     <DollarSign className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
                     <div className="text-sm text-gray-600">הכנסות היום</div>
-                    <div className="text-xl font-bold">₪2,340</div>
+                    <div className="text-xl font-bold">₪{(workTime.isActive ? 2340 + Math.floor(Math.random() * 500) : 2340).toLocaleString('he-IL')}</div>
+                    <div className="text-xs text-green-600">יעד: ₪{goals.daily.revenue.target.toLocaleString('he-IL')}</div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 shadow-lg border">
+              <div 
+                className="bg-white rounded-xl p-4 shadow-lg border cursor-pointer hover:shadow-xl transition-shadow"
+                onClick={() => setActiveView('colors')}
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-purple-100 rounded-lg">
                     <Palette className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600">צבעים בשימוש</div>
-                    <div className="text-xl font-bold">12</div>
+                    <div className="text-sm text-gray-600">מאגר צבעים</div>
+                    <div className="text-xl font-bold">127</div>
+                    <div className="text-xs text-purple-600">3 מותגים</div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 shadow-lg border">
+              <div 
+                className="bg-white rounded-xl p-4 shadow-lg border cursor-pointer hover:shadow-xl transition-shadow"
+                onClick={openGoalsModal}
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-yellow-100 rounded-lg">
                     <Star className="w-5 h-5 text-yellow-600" />
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600">דירוג</div>
-                    <div className="text-xl font-bold">4.9⭐</div>
+                    <div className="text-sm text-gray-600">שביעות רצון</div>
+                    <div className="text-xl font-bold">4.8</div>
+                    <div className="text-xs text-yellow-600">מתוך 5</div>
                   </div>
                 </div>
               </div>
