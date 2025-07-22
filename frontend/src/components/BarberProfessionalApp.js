@@ -1008,11 +1008,128 @@ const BarberProfessionalApp = ({ user }) => {
             </div>
           </div>
         )}
-        {activeView === 'stats' && (
-          <div className="bg-white rounded-lg p-6 text-center">
-            <Target className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-            <h3 className="text-xl font-bold mb-2">דוחות ואנליטיקה</h3>
-            <p className="text-gray-600">מעקב אחר ביצועים ויעדים עסקיים</p>
+        {activeView === 'inventory' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl p-6 shadow-lg border">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Package className="w-6 h-6" />
+                  ניהול מלאי חכם
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                    {inventory.length} מוצרים
+                  </span>
+                  <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                    <Plus className="w-4 h-4 inline ml-1" />
+                    הוסף מוצר
+                  </button>
+                </div>
+              </div>
+              
+              {inventory.length === 0 ? (
+                <div className="text-center py-8">
+                  <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">המלאי ריק</h3>
+                  <p className="text-gray-500 mb-4">התחל על ידי יצירת נתוני דמו או הוספת מוצר חדש</p>
+                  <button
+                    onClick={createDemoData}
+                    className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
+                  >
+                    צור נתוני דמו
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {inventory.map((item) => (
+                    <div key={item.id} className="bg-gray-50 rounded-lg p-4 border hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                          <span className="font-semibold text-gray-900">
+                            {item.product_details?.brand || item.brand || 'מותג לא ידוע'}
+                          </span>
+                        </div>
+                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">
+                          {item.product_category || 'צבע'}
+                        </span>
+                      </div>
+
+                      <h4 className="font-bold text-gray-900 mb-2">
+                        {item.product_details?.name || item.product || item.name}
+                      </h4>
+
+                      <div className="space-y-2 mb-4">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">מלאי נוכחי:</span>
+                          <span className={`font-bold ${
+                            item.current_stock <= item.minimum_stock 
+                              ? 'text-red-600' 
+                              : 'text-green-600'
+                          }`}>
+                            {item.current_stock} יחידות
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">מינימום:</span>
+                          <span className="font-medium">{item.minimum_stock} יחידות</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">מחיר ליחידה:</span>
+                          <span className="font-bold text-green-600">
+                            ₪{item.product_details?.unit_price || item.pricePerUnit}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* התראת מלאי נמוך */}
+                      {item.current_stock <= item.minimum_stock && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-3">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 text-red-500" />
+                            <span className="text-red-800 text-xs font-semibold">מלאי נמוך!</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* מד מלאי */}
+                      <div className="mb-3">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span>רמת מלאי</span>
+                          <span>{Math.round((item.current_stock / (item.minimum_stock * 3)) * 100)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all ${
+                              item.current_stock <= item.minimum_stock 
+                                ? 'bg-red-500' 
+                                : item.current_stock <= item.minimum_stock * 2
+                                ? 'bg-yellow-500'
+                                : 'bg-green-500'
+                            }`}
+                            style={{ 
+                              width: `${Math.min(100, (item.current_stock / (item.minimum_stock * 3)) * 100)}%` 
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* פעולות */}
+                      <div className="flex gap-2">
+                        <button className="flex-1 bg-blue-500 text-white px-3 py-2 rounded text-xs hover:bg-blue-600">
+                          <Plus className="w-3 h-3 inline ml-1" />
+                          הוסף מלאי
+                        </button>
+                        <button className="flex-1 bg-purple-500 text-white px-3 py-2 rounded text-xs hover:bg-purple-600">
+                          <Edit className="w-3 h-3 inline ml-1" />
+                          ערוך
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
