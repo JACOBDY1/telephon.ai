@@ -1134,6 +1134,21 @@ const BarberProfessionalApp = ({ user }) => {
             </div>
           </div>
         )}
+
+        {activeView === 'formulas' && (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-green-600 via-blue-600 to-purple-700 text-white p-6 rounded-2xl">
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Beaker className="w-8 h-8" />
+                מנהל פורמולות מתקדם 🧪
+              </h1>
+              <p className="text-blue-100 mt-1">ניהול מתקדם של פורמולות צבע עם חישובי עלויות בזמן אמת</p>
+            </div>
+            
+            <AdvancedFormulaManager user={user} colorDatabase={colorDatabase} />
+          </div>
+        )}
+
       </div>
 
       {/* Navigation */}
