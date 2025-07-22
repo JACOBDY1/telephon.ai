@@ -1527,6 +1527,132 @@ const BarberProfessionalApp = ({ user }) => {
         </div>
       )}
 
+      {/* פופ-אפ ליד */}
+      {showLeadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowLeadModal(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                {selectedLead ? 'עריכת ליד' : 'ליד חדש'}
+              </h2>
+              <button 
+                onClick={() => setShowLeadModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">שם מלא</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                    placeholder="שם הליד המלא"
+                    defaultValue={selectedLead?.name || ''}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">טלפון</label>
+                  <input
+                    type="tel"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                    placeholder="050-123-4567"
+                    defaultValue={selectedLead?.phone || ''}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">אימייל</label>
+                <input
+                  type="email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                  placeholder="email@example.com"
+                  defaultValue={selectedLead?.email || ''}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">מקור הליד</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                    defaultValue={selectedLead?.source || ''}
+                  >
+                    <option value="">בחר מקור...</option>
+                    <option value="פייסבוק">פייסבוק</option>
+                    <option value="אינסטגרם">אינסטגרם</option>
+                    <option value="Google">Google</option>
+                    <option value="המלצה">המלצה</option>
+                    <option value="לקוח קיים">לקוח קיים</option>
+                    <option value="אתר">אתר</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">תחום עניין</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                    defaultValue={selectedLead?.interest || ''}
+                  >
+                    <option value="">בחר תחום...</option>
+                    <option value="צבע שיער">צבע שיער</option>
+                    <option value="תספורת">תספורת</option>
+                    <option value="תספורת + צבע">תספורת + צבע</option>
+                    <option value="טיפולי שיער">טיפולי שיער</option>
+                    <option value="החלקה">החלקה</option>
+                    <option value="תסרוקת אירועים">תסרוקת אירועים</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">סטטוס</label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                  defaultValue={selectedLead?.status || 'חדש'}
+                >
+                  <option value="חדש">חדש</option>
+                  <option value="בטיפול">בטיפול</option>
+                  <option value="עקוב">עקוב</option>
+                  <option value="קבע תור">קבע תור</option>
+                  <option value="הפך ללקוח">הפך ללקוח</option>
+                  <option value="לא רלוונטי">לא רלוונטי</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">הערות</label>
+                <textarea
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                  placeholder="הערות על הליד..."
+                  defaultValue={selectedLead?.notes || ''}
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLeadModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                >
+                  ביטול
+                </button>
+                <button
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  שמור ליד
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* פופ-אפ יעדים */}
       {showGoalsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowGoalsModal(false)}>
