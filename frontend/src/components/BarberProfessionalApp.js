@@ -782,20 +782,150 @@ const BarberProfessionalApp = ({ user }) => {
           </div>
         )}
         {activeView === 'clients' && (
-          <div className="bg-white rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <Users className="w-6 h-6" />
-              ניהול לקוחות מתקדם
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">💳 כרטיסי כימיה</h4>
-                <p className="text-sm text-blue-600">מעקב אחר רגישויות ואלרגיות של לקוחות</p>
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl p-6 shadow-lg border">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Users className="w-6 h-6" />
+                  ניהול לקוחות מתקדם
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                    {clients.length} לקוחות
+                  </span>
+                  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <Plus className="w-4 h-4 inline ml-1" />
+                    לקוח חדש
+                  </button>
+                </div>
               </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-800 mb-2">📝 היסטוריית טיפולים</h4>
-                <p className="text-sm text-green-600">תיעוד מלא של כל הטיפולים הקודמים</p>
-              </div>
+              
+              {clients.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">אין לקוחות עדיין</h3>
+                  <p className="text-gray-500 mb-4">התחל על ידי יצירת נתוני דמו או הוספת לקוח חדש</p>
+                  <button
+                    onClick={createDemoData}
+                    className="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600"
+                  >
+                    צור נתוני דמו
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {clients.map((client) => (
+                    <div key={client.id} className="bg-gray-50 rounded-lg p-6 border hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                            {(client.personal_info?.full_name || client.name || 'L').charAt(0)}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-gray-900">
+                              {client.personal_info?.full_name || client.name || 'לקוח'}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {client.personal_info?.phone || client.phone || 'ללא טלפון'}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                          פעיל
+                        </span>
+                      </div>
+
+                      {/* פרופיל שיער */}
+                      <div className="mb-4">
+                        <h5 className="font-semibold text-gray-700 mb-2">פרופיל שיער</h5>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-600">צבע טבעי:</span>
+                            <span className="mr-2 font-medium">
+                              {client.hair_profile?.natural_color || 'לא צוין'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">צבע נוכחי:</span>
+                            <span className="mr-2 font-medium">
+                              {client.hair_profile?.current_color || 'לא צוין'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">סוג שיער:</span>
+                            <span className="mr-2 font-medium">
+                              {client.hair_profile?.hair_type || 'לא צוין'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">עובי:</span>
+                            <span className="mr-2 font-medium">
+                              {client.hair_profile?.hair_thickness || 'לא צוין'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* כרטיס כימיה */}
+                      <div className="mb-4">
+                        <h5 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 text-red-500" />
+                          כרטיס כימיה
+                        </h5>
+                        <div className="space-y-2">
+                          {client.chemistry_card?.allergies?.length > 0 && (
+                            <div className="bg-red-50 border border-red-200 rounded p-2">
+                              <div className="text-xs font-semibold text-red-800 mb-1">אלרגיות:</div>
+                              <div className="text-xs text-red-700">
+                                {client.chemistry_card.allergies.join(', ')}
+                              </div>
+                            </div>
+                          )}
+                          {client.chemistry_card?.sensitivities?.length > 0 && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
+                              <div className="text-xs font-semibold text-yellow-800 mb-1">רגישויות:</div>
+                              <div className="text-xs text-yellow-700">
+                                {client.chemistry_card.sensitivities.join(', ')}
+                              </div>
+                            </div>
+                          )}
+                          {client.chemistry_card?.patch_test_date && (
+                            <div className="bg-green-50 border border-green-200 rounded p-2">
+                              <div className="text-xs font-semibold text-green-800">
+                                בדיקת עור: {client.chemistry_card.patch_test_result || 'שלילי'}
+                              </div>
+                              <div className="text-xs text-green-700">
+                                תאריך: {new Date(client.chemistry_card.patch_test_date).toLocaleDateString('he-IL')}
+                              </div>
+                            </div>
+                          )}
+                          {client.chemistry_card?.notes && (
+                            <div className="bg-blue-50 border border-blue-200 rounded p-2">
+                              <div className="text-xs font-semibold text-blue-800 mb-1">הערות:</div>
+                              <div className="text-xs text-blue-700">{client.chemistry_card.notes}</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* פעולות */}
+                      <div className="flex gap-2">
+                        <button className="flex-1 bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600">
+                          <Calendar className="w-4 h-4 inline ml-1" />
+                          קבע תור
+                        </button>
+                        <button className="flex-1 bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600">
+                          <Edit className="w-4 h-4 inline ml-1" />
+                          ערוך פרטים
+                        </button>
+                        <button className="bg-purple-500 text-white px-3 py-2 rounded text-sm hover:bg-purple-600">
+                          <Phone className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
