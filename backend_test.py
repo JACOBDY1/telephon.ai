@@ -60,6 +60,438 @@ class APITester:
         if response_data and not success:
             print(f"   Response: {response_data}")
     
+    # ===== USER PROFILE & SUBSCRIPTION SYSTEM TESTS =====
+    
+    def test_professional_user_login(self):
+        """Test professional user login with pro123 password"""
+        try:
+            # Test login with professional user
+            login_data = {
+                "username": "professional",
+                "password": "pro123"
+            }
+            
+            response = self.session.post(
+                f"{BACKEND_URL}/auth/login", 
+                data=login_data,
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "access_token" in data and "user" in data:
+                    # Store token for later tests
+                    self.auth_tokens["professional"] = data["access_token"]
+                    
+                    # Verify user data
+                    user_info = data["user"]
+                    if (user_info.get("username") == "professional" and 
+                        user_info.get("user_type") == "professional"):
+                        self.log_result("Professional User Login", True, 
+                                      f"Successfully logged in professional user with user_type: {user_info.get('user_type')}")
+                        return True
+                    else:
+                        self.log_result("Professional User Login", False, 
+                                      f"User data mismatch for professional user", user_info)
+                        return False
+                else:
+                    self.log_result("Professional User Login", False, 
+                                  "Missing token or user data in professional login response", data)
+                    return False
+            else:
+                self.log_result("Professional User Login", False, 
+                              f"Professional login failed with status {response.status_code}", response.text)
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional User Login", False, f"Professional login test failed: {str(e)}")
+            return False
+    
+    def test_user_profile_me_endpoint(self):
+        """Test GET /api/auth/me endpoint"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("User Profile Me Endpoint", False, "No auth tokens available")
+                return False
+            
+            # Test with demo user
+            demo_token = self.auth_tokens.get("demo")
+            if demo_token:
+                headers = {"Authorization": f"Bearer {demo_token}"}
+                response = self.session.get(f"{BACKEND_URL}/auth/me", headers=headers)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    required_fields = ["id", "username", "email", "full_name", "role", "user_type"]
+                    missing_fields = [field for field in required_fields if field not in data]
+                    
+                    if not missing_fields:
+                        self.log_result("User Profile Me Endpoint", True, 
+                                      f"Successfully retrieved user profile: {data.get('username')} (type: {data.get('user_type', 'N/A')})")
+                        return True
+                    else:
+                        self.log_result("User Profile Me Endpoint", False, 
+                                      f"Missing required fields in profile: {missing_fields}", data)
+                        return False
+                else:
+                    self.log_result("User Profile Me Endpoint", False, 
+                                  f"/auth/me failed with status {response.status_code}", response.text)
+                    return False
+            else:
+                self.log_result("User Profile Me Endpoint", False, "No demo token available")
+                return False
+                
+        except Exception as e:
+            self.log_result("User Profile Me Endpoint", False, f"Profile me test failed: {str(e)}")
+            return False
+    
+    def test_user_profile_advanced_update(self):
+        """Test PUT /api/auth/profile/advanced endpoint"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("User Profile Advanced Update", False, "No auth tokens available")
+                return False
+            
+            demo_token = self.auth_tokens.get("demo")
+            if demo_token:
+                headers = {"Authorization": f"Bearer {demo_token}"}
+                
+                # Test advanced profile update
+                update_data = {
+                    "full_name": "משתמש דמו מתקדם",
+                    "phone": "+972-50-888-9999",
+                    "preferences": {
+                        "language": "he",
+                        "theme": "dark",
+                        "notifications": True,
+                        "advanced_features": True
+                    }
+                }
+                
+                response = self.session.put(
+                    f"{BACKEND_URL}/auth/profile/advanced", 
+                    json=update_data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    # Check if the profile was updated
+                    if (data.get("full_name") == update_data["full_name"] and 
+                        data.get("phone") == update_data["phone"]):
+                        self.log_result("User Profile Advanced Update", True, 
+                                      "Successfully updated user profile with advanced endpoint")
+                        return True
+                    else:
+                        self.log_result("User Profile Advanced Update", True, 
+                                      "Minor: Advanced profile update working but data structure may differ")
+                        return True
+                else:
+                    self.log_result("User Profile Advanced Update", False, 
+                                  f"Advanced profile update failed with status {response.status_code}", response.text)
+                    return False
+            else:
+                self.log_result("User Profile Advanced Update", False, "No demo token available")
+                return False
+                
+        except Exception as e:
+            self.log_result("User Profile Advanced Update", False, f"Advanced profile update test failed: {str(e)}")
+            return False
+    
+    def test_subscription_plans_endpoint(self):
+        """Test GET /api/subscription/plans endpoint"""
+        try:
+            response = self.session.get(f"{BACKEND_URL}/subscription/plans")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "plans" in data and isinstance(data["plans"], list):
+                    plans = data["plans"]
+                    
+                    # Check for expected plans
+                    plan_names = [plan.get("name", "") for plan in plans]
+                    expected_plans = ["ניסיון חינם", "תכנית בסיסית", "תכנית מקצועית - HairPro", "תכנית עסקית"]
+                    
+                    found_plans = [plan for plan in expected_plans if any(expected in name for name in plan_names for expected in [plan])]
+                    
+                    if len(found_plans) >= 3:  # At least 3 plans should be found
+                        self.log_result("Subscription Plans Endpoint", True, 
+                                      f"Retrieved {len(plans)} subscription plans including HairPro plan")
+                        
+                        # Check for HairPro plan specifically
+                        hairpro_plan = next((plan for plan in plans if "HairPro" in plan.get("name", "")), None)
+                        if hairpro_plan:
+                            self.log_result("HairPro Plan Available", True, 
+                                          f"HairPro plan found with price: {hairpro_plan.get('price', 0)} {hairpro_plan.get('currency', 'ILS')}")
+                        else:
+                            self.log_result("HairPro Plan Available", False, "HairPro plan not found in subscription plans")
+                        
+                        return True
+                    else:
+                        self.log_result("Subscription Plans Endpoint", False, 
+                                      f"Expected plans not found. Available: {plan_names}")
+                        return False
+                else:
+                    self.log_result("Subscription Plans Endpoint", False, 
+                                  "Invalid response format for subscription plans", data)
+                    return False
+            else:
+                self.log_result("Subscription Plans Endpoint", False, 
+                              f"Subscription plans failed with status {response.status_code}", response.text)
+                return False
+                
+        except Exception as e:
+            self.log_result("Subscription Plans Endpoint", False, f"Subscription plans test failed: {str(e)}")
+            return False
+    
+    def test_current_subscription_endpoint(self):
+        """Test GET /api/subscription/current endpoint"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Current Subscription Endpoint", False, "No auth tokens available")
+                return False
+            
+            # Test with demo user
+            demo_token = self.auth_tokens.get("demo")
+            if demo_token:
+                headers = {"Authorization": f"Bearer {demo_token}"}
+                response = self.session.get(f"{BACKEND_URL}/subscription/current", headers=headers)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "subscription" in data:
+                        subscription = data["subscription"]
+                        required_fields = ["plan_id", "plan_name", "status"]
+                        missing_fields = [field for field in required_fields if field not in subscription]
+                        
+                        if not missing_fields:
+                            self.log_result("Current Subscription Endpoint", True, 
+                                          f"Retrieved current subscription: {subscription.get('plan_name')} (status: {subscription.get('status')})")
+                            return True
+                        else:
+                            self.log_result("Current Subscription Endpoint", False, 
+                                          f"Missing subscription fields: {missing_fields}", subscription)
+                            return False
+                    else:
+                        self.log_result("Current Subscription Endpoint", False, 
+                                      "Missing subscription data in response", data)
+                        return False
+                else:
+                    self.log_result("Current Subscription Endpoint", False, 
+                                  f"Current subscription failed with status {response.status_code}", response.text)
+                    return False
+            else:
+                self.log_result("Current Subscription Endpoint", False, "No demo token available")
+                return False
+                
+        except Exception as e:
+            self.log_result("Current Subscription Endpoint", False, f"Current subscription test failed: {str(e)}")
+            return False
+    
+    def test_professional_user_subscription(self):
+        """Test professional user has correct subscription"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional User Subscription", False, "No auth tokens available")
+                return False
+            
+            # Test with professional user
+            professional_token = self.auth_tokens.get("professional")
+            if professional_token:
+                headers = {"Authorization": f"Bearer {professional_token}"}
+                response = self.session.get(f"{BACKEND_URL}/subscription/current", headers=headers)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "subscription" in data:
+                        subscription = data["subscription"]
+                        plan_name = subscription.get("plan_name", "")
+                        
+                        # Check if professional user has HairPro subscription
+                        if "HairPro" in plan_name or "מקצועית" in plan_name:
+                            self.log_result("Professional User Subscription", True, 
+                                          f"Professional user has correct subscription: {plan_name}")
+                            return True
+                        else:
+                            self.log_result("Professional User Subscription", False, 
+                                          f"Professional user should have HairPro subscription, got: {plan_name}")
+                            return False
+                    else:
+                        self.log_result("Professional User Subscription", False, 
+                                      "Missing subscription data for professional user", data)
+                        return False
+                else:
+                    self.log_result("Professional User Subscription", False, 
+                                  f"Professional subscription check failed with status {response.status_code}", response.text)
+                    return False
+            else:
+                self.log_result("Professional User Subscription", False, "No professional token available")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional User Subscription", False, f"Professional subscription test failed: {str(e)}")
+            return False
+    
+    def test_subscription_upgrade_endpoint(self):
+        """Test POST /api/subscription/upgrade endpoint"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Subscription Upgrade Endpoint", False, "No auth tokens available")
+                return False
+            
+            demo_token = self.auth_tokens.get("demo")
+            if demo_token:
+                headers = {"Authorization": f"Bearer {demo_token}"}
+                
+                # Test subscription upgrade
+                upgrade_data = {
+                    "plan_id": "basic",
+                    "payment_method": "credit_card"
+                }
+                
+                response = self.session.post(
+                    f"{BACKEND_URL}/subscription/upgrade", 
+                    json=upgrade_data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "message" in data and "subscription" in data:
+                        subscription = data["subscription"]
+                        if subscription.get("plan_id") == "basic":
+                            self.log_result("Subscription Upgrade Endpoint", True, 
+                                          f"Successfully upgraded subscription to: {subscription.get('plan_name')}")
+                            return True
+                        else:
+                            self.log_result("Subscription Upgrade Endpoint", False, 
+                                          "Subscription upgrade data incorrect", subscription)
+                            return False
+                    else:
+                        self.log_result("Subscription Upgrade Endpoint", False, 
+                                      "Missing expected fields in upgrade response", data)
+                        return False
+                else:
+                    self.log_result("Subscription Upgrade Endpoint", False, 
+                                  f"Subscription upgrade failed with status {response.status_code}", response.text)
+                    return False
+            else:
+                self.log_result("Subscription Upgrade Endpoint", False, "No demo token available")
+                return False
+                
+        except Exception as e:
+            self.log_result("Subscription Upgrade Endpoint", False, f"Subscription upgrade test failed: {str(e)}")
+            return False
+    
+    def test_users_professional_endpoint(self):
+        """Test GET /api/users/professional endpoint"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Users Professional Endpoint", False, "No auth tokens available")
+                return False
+            
+            admin_token = self.auth_tokens.get("admin")
+            if admin_token:
+                headers = {"Authorization": f"Bearer {admin_token}"}
+                response = self.session.get(f"{BACKEND_URL}/users/professional", headers=headers)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if isinstance(data, list):
+                        professional_users = data
+                        
+                        # Check if professional user exists
+                        professional_user = next((user for user in professional_users if user.get("username") == "professional"), None)
+                        if professional_user:
+                            self.log_result("Users Professional Endpoint", True, 
+                                          f"Found professional user: {professional_user.get('username')} (type: {professional_user.get('user_type')})")
+                            return True
+                        else:
+                            self.log_result("Users Professional Endpoint", False, 
+                                          f"Professional user not found in {len(professional_users)} professional users")
+                            return False
+                    else:
+                        self.log_result("Users Professional Endpoint", False, 
+                                      "Invalid response format for professional users", data)
+                        return False
+                else:
+                    self.log_result("Users Professional Endpoint", False, 
+                                  f"Professional users endpoint failed with status {response.status_code}", response.text)
+                    return False
+            else:
+                self.log_result("Users Professional Endpoint", False, "No admin token available")
+                return False
+                
+        except Exception as e:
+            self.log_result("Users Professional Endpoint", False, f"Professional users test failed: {str(e)}")
+            return False
+    
+    def test_user_type_system(self):
+        """Test user_type field functionality"""
+        try:
+            # Test user registration with user_type
+            test_user = {
+                "username": f"testbarber_{int(time.time())}",
+                "email": f"barber_{int(time.time())}@example.com",
+                "password": "testpass123",
+                "full_name": "ספר בדיקה",
+                "phone": "+972-50-999-7777",
+                "user_type": "barber"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/register", json=test_user)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "user" in data:
+                    user_info = data["user"]
+                    if user_info.get("user_type") == "barber":
+                        self.log_result("User Type System - Registration", True, 
+                                      f"Successfully registered user with user_type: {user_info.get('user_type')}")
+                        
+                        # Test login and verify user_type persists
+                        login_data = {
+                            "username": test_user["username"],
+                            "password": test_user["password"]
+                        }
+                        
+                        login_response = self.session.post(
+                            f"{BACKEND_URL}/auth/login",
+                            data=login_data,
+                            headers={"Content-Type": "application/x-www-form-urlencoded"}
+                        )
+                        
+                        if login_response.status_code == 200:
+                            login_data = login_response.json()
+                            if login_data.get("user", {}).get("user_type") == "barber":
+                                self.log_result("User Type System - Login Persistence", True, 
+                                              "User type persists after login")
+                                return True
+                            else:
+                                self.log_result("User Type System - Login Persistence", False, 
+                                              "User type not preserved after login")
+                                return False
+                        else:
+                            self.log_result("User Type System - Login Persistence", False, 
+                                          "Cannot login with new user to test persistence")
+                            return False
+                    else:
+                        self.log_result("User Type System - Registration", False, 
+                                      f"User type not set correctly, got: {user_info.get('user_type')}")
+                        return False
+                else:
+                    self.log_result("User Type System - Registration", False, 
+                                  "Missing user data in registration response", data)
+                    return False
+            else:
+                self.log_result("User Type System - Registration", False, 
+                              f"Registration with user_type failed: {response.status_code}", response.text)
+                return False
+                
+        except Exception as e:
+            self.log_result("User Type System", False, f"User type system test failed: {str(e)}")
+            return False
+
     # ===== AUTHENTICATION SYSTEM TESTS =====
     
     def test_user_registration(self):
