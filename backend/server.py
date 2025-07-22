@@ -5132,6 +5132,216 @@ async def download_document(
         logger.error(f"Error downloading document: {str(e)}")
         raise HTTPException(status_code=500, detail="Error downloading document")
 
+# ===== PROFESSIONAL ATTENDANCE SYSTEM =====
+
+@api_router.post("/professional/attendance/start")
+async def start_professional_attendance(
+    attendance_data: dict,
+    current_user: User = Depends(get_current_active_user)
+):
+    """התחלת יום עבודה למשתמש מקצועי"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        current_date = datetime.utcnow().date()
+        start_time = datetime.utcnow()
+        
+        # בדיקה אם כבר יש רשומת נוכחות היום
+        existing_attendance = attendance_collection.find_one({
+            "professional_id": current_user.id,
+            "date": current_date,
+            "status": "active"
+        })
+        
+        if existing_attendance:
+            return {"status": "error", "message": "יום עבודה כבר החל היום"}
+        
+        # יצירת רשומת נוכחות חדשה
+        attendance_record = {
+            "id": str(uuid.uuid4()),
+            "professional_id": current_user.id,
+            "date": current_date,
+            "start_time": start_time,
+            "status": "active",
+            "location": attendance_data.get("location", ""),
+            "notes": attendance_data.get("notes", ""),
+            "created_at": datetime.utcnow()
+        }
+        
+        attendance_collection.insert_one(attendance_record)
+        
+        return {
+            "status": "success",
+            "message": "יום עבודה החל בהצלחה",
+            "id": attendance_record["id"],
+            "start_time": start_time.isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error starting attendance: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בהתחלת יום עבודה")
+
+@api_router.post("/professional/attendance/end")
+async def end_professional_attendance(
+    attendance_data: dict,
+    current_user: User = Depends(get_current_active_user)
+):
+    """סיום יום עבודה למשתמש מקצועי"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        current_date = datetime.utcnow().date()
+        end_time = datetime.utcnow()
+        
+        # מציאת רשומת הנוכחות הפעילה
+        active_attendance = attendance_collection.find_one({
+            "professional_id": current_user.id,
+            "date": current_date,
+            "status": "active"
+        })
+        
+        if not active_attendance:
+            raise HTTPException(status_code=404, detail="לא נמצאה רשומת נוכחות פעילה היום")
+        
+        # חישוב שעות עבודה
+        start_time = active_attendance["start_time"]
+        if isinstance(start_time, str):
+            start_time = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+        
+        total_hours = (end_time - start_time).total_seconds() / 3600
+        
+        # עדכון רשומת הנוכחות
+        attendance_collection.update_one(
+            {"id": active_attendance["id"]},
+            {"$set": {
+                "end_time": end_time,
+                "total_hours": round(total_hours, 2),
+                "status": "completed",
+                "end_notes": attendance_data.get("notes", ""),
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        return {
+            "status": "success",
+            "message": "יום עבודה הסתיים בהצלחה",
+            "end_time": end_time.isoformat(),
+            "total_hours": round(total_hours, 2)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error ending attendance: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בסיום יום עבודה")
+
+@api_router.get("/professional/attendance/status")
+async def get_professional_attendance_status(
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת סטטוס נוכחות נוכחי"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        current_date = datetime.utcnow().date()
+        
+        # מציאת רשומת הנוכחות של היום
+        attendance_record = attendance_collection.find_one({
+            "professional_id": current_user.id,
+            "date": current_date
+        })
+        
+        if not attendance_record:
+            return {
+                "status": "not_started",
+                "message": "יום עבודה טרם החל",
+                "is_active": False
+            }
+        
+        # חישוב זמן עבודה נוכחי אם פעיל
+        current_work_time = None
+        if attendance_record.get("status") == "active":
+            start_time = attendance_record["start_time"]
+            if isinstance(start_time, str):
+                start_time = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+            
+            current_hours = (datetime.utcnow() - start_time).total_seconds() / 3600
+            current_work_time = round(current_hours, 2)
+        
+        return {
+            "status": attendance_record.get("status", "unknown"),
+            "start_time": attendance_record.get("start_time", "").isoformat() if attendance_record.get("start_time") else None,
+            "end_time": attendance_record.get("end_time", "").isoformat() if attendance_record.get("end_time") else None,
+            "total_hours": attendance_record.get("total_hours"),
+            "current_work_time": current_work_time,
+            "is_active": attendance_record.get("status") == "active",
+            "location": attendance_record.get("location", ""),
+            "notes": attendance_record.get("notes", "")
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting attendance status: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת סטטוס נוכחות")
+
+@api_router.get("/professional/goals")
+async def get_professional_goals(
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת יעדים של המשתמש המקצועי"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        # מציאת יעדים קיימים
+        goals = goals_collection.find_one({"professional_id": current_user.id})
+        
+        if not goals:
+            # יצירת יעדים דיפולטיביים
+            default_goals = {
+                "id": str(uuid.uuid4()),
+                "professional_id": current_user.id,
+                "daily": {
+                    "appointments": {"target": 8, "current": 0},
+                    "revenue": {"target": 1500, "current": 0},
+                    "efficiency": {"target": 90, "current": 0},
+                    "satisfaction": {"target": 4.5, "current": 0}
+                },
+                "weekly": {
+                    "appointments": {"target": 40, "current": 0},
+                    "revenue": {"target": 7500, "current": 0},
+                    "new_clients": {"target": 5, "current": 0}
+                },
+                "monthly": {
+                    "appointments": {"target": 160, "current": 0},
+                    "revenue": {"target": 30000, "current": 0},
+                    "retention": {"target": 85, "current": 0}
+                },
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+            
+            goals_collection.insert_one(default_goals)
+            goals = default_goals
+        
+        # הסרת _id של MongoDB לסידור JSON
+        if "_id" in goals:
+            del goals["_id"]
+        
+        return goals
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting professional goals: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת יעדים")
+
 # ===== EMAIL INTEGRATION FOR DOCUMENTS =====
 
 import smtplib
