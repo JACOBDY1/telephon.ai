@@ -793,8 +793,8 @@ const BarberProfessionalApp = ({ user }) => {
         </div>
       )}
       
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b px-4 py-3">
+      {/* Header Sticky */}
+      <div className="sticky top-0 bg-white shadow-sm border-b px-4 py-3 z-30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -807,6 +807,23 @@ const BarberProfessionalApp = ({ user }) => {
           </div>
           
           <div className="flex items-center gap-3">
+            {/* כפתור יעדים */}
+            <button 
+              onClick={openGoalsModal}
+              className="p-2 hover:bg-gray-100 rounded-lg relative"
+            >
+              <Target className="w-5 h-5 text-gray-600" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full"></div>
+            </button>
+            
+            {/* כפתור הוסף לקוח */}
+            <button 
+              onClick={() => openClientModal()}
+              className="p-2 hover:bg-gray-100 rounded-lg"
+            >
+              <Plus className="w-5 h-5 text-gray-600" />
+            </button>
+            
             {notifications.length > 0 && (
               <div className="relative">
                 <div className="w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
