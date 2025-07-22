@@ -416,9 +416,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Authentication & Login Integration"
-    - "All Frontend Components Working"  
-  stuck_tasks: []
+    - "User Profile & Subscription System - Authentication"
+    - "User Profile Management Endpoints"
+    - "Professional User Features"
+    - "User Type System Implementation"
+  stuck_tasks:
+    - "User Profile & Subscription System - Authentication"
+    - "Professional User Features"
+    - "User Type System Implementation"
   test_all: false
   test_priority: "high_first"
 
