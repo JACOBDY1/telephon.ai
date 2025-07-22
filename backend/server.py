@@ -2014,6 +2014,445 @@ async def get_professional_users():
         logger.error(f"Error getting professional users: {str(e)}")
         raise HTTPException(status_code=500, detail="שגיאה בקבלת משתמשים מקצועיים")
 
+# ===== COMPREHENSIVE PROFESSIONAL SYSTEM API ENDPOINTS =====
+
+# Collection references
+clients_collection = db.clients
+treatments_collection = db.treatments  
+appointments_collection = db.appointments
+schedules_collection = db.schedules
+communications_collection = db.communications
+goals_collection = db.goals
+inventory_collection = db.inventory
+
+# ===== CLIENT MANAGEMENT ENDPOINTS =====
+
+@api_router.post("/professional/clients", response_model=ClientProfile)
+async def create_client(
+    client_data: ClientProfile,
+    current_user: User = Depends(get_current_active_user)
+):
+    """יצירת לקוח חדש"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        client_data.professional_id = current_user.id
+        client_dict = client_data.dict()
+        
+        result = clients_collection.insert_one(client_dict)
+        client_dict["id"] = str(result.inserted_id)
+        
+        return ClientProfile(**client_dict)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating client: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה ביצירת לקוח")
+
+@api_router.get("/professional/clients")
+async def get_professional_clients(
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת כל הלקוחות של המשתמש המקצועי"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        clients = list(clients_collection.find({
+            "professional_id": current_user.id,
+            "is_active": True
+        }))
+        
+        for client in clients:
+            client["id"] = str(client.pop("_id"))
+            
+        return {"clients": clients, "total": len(clients)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting clients: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת לקוחות")
+
+@api_router.get("/professional/clients/{client_id}")
+async def get_client_details(
+    client_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת פרטי לקוח מפורטים"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        # קבלת פרטי לקוח
+        client = clients_collection.find_one({
+            "id": client_id,
+            "professional_id": current_user.id
+        })
+        
+        if not client:
+            raise HTTPException(status_code=404, detail="לקוח לא נמצא")
+            
+        client["id"] = str(client.pop("_id", client_id))
+        
+        # קבלת היסטוריית טיפולים
+        treatments = list(treatments_collection.find({
+            "client_id": client_id,
+            "professional_id": current_user.id
+        }).sort("created_at", -1))
+        
+        for treatment in treatments:
+            treatment["id"] = str(treatment.pop("_id"))
+            
+        # קבלת תורים עתידיים
+        upcoming_appointments = list(appointments_collection.find({
+            "client_id": client_id,
+            "professional_id": current_user.id,
+            "scheduled_datetime": {"$gte": datetime.utcnow()},
+            "status": {"$in": ["scheduled", "confirmed"]}
+        }).sort("scheduled_datetime", 1))
+        
+        for appointment in upcoming_appointments:
+            appointment["id"] = str(appointment.pop("_id"))
+            
+        return {
+            "client": client,
+            "treatments_history": treatments,
+            "upcoming_appointments": upcoming_appointments,
+            "total_treatments": len(treatments),
+            "last_treatment": treatments[0] if treatments else None
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting client details: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת פרטי לקוח")
+
+@api_router.put("/professional/clients/{client_id}")
+async def update_client(
+    client_id: str,
+    client_updates: Dict[str, Any],
+    current_user: User = Depends(get_current_active_user)
+):
+    """עדכון פרטי לקוח"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        client_updates["updated_at"] = datetime.utcnow()
+        
+        result = clients_collection.update_one(
+            {"id": client_id, "professional_id": current_user.id},
+            {"$set": client_updates}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="לקוח לא נמצא")
+            
+        return {"message": "פרטי הלקוח עודכנו בהצלחה"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating client: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בעדכון לקוח")
+
+# ===== TREATMENT MANAGEMENT ENDPOINTS =====
+
+@api_router.post("/professional/treatments", response_model=TreatmentRecord)
+async def create_treatment_record(
+    treatment_data: TreatmentRecord,
+    current_user: User = Depends(get_current_active_user)
+):
+    """יצירת רשומת טיפול"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        treatment_data.professional_id = current_user.id
+        treatment_dict = treatment_data.dict()
+        
+        result = treatments_collection.insert_one(treatment_dict)
+        treatment_dict["id"] = str(result.inserted_id)
+        
+        # עדכון היסטוריית הלקוח
+        clients_collection.update_one(
+            {"id": treatment_data.client_id},
+            {"$push": {"hair_profile.previous_treatments": {
+                "treatment_id": treatment_dict["id"],
+                "date": treatment_data.created_at,
+                "service": treatment_data.service_type
+            }}}
+        )
+        
+        return TreatmentRecord(**treatment_dict)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating treatment: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה ביצירת רשומת טיפול")
+
+@api_router.get("/professional/treatments")
+async def get_treatments(
+    client_id: Optional[str] = None,
+    limit: int = 20,
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת רשומות טיפולים"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        query = {"professional_id": current_user.id}
+        if client_id:
+            query["client_id"] = client_id
+            
+        treatments = list(treatments_collection.find(query)
+                         .sort("created_at", -1)
+                         .limit(limit))
+        
+        for treatment in treatments:
+            treatment["id"] = str(treatment.pop("_id"))
+            
+        return {"treatments": treatments, "total": len(treatments)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting treatments: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת רשומות טיפולים")
+
+# ===== APPOINTMENT MANAGEMENT ENDPOINTS =====
+
+@api_router.post("/professional/appointments", response_model=Appointment)
+async def create_appointment(
+    appointment_data: Appointment,
+    current_user: User = Depends(get_current_active_user)
+):
+    """יצירת תור חדש"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        appointment_data.professional_id = current_user.id
+        appointment_dict = appointment_data.dict()
+        
+        result = appointments_collection.insert_one(appointment_dict)
+        appointment_dict["id"] = str(result.inserted_id)
+        
+        return Appointment(**appointment_dict)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating appointment: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה ביצירת תור")
+
+@api_router.get("/professional/appointments")
+async def get_appointments(
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    status: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת תורים"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        query = {"professional_id": current_user.id}
+        
+        if date_from or date_to:
+            date_query = {}
+            if date_from:
+                date_query["$gte"] = datetime.fromisoformat(date_from.replace('Z', '+00:00'))
+            if date_to:
+                date_query["$lte"] = datetime.fromisoformat(date_to.replace('Z', '+00:00'))
+            query["scheduled_datetime"] = date_query
+            
+        if status:
+            query["status"] = status
+            
+        appointments = list(appointments_collection.find(query)
+                          .sort("scheduled_datetime", 1))
+        
+        for appointment in appointments:
+            appointment["id"] = str(appointment.pop("_id"))
+            
+        return {"appointments": appointments, "total": len(appointments)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting appointments: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת תורים")
+
+# ===== PROFESSIONAL SCHEDULE MANAGEMENT =====
+
+@api_router.post("/professional/schedule")
+async def set_schedule(
+    schedule_data: ProfessionalSchedule,
+    current_user: User = Depends(get_current_active_user)
+):
+    """הגדרת לוח זמנים יומי"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        schedule_data.professional_id = current_user.id
+        schedule_dict = schedule_data.dict()
+        
+        # עדכון או יצירה
+        result = schedules_collection.update_one(
+            {"professional_id": current_user.id, "date": schedule_data.date},
+            {"$set": schedule_dict},
+            upsert=True
+        )
+        
+        return {"message": "לוח הזמנים עודכן בהצלחה"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting schedule: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בהגדרת לוח זמנים")
+
+@api_router.get("/professional/schedule")
+async def get_schedule(
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת לוח זמנים"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        query = {"professional_id": current_user.id}
+        
+        if date_from or date_to:
+            date_query = {}
+            if date_from:
+                date_query["$gte"] = datetime.fromisoformat(date_from).date()
+            if date_to:
+                date_query["$lte"] = datetime.fromisoformat(date_to).date()
+            query["date"] = date_query
+            
+        schedules = list(schedules_collection.find(query).sort("date", 1))
+        
+        for schedule in schedules:
+            schedule["id"] = str(schedule.pop("_id"))
+            
+        return {"schedules": schedules}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting schedule: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת לוח זמנים")
+
+# ===== GOALS AND ANALYTICS =====
+
+@api_router.post("/professional/goals")
+async def set_goals(
+    goals_data: ProfessionalGoals,
+    current_user: User = Depends(get_current_active_user)
+):
+    """הגדרת יעדים"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        goals_data.professional_id = current_user.id
+        goals_dict = goals_data.dict()
+        
+        result = goals_collection.insert_one(goals_dict)
+        goals_dict["id"] = str(result.inserted_id)
+        
+        return {"message": "יעדים נשמרו בהצלחה", "goals": goals_dict}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting goals: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בהגדרת יעדים")
+
+@api_router.get("/professional/analytics")
+async def get_professional_analytics(
+    period: str = "month",  # day, week, month, year
+    current_user: User = Depends(get_current_active_user)
+):
+    """קבלת אנליטיקה מקצועית"""
+    try:
+        if current_user.user_type not in ["professional", "barber", "therapist"]:
+            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        
+        # חישוב תקופת זמן
+        now = datetime.utcnow()
+        if period == "day":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == "week":
+            start_date = now - timedelta(days=7)
+        elif period == "month":
+            start_date = now - timedelta(days=30)
+        else:  # year
+            start_date = now - timedelta(days=365)
+            
+        # סטטיסטיקות טיפולים
+        treatments_stats = treatments_collection.aggregate([
+            {"$match": {
+                "professional_id": current_user.id,
+                "created_at": {"$gte": start_date}
+            }},
+            {"$group": {
+                "_id": None,
+                "total_treatments": {"$sum": 1},
+                "total_revenue": {"$sum": "$service_details.final_price"},
+                "avg_satisfaction": {"$avg": "$client_satisfaction"}
+            }}
+        ])
+        treatments_data = list(treatments_stats)
+        
+        # סטטיסטיקות לקוחות
+        clients_stats = clients_collection.count_documents({
+            "professional_id": current_user.id,
+            "created_at": {"$gte": start_date}
+        })
+        
+        # סטטיסטיקות תורים
+        appointments_stats = appointments_collection.aggregate([
+            {"$match": {
+                "professional_id": current_user.id,
+                "scheduled_datetime": {"$gte": start_date}
+            }},
+            {"$group": {
+                "_id": "$status",
+                "count": {"$sum": 1}
+            }}
+        ])
+        appointments_data = list(appointments_stats)
+        
+        return {
+            "period": period,
+            "treatments": treatments_data[0] if treatments_data else {
+                "total_treatments": 0,
+                "total_revenue": 0,
+                "avg_satisfaction": 0
+            },
+            "new_clients": clients_stats,
+            "appointments": {item["_id"]: item["count"] for item in appointments_data}
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting analytics: {str(e)}")
+        raise HTTPException(status_code=500, detail="שגיאה בקבלת אנליטיקה")
+
 @api_router.post("/setup/demo-data")
 async def create_demo_data():
     """Create demo users and data - Development only"""
