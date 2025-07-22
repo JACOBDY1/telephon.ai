@@ -14,7 +14,7 @@ import jwt
 import base64
 
 # Backend URL from frontend/.env
-BACKEND_URL = "https://b532036c-e919-442e-8796-a659534d8cdf.preview.emergentagent.com/api"
+BACKEND_URL = "https://85599114-0b34-4acc-a752-adb95ae9b552.preview.emergentagent.com/api"
 
 # Test credentials provided
 CHECKCALL_CREDS = {
