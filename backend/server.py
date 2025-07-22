@@ -238,13 +238,13 @@ async def get_user_by_username(username: str) -> Optional[UserInDB]:
         if user_data:
             user_data["id"] = str(user_data["_id"])
             del user_data["_id"]
-            # Ensure user_type and subscription exist
-            if "user_type" not in user_data:
+            # Ensure user_type and subscription exist with safe defaults
+            if "user_type" not in user_data or user_data["user_type"] is None:
                 user_data["user_type"] = "client"
-            if "subscription" not in user_data:
+            if "subscription" not in user_data or user_data["subscription"] is None:
                 user_data["subscription"] = {
                     "plan_id": "free_trial",
-                    "plan_name": "ניסיון חינם",
+                    "plan_name": "ניסיון חינם", 
                     "status": "trial"
                 }
             return UserInDB(**user_data)
