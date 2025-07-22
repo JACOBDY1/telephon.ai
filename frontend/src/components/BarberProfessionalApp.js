@@ -389,6 +389,89 @@ const BarberProfessionalApp = ({ user }) => {
     });
   };
 
+  // פונקציות ניהול זמן ונוכחות
+  const startWorkDay = () => {
+    const now = new Date();
+    setWorkTime(prev => ({
+      ...prev,
+      startTime: now,
+      isActive: true
+    }));
+    setWorkStatus('working');
+    
+    addNotification({
+      type: 'success',
+      title: 'יום עבודה החל',
+      message: `יום העבודה החל בשעה ${now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}`
+    });
+  };
+
+  const endWorkDay = () => {
+    const now = new Date();
+    setWorkTime(prev => {
+      const totalMs = now - (prev.startTime || now);
+      const totalHours = totalMs / (1000 * 60 * 60);
+      
+      return {
+        ...prev,
+        endTime: now,
+        totalHours: totalHours,
+        isActive: false
+      };
+    });
+    setWorkStatus('ready');
+    
+    addNotification({
+      type: 'info',
+      title: 'יום עבודה הסתיים',
+      message: `יום העבודה הסתיים בשעה ${now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}`
+    });
+  };
+
+  const takeBreak = () => {
+    setWorkStatus('break');
+    addNotification({
+      type: 'info',
+      title: 'הפסקה',
+      message: 'יצאת להפסקה'
+    });
+  };
+
+  const resumeWork = () => {
+    setWorkStatus('working');
+    addNotification({
+      type: 'info',
+      title: 'חזרה לעבודה',
+      message: 'חזרת לעבודה'
+    });
+  };
+
+  // פונקציות לפופ-אפים
+  const openClientModal = (client = null) => {
+    setSelectedClient(client);
+    setShowClientModal(true);
+  };
+
+  const openLeadModal = (lead = null) => {
+    setSelectedLead(lead);
+    setShowLeadModal(true);
+  };
+
+  const openGoalsModal = () => {
+    setShowGoalsModal(true);
+  };
+
+  const updateGoals = (newGoals) => {
+    setGoals(newGoals);
+    setShowGoalsModal(false);
+    
+    addNotification({
+      type: 'success',
+      title: 'יעדים עודכנו',
+      message: 'היעדים שלך עודכנו בהצלחה'
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
