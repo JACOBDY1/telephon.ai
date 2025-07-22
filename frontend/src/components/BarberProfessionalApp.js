@@ -208,22 +208,22 @@ const FloatingActivityClock = ({ workStatus, currentClient, onStatusChange }) =>
   );
 };
 
-const BarberProfessionalApp = () => {
+const BarberProfessionalApp = ({ user }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [workStatus, setWorkStatus] = useState('ready'); // ready, working, break
   const [currentClient, setCurrentClient] = useState(null);
   const [activeView, setActiveView] = useState('dashboard');
   const [notifications, setNotifications] = useState([]);
   
-  // נתונים מתקדמים לHairPro IL Advanced
-  const [todayStats, setTodayStats] = useState({});
-  const [dailyGoals, setDailyGoals] = useState({});
-  const [todayAppointments, setTodayAppointments] = useState([]);
+  // מערכת נתונים מקיפה
   const [clients, setClients] = useState([]);
+  const [treatments, setTreatments] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [inventory, setInventory] = useState([]);
-  const [formulas, setFormulas] = useState([]);
-  const [analyticsData, setAnalyticsData] = useState({});
-
+  const [goals, setGoals] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
   // Update time every second
   useEffect(() => {
     const timer = setInterval(() => {
@@ -232,187 +232,91 @@ const BarberProfessionalApp = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Load barber data
+  // Load comprehensive professional data
   useEffect(() => {
-    loadBarberData();
-  }, []);
+    if (user?.user_type === 'professional' || user?.user_type === 'barber') {
+      loadProfessionalData();
+    }
+  }, [user]);
 
-  const loadBarberData = () => {
-    // נתונים סטטיסטיים מתקדמים של HairPro IL Advanced
-    setTodayStats({
-      appointmentsCompleted: 8,
-      totalRevenue: 1420,
-      tips: 180,
-      averageService: 178,
-      workingHours: 6.5,
-      customerSatisfaction: 4.9,
-      newCustomers: 3,
-      repeatCustomers: 5,
-      colorUsed: 245, // גרם
-      wastePercentage: 12,
-      efficiency: 88
-    });
+  const loadProfessionalData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
 
-    // יעדים יומיים מתקדמים
-    setDailyGoals({
-      appointments: { current: 8, target: 12, percentage: 67 },
-      revenue: { current: 1420, target: 1800, percentage: 79 },
-      tips: { current: 180, target: 250, percentage: 72 },
-      newCustomers: { current: 3, target: 4, percentage: 75 },
-      satisfaction: { current: 4.9, target: 4.5, percentage: 109 },
-      colorEfficiency: { current: 88, target: 85, percentage: 103 },
-      wasteReduction: { current: 12, target: 15, percentage: 80 }
-    });
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
 
-    // לקוחות עם כרטיסי כימיה מתקדמים
-    setClients([
-      {
-        id: 1,
-        name: 'שרה כהן',
-        phone: '050-1234567',
-        email: 'sarah@example.com',
-        photo: null,
-        birthDate: '1985-03-15',
-        hairProfile: {
-          naturalColor: 'חום כהה 4',
-          currentColor: 'בלונד בהיר 8.3',
-          hairType: 'חלק, דק',
-          scalpCondition: 'רגיל'
-        },
-        chemistryCard: {
-          allergies: ['PPD - פניל דיאמין'],
-          sensitivities: ['אמוניה חזקה'],
-          skinTest: {
-            date: '2024-01-10',
-            result: 'שלילי'
-          }
-        },
-        history: [
-          {
-            id: 1,
-            date: '2024-01-15',
-            service: 'צביעה + תספורת',
-            cost: 380,
-            satisfaction: 5
-          }
-        ],
-        metrics: {
-          totalVisits: 12,
-          totalSpent: 4250,
-          lastVisit: '2024-01-15',
-          loyaltyScore: 95
+      // טעינת נתוני דשבורד מקיפים
+      const dashboardResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/dashboard`, { headers });
+      if (dashboardResponse.ok) {
+        const dashboardData = await dashboardResponse.json();
+        setDashboardData(dashboardData);
+        setAppointments(dashboardData.today_appointments || []);
+      }
+
+      // טעינת לקוחות
+      const clientsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/clients`, { headers });
+      if (clientsResponse.ok) {
+        const clientsData = await clientsResponse.json();
+        setClients(clientsData.clients || []);
+      }
+
+      // טעינת רשומות טיפולים
+      const treatmentsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/treatments?limit=10`, { headers });
+      if (treatmentsResponse.ok) {
+        const treatmentsData = await treatmentsResponse.json();
+        setTreatments(treatmentsData.treatments || []);
+      }
+
+      // טעינת מלאי
+      const inventoryResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/inventory`, { headers });
+      if (inventoryResponse.ok) {
+        const inventoryData = await inventoryResponse.json();
+        setInventory(inventoryData.inventory || []);
+      }
+
+    } catch (error) {
+      console.error('Error loading professional data:', error);
+      addNotification({
+        type: 'error',
+        title: 'שגיאה בטעינת נתונים',
+        message: 'לא ניתן לטעון את נתוני המערכת'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createDemoData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/populate-demo-data`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      }
-    ]);
+      });
 
-    // תורים מתקדמים עם פרטי לקוחות
-    setTodayAppointments([
-      {
-        id: 1,
-        time: '09:00',
-        clientId: 1,
-        clientName: 'שרה כהן',
-        service: 'צביעה + תספורת',
-        price: 380,
-        duration: 120,
-        status: 'completed',
-        tip: 50,
-        notes: 'לקוחה VIP, מעדיפה בלונדים',
-        satisfaction: 5,
-        allergies: ['PPD'],
-        lastColor: 'בלונד בהיר 8.3'
-      },
-      {
-        id: 2,
-        time: '11:30',
-        clientName: 'רחל אברהם',
-        service: 'צביעת שורשים',
-        price: 250,
-        duration: 90,
-        status: 'completed',
-        tip: 30,
-        satisfaction: 4
-      },
-      {
-        id: 3,
-        time: '14:00',
-        clientName: 'מירי לוי',
-        service: 'גוונים',
-        price: 280,
-        duration: 75,
-        status: 'in-progress',
-        notes: 'לקוחה חדשה, רוצה שינוי דרמטי'
-      },
-      {
-        id: 4,
-        time: '15:30',
-        clientName: 'יעל כהן',
-        service: 'תספורת + פן',
-        price: 180,
-        duration: 60,
-        status: 'upcoming',
-        notes: 'תספורת לאירוע מיוחד'
+      if (response.ok) {
+        addNotification({
+          type: 'success',
+          title: 'נתוני דמו נוצרו',
+          message: 'נתוני הדמו נוצרו בהצלחה!'
+        });
+        await loadProfessionalData(); // רענון נתונים
       }
-    ]);
-
-    // מלאי חכם
-    setInventory([
-      {
-        id: 1,
-        product: 'שוורצקוף איגורא 6-0',
-        quantity: 12,
-        minStock: 5,
-        pricePerUnit: 28,
-        dailyUsage: 2.5,
-        daysLeft: Math.floor(12 / 2.5)
-      },
-      {
-        id: 2,
-        product: 'לוריאל מג\'ירל 8.3',
-        quantity: 8,
-        minStock: 5,
-        pricePerUnit: 32,
-        dailyUsage: 1.8,
-        daysLeft: Math.floor(8 / 1.8)
-      }
-    ]);
-
-    // נתוני אנליטיקה
-    setAnalyticsData({
-      colorUsage: {
-        'בלונדים': 45,
-        'חומים': 35,
-        'שחורים': 12,
-        'אדומים': 8
-      },
-      wasteReduction: 22,
-      efficiency: 88,
-      revenue: {
-        daily: 1420,
-        weekly: 8640,
-        monthly: 36800
-      },
-      trends: {
-        popularColors: ['8.3', '7.0', '6.0', '5.52'],
-        peakHours: ['10:00-12:00', '14:00-16:00']
-      }
-    });
-
-    // התראות
-    setNotifications([
-      {
-        id: 1,
-        type: 'warning',
-        title: 'מלאי נמוך',
-        message: 'לוריאל מג\'ירל 8.3 - נותרו 3 שפופרות'
-      },
-      {
-        id: 2,
-        type: 'success', 
-        title: 'לקוחה מרוצה',
-        message: 'שרה כהן נתנה דירוג 5 כוכבים'
-      }
-    ]);
+    } catch (error) {
+      console.error('Error creating demo data:', error);
+    }
   };
 
   const addNotification = (notification) => {
@@ -428,53 +332,39 @@ const BarberProfessionalApp = () => {
   };
 
   const startAppointment = (appointmentId) => {
-    const appointment = todayAppointments.find(apt => apt.id === appointmentId);
-    setTodayAppointments(prev => prev.map(apt => 
-      apt.id === appointmentId 
-        ? { ...apt, status: 'in-progress', actualStartTime: currentTime.toLocaleTimeString() }
-        : apt
-    ));
-    setWorkStatus('working');
+    const appointment = appointments.find(apt => apt.id === appointmentId);
     setCurrentClient(appointment);
+    setWorkStatus('working');
     
     addNotification({
       type: 'info',
       title: 'טיפול החל',
-      message: `התחלת טיפול ל-${appointment?.clientName}`
+      message: `התחלת טיפול עבור ${appointment?.client_name || 'לקוח'}`
     });
   };
 
-  const completeAppointment = (appointmentId, tip = 0, satisfaction = 5) => {
-    const appointment = todayAppointments.find(apt => apt.id === appointmentId);
-    
-    setTodayAppointments(prev => prev.map(apt => 
-      apt.id === appointmentId 
-        ? { 
-            ...apt, 
-            status: 'completed', 
-            tip, 
-            satisfaction,
-            actualEndTime: currentTime.toLocaleTimeString()
-          }
-        : apt
-    ));
+  const completeAppointment = (appointmentId, satisfaction = 5) => {
     setWorkStatus('ready');
     setCurrentClient(null);
     
-    // עדכון סטטיסטיקות
-    setTodayStats(prev => ({
-      ...prev,
-      appointmentsCompleted: prev.appointmentsCompleted + 1,
-      totalRevenue: prev.totalRevenue + (appointment?.price || 0),
-      tips: prev.tips + tip
-    }));
-
     addNotification({
       type: 'success',
       title: 'טיפול הושלם',
-      message: `טיפול ל-${appointment?.clientName} הושלם בהצלחה`
+      message: 'הטיפול הושלם בהצלחה'
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-lg font-semibold text-gray-700">טוען מערכת HairPro IL Advanced...</p>
+          <p className="text-sm text-gray-500">מכין את כל הנתונים שלך</p>
+        </div>
+      </div>
+    );
+  }
 
   // דשבורד מתקדם של HairPro IL Advanced
   const AdvancedDashboard = () => (
