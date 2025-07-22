@@ -1129,6 +1129,606 @@ class APITester:
         except Exception as e:
             self.log_result("Error Handling", False, f"Error handling test failed: {str(e)}")
     
+    # ===== HAIRPRO PROFESSIONAL SYSTEM TESTS =====
+    
+    def test_professional_clients_crud(self):
+        """Test Professional Clients CRUD operations"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Clients CRUD", False, "No auth tokens available")
+                return False
+            
+            # Use professional token for professional endpoints
+            professional_token = self.auth_tokens.get("professional") or self.auth_tokens.get("admin")
+            if not professional_token:
+                self.log_result("Professional Clients CRUD", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test GET /api/professional/clients
+            response = self.session.get(f"{BACKEND_URL}/professional/clients", headers=headers)
+            if response.status_code == 200:
+                clients = response.json()
+                self.log_result("Professional Clients - GET", True, f"Retrieved {len(clients)} clients")
+            else:
+                self.log_result("Professional Clients - GET", False, f"GET clients failed: {response.status_code}")
+                return False
+            
+            # Test POST /api/professional/clients
+            new_client = {
+                "personal_info": {
+                    "full_name": "שרה כהן",
+                    "phone": "+972-50-123-4567",
+                    "email": "sarah.cohen@example.com",
+                    "birth_date": "1985-03-15",
+                    "address": "רחוב הרצל 123, תל אביב",
+                    "emergency_contact": "+972-50-987-6543"
+                },
+                "hair_profile": {
+                    "natural_color": "חום כהה",
+                    "current_color": "בלונד זהוב",
+                    "hair_type": "גלי",
+                    "hair_thickness": "בינוני",
+                    "scalp_condition": "רגיל",
+                    "hair_length": "אורך בינוני",
+                    "previous_treatments": ["צבע", "החלקה"]
+                },
+                "chemistry_card": {
+                    "allergies": ["PPD", "אמוניה"],
+                    "sensitivities": ["ריחות חזקים"],
+                    "patch_test_date": "2024-01-01",
+                    "patch_test_result": "שלילי",
+                    "notes": "רגישות קלה לכימיקלים",
+                    "restrictions": ["אין שימוש בחמצן מעל 20vol"]
+                },
+                "preferences": {
+                    "preferred_time_slots": ["10:00-12:00", "14:00-16:00"],
+                    "preferred_services": ["צבע", "תספורת"],
+                    "communication_preference": "whatsapp",
+                    "language": "he",
+                    "special_requests": "מוזיקה שקטה"
+                }
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/clients", json=new_client, headers=headers)
+            if response.status_code == 200:
+                created_client = response.json()
+                client_id = created_client.get("id")
+                self.log_result("Professional Clients - POST", True, f"Created client with ID: {client_id}")
+                
+                # Test GET specific client
+                response = self.session.get(f"{BACKEND_URL}/professional/clients/{client_id}", headers=headers)
+                if response.status_code == 200:
+                    client_data = response.json()
+                    if client_data.get("personal_info", {}).get("full_name") == "שרה כהן":
+                        self.log_result("Professional Clients - GET by ID", True, "Retrieved specific client with Hebrew data")
+                    else:
+                        self.log_result("Professional Clients - GET by ID", False, "Client data incorrect")
+                else:
+                    self.log_result("Professional Clients - GET by ID", False, f"GET by ID failed: {response.status_code}")
+                
+                # Test PUT /api/professional/clients/{id}
+                update_data = {
+                    "personal_info": {
+                        "full_name": "שרה כהן-לוי",
+                        "phone": "+972-50-123-4567",
+                        "email": "sarah.cohen.levi@example.com"
+                    },
+                    "hair_profile": {
+                        "current_color": "בלונד פלטינה",
+                        "hair_length": "אורך ארוך"
+                    }
+                }
+                
+                response = self.session.put(f"{BACKEND_URL}/professional/clients/{client_id}", json=update_data, headers=headers)
+                if response.status_code == 200:
+                    updated_client = response.json()
+                    if "שרה כהן-לוי" in updated_client.get("personal_info", {}).get("full_name", ""):
+                        self.log_result("Professional Clients - PUT", True, "Client updated successfully with Hebrew data")
+                    else:
+                        self.log_result("Professional Clients - PUT", False, "Client update data incorrect")
+                else:
+                    self.log_result("Professional Clients - PUT", False, f"PUT failed: {response.status_code}")
+                
+                return True
+            else:
+                self.log_result("Professional Clients - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional Clients CRUD", False, f"Clients CRUD test failed: {str(e)}")
+            return False
+    
+    def test_professional_formulas_crud(self):
+        """Test Professional Formulas CRUD operations with cost analysis"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Formulas CRUD", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional") or self.auth_tokens.get("admin")
+            if not professional_token:
+                self.log_result("Professional Formulas CRUD", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test GET /api/professional/formulas
+            response = self.session.get(f"{BACKEND_URL}/professional/formulas", headers=headers)
+            if response.status_code == 200:
+                formulas = response.json()
+                self.log_result("Professional Formulas - GET", True, f"Retrieved {len(formulas)} formulas")
+            else:
+                self.log_result("Professional Formulas - GET", False, f"GET formulas failed: {response.status_code}")
+                return False
+            
+            # Test POST /api/professional/formulas
+            new_formula = {
+                "client_id": "test_client_123",
+                "formula_name": "בלונד זהוב לשרה",
+                "colors_used": [
+                    {
+                        "brand": "schwarzkopf",
+                        "code": "8-0",
+                        "planned_weight": 60,
+                        "actual_weight": 58
+                    },
+                    {
+                        "brand": "schwarzkopf", 
+                        "code": "9-1",
+                        "planned_weight": 30,
+                        "actual_weight": 29
+                    }
+                ],
+                "developer": {
+                    "vol": "20vol",
+                    "amount_ml": 90,
+                    "actual_amount_ml": 87
+                },
+                "total_planned_weight": 90,
+                "total_actual_weight": 87,
+                "mixing_ratio": "1:1",
+                "processing_time_minutes": 35,
+                "service_price": 350.0,
+                "notes": "תוצאה מעולה, הלקוחה מרוצה מאוד"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/formulas", json=new_formula, headers=headers)
+            if response.status_code == 200:
+                created_formula = response.json()
+                formula_id = created_formula.get("id")
+                self.log_result("Professional Formulas - POST", True, f"Created formula with ID: {formula_id}")
+                
+                # Test cost analysis endpoint
+                response = self.session.get(f"{BACKEND_URL}/professional/formulas/{formula_id}/cost-analysis", headers=headers)
+                if response.status_code == 200:
+                    cost_analysis = response.json()
+                    required_fields = ["color_cost", "developer_cost", "total_material_cost", "efficiency_score", "profit_margin"]
+                    missing_fields = [field for field in required_fields if field not in cost_analysis]
+                    
+                    if not missing_fields:
+                        self.log_result("Professional Formulas - Cost Analysis", True, 
+                                      f"Cost analysis working: efficiency {cost_analysis.get('efficiency_score', 0)}%, "
+                                      f"profit margin {cost_analysis.get('profit_margin', 0)}%")
+                    else:
+                        self.log_result("Professional Formulas - Cost Analysis", False, 
+                                      f"Missing cost analysis fields: {missing_fields}")
+                else:
+                    self.log_result("Professional Formulas - Cost Analysis", False, 
+                                  f"Cost analysis failed: {response.status_code}")
+                
+                return True
+            else:
+                self.log_result("Professional Formulas - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional Formulas CRUD", False, f"Formulas CRUD test failed: {str(e)}")
+            return False
+    
+    def test_professional_inventory_management(self):
+        """Test Professional Smart Inventory Management"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Inventory Management", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional") or self.auth_tokens.get("admin")
+            if not professional_token:
+                self.log_result("Professional Inventory Management", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test GET /api/professional/inventory
+            response = self.session.get(f"{BACKEND_URL}/professional/inventory", headers=headers)
+            if response.status_code == 200:
+                inventory = response.json()
+                self.log_result("Professional Inventory - GET", True, f"Retrieved {len(inventory)} inventory items")
+            else:
+                self.log_result("Professional Inventory - GET", False, f"GET inventory failed: {response.status_code}")
+                return False
+            
+            # Test POST /api/professional/inventory
+            new_inventory_item = {
+                "brand": "שוורצקופף",
+                "product_name": "IGORA ROYAL 8-0",
+                "product_code": "8-0",
+                "category": "color",
+                "unit_type": "grams",
+                "current_stock": 240.0,
+                "minimum_stock": 60.0,
+                "maximum_stock": 480.0,
+                "reorder_point": 120.0,
+                "cost_per_unit": 0.47,
+                "selling_price_per_unit": 0.85,
+                "supplier": "ספק צבעים מקצועי",
+                "average_daily_usage": 15.0,
+                "expiry_date": "2025-12-31T00:00:00"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/inventory", json=new_inventory_item, headers=headers)
+            if response.status_code == 200:
+                created_item = response.json()
+                item_id = created_item.get("id")
+                self.log_result("Professional Inventory - POST", True, f"Created inventory item with ID: {item_id}")
+                
+                # Test stock update
+                stock_update = {
+                    "quantity_used": 30.0,
+                    "reason": "שימוש בטיפול ללקוחה שרה כהן"
+                }
+                
+                response = self.session.put(f"{BACKEND_URL}/professional/inventory/{item_id}/stock", json=stock_update, headers=headers)
+                if response.status_code == 200:
+                    updated_item = response.json()
+                    if updated_item.get("current_stock") == 210.0:  # 240 - 30
+                        self.log_result("Professional Inventory - Stock Update", True, "Stock updated correctly")
+                    else:
+                        self.log_result("Professional Inventory - Stock Update", False, "Stock calculation incorrect")
+                else:
+                    self.log_result("Professional Inventory - Stock Update", False, f"Stock update failed: {response.status_code}")
+                
+                # Test smart analysis
+                response = self.session.get(f"{BACKEND_URL}/professional/inventory/smart-analysis", headers=headers)
+                if response.status_code == 200:
+                    analysis = response.json()
+                    required_fields = ["low_stock_items", "reorder_recommendations", "usage_predictions"]
+                    missing_fields = [field for field in required_fields if field not in analysis]
+                    
+                    if not missing_fields:
+                        self.log_result("Professional Inventory - Smart Analysis", True, 
+                                      f"Smart analysis working: {len(analysis.get('low_stock_items', []))} low stock items")
+                    else:
+                        self.log_result("Professional Inventory - Smart Analysis", False, 
+                                      f"Missing analysis fields: {missing_fields}")
+                else:
+                    self.log_result("Professional Inventory - Smart Analysis", False, 
+                                  f"Smart analysis failed: {response.status_code}")
+                
+                return True
+            else:
+                self.log_result("Professional Inventory - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional Inventory Management", False, f"Inventory management test failed: {str(e)}")
+            return False
+    
+    def test_professional_appointments_system(self):
+        """Test Professional Appointments System"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Appointments System", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional") or self.auth_tokens.get("admin")
+            if not professional_token:
+                self.log_result("Professional Appointments System", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test GET /api/professional/appointments
+            response = self.session.get(f"{BACKEND_URL}/professional/appointments", headers=headers)
+            if response.status_code == 200:
+                appointments = response.json()
+                self.log_result("Professional Appointments - GET", True, f"Retrieved {len(appointments)} appointments")
+            else:
+                self.log_result("Professional Appointments - GET", False, f"GET appointments failed: {response.status_code}")
+                return False
+            
+            # Test POST /api/professional/appointments
+            new_appointment = {
+                "client_id": "test_client_123",
+                "scheduled_datetime": (datetime.utcnow() + timedelta(days=7)).isoformat(),
+                "duration_minutes": 120,
+                "service_type": "צבע ותספורת",
+                "service_details": {
+                    "services": ["צבע שורשים", "תספורת", "עיצוב"],
+                    "estimated_cost": 350.0,
+                    "special_requirements": "שימוש בצבעים ללא אמוניה"
+                },
+                "notes": "לקוחה חדשה, צריך בדיקת רגישות"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/appointments", json=new_appointment, headers=headers)
+            if response.status_code == 200:
+                created_appointment = response.json()
+                appointment_id = created_appointment.get("id")
+                self.log_result("Professional Appointments - POST", True, f"Created appointment with ID: {appointment_id}")
+                
+                # Test appointment filtering by date
+                today = datetime.utcnow().date().isoformat()
+                response = self.session.get(f"{BACKEND_URL}/professional/appointments?date={today}", headers=headers)
+                if response.status_code == 200:
+                    filtered_appointments = response.json()
+                    self.log_result("Professional Appointments - Date Filter", True, 
+                                  f"Retrieved {len(filtered_appointments)} appointments for {today}")
+                else:
+                    self.log_result("Professional Appointments - Date Filter", False, 
+                                  f"Date filtering failed: {response.status_code}")
+                
+                return True
+            else:
+                self.log_result("Professional Appointments - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional Appointments System", False, f"Appointments system test failed: {str(e)}")
+            return False
+    
+    def test_professional_scale_integration(self):
+        """Test Professional Bluetooth Scale Integration (Mocked)"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Scale Integration", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional") or self.auth_tokens.get("admin")
+            if not professional_token:
+                self.log_result("Professional Scale Integration", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test POST /api/professional/scale/connect
+            connect_data = {
+                "device_name": "Professional Scale Pro",
+                "device_id": "scale_001"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/scale/connect", json=connect_data, headers=headers)
+            if response.status_code == 200:
+                connection_result = response.json()
+                if connection_result.get("status") == "connected":
+                    self.log_result("Professional Scale - Connect", True, 
+                                  f"Scale connected: {connection_result.get('device', 'Unknown')}")
+                else:
+                    self.log_result("Professional Scale - Connect", False, "Scale connection failed")
+                    return False
+            else:
+                self.log_result("Professional Scale - Connect", False, f"Scale connect failed: {response.status_code}")
+                return False
+            
+            # Test GET /api/professional/scale/reading
+            response = self.session.get(f"{BACKEND_URL}/professional/scale/reading", headers=headers)
+            if response.status_code == 200:
+                reading_data = response.json()
+                if "weight" in reading_data and "timestamp" in reading_data:
+                    self.log_result("Professional Scale - Reading", True, 
+                                  f"Scale reading: {reading_data.get('weight', 0)}g")
+                else:
+                    self.log_result("Professional Scale - Reading", False, "Invalid reading data format")
+                    return False
+            else:
+                self.log_result("Professional Scale - Reading", False, f"Scale reading failed: {response.status_code}")
+                return False
+            
+            # Test POST /api/professional/scale/validate
+            validation_data = {
+                "formula_id": "test_formula_123",
+                "component_type": "color",
+                "component_code": "8-0",
+                "planned_weight": 60.0,
+                "actual_weight": 58.5
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/scale/validate", json=validation_data, headers=headers)
+            if response.status_code == 200:
+                validation_result = response.json()
+                required_fields = ["within_tolerance", "variance", "variance_percentage", "recommendation"]
+                missing_fields = [field for field in required_fields if field not in validation_result]
+                
+                if not missing_fields:
+                    self.log_result("Professional Scale - Validation", True, 
+                                  f"Scale validation working: variance {validation_result.get('variance', 0)}g, "
+                                  f"recommendation: {validation_result.get('recommendation', 'N/A')}")
+                else:
+                    self.log_result("Professional Scale - Validation", False, 
+                                  f"Missing validation fields: {missing_fields}")
+            else:
+                self.log_result("Professional Scale - Validation", False, f"Scale validation failed: {response.status_code}")
+                return False
+            
+            return True
+                
+        except Exception as e:
+            self.log_result("Professional Scale Integration", False, f"Scale integration test failed: {str(e)}")
+            return False
+    
+    def test_professional_analytics_dashboard(self):
+        """Test Professional Analytics and Dashboard"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Analytics Dashboard", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional") or self.auth_tokens.get("admin")
+            if not professional_token:
+                self.log_result("Professional Analytics Dashboard", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test GET /api/professional/analytics
+            response = self.session.get(f"{BACKEND_URL}/professional/analytics", headers=headers)
+            if response.status_code == 200:
+                analytics = response.json()
+                required_fields = ["daily_metrics", "weekly_summary", "monthly_trends", "efficiency_scores"]
+                missing_fields = [field for field in required_fields if field not in analytics]
+                
+                if not missing_fields:
+                    daily_metrics = analytics.get("daily_metrics", {})
+                    self.log_result("Professional Analytics", True, 
+                                  f"Analytics working: {daily_metrics.get('clients_served', 0)} clients served, "
+                                  f"revenue: {daily_metrics.get('total_revenue', 0)} ILS")
+                else:
+                    self.log_result("Professional Analytics", False, 
+                                  f"Missing analytics fields: {missing_fields}")
+                    return False
+            else:
+                self.log_result("Professional Analytics", False, f"Analytics failed: {response.status_code}")
+                return False
+            
+            # Test GET /api/professional/dashboard
+            response = self.session.get(f"{BACKEND_URL}/professional/dashboard", headers=headers)
+            if response.status_code == 200:
+                dashboard = response.json()
+                required_sections = ["today_appointments", "pending_tasks", "inventory_alerts", "recent_clients"]
+                missing_sections = [section for section in required_sections if section not in dashboard]
+                
+                if not missing_sections:
+                    self.log_result("Professional Dashboard", True, 
+                                  f"Dashboard working: {len(dashboard.get('today_appointments', []))} appointments today, "
+                                  f"{len(dashboard.get('inventory_alerts', []))} inventory alerts")
+                else:
+                    self.log_result("Professional Dashboard", False, 
+                                  f"Missing dashboard sections: {missing_sections}")
+                    return False
+            else:
+                self.log_result("Professional Dashboard", False, f"Dashboard failed: {response.status_code}")
+                return False
+            
+            return True
+                
+        except Exception as e:
+            self.log_result("Professional Analytics Dashboard", False, f"Analytics dashboard test failed: {str(e)}")
+            return False
+    
+    def test_professional_chemistry_cards(self):
+        """Test Professional Client Chemistry Cards"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Chemistry Cards", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional") or self.auth_tokens.get("admin")
+            if not professional_token:
+                self.log_result("Professional Chemistry Cards", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test POST /api/professional/chemistry-cards
+            new_chemistry_card = {
+                "client_id": "test_client_123",
+                "allergies": ["PPD", "אמוניה", "פרבנים"],
+                "sensitivities": ["ריחות חזקים", "חמצן מעל 20vol"],
+                "skin_test_results": [
+                    {
+                        "date": "2024-01-15",
+                        "product": "IGORA ROYAL",
+                        "result": "שלילי",
+                        "patch_location": "מאחורי האוזן"
+                    }
+                ],
+                "hair_analysis": {
+                    "porosity": "בינוני",
+                    "elasticity": "טוב",
+                    "density": "בינוני",
+                    "texture": "בינוני",
+                    "natural_color_level": 6,
+                    "grey_percentage": 15,
+                    "previous_chemical_treatments": ["צבע", "החלקה", "פרמננט"]
+                },
+                "contraindications": ["אין שימוש בחמצן מעל 20vol", "אין צבעים עם אמוניה"],
+                "recommended_products": ["IGORA ROYAL ללא אמוניה", "שמפו לשיער צבוע"],
+                "notes": "לקוחה רגישה, צריך זהירות מיוחדת"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/chemistry-cards", json=new_chemistry_card, headers=headers)
+            if response.status_code == 200:
+                created_card = response.json()
+                card_id = created_card.get("id")
+                client_id = created_card.get("client_id")
+                self.log_result("Professional Chemistry Cards - POST", True, f"Created chemistry card with ID: {card_id}")
+                
+                # Test GET /api/professional/chemistry-cards/{client_id}
+                response = self.session.get(f"{BACKEND_URL}/professional/chemistry-cards/{client_id}", headers=headers)
+                if response.status_code == 200:
+                    card_data = response.json()
+                    if "PPD" in card_data.get("allergies", []) and "אמוניה" in card_data.get("allergies", []):
+                        self.log_result("Professional Chemistry Cards - GET", True, 
+                                      "Retrieved chemistry card with Hebrew allergy data")
+                    else:
+                        self.log_result("Professional Chemistry Cards - GET", False, "Chemistry card data incorrect")
+                else:
+                    self.log_result("Professional Chemistry Cards - GET", False, 
+                                  f"GET chemistry card failed: {response.status_code}")
+                
+                return True
+            else:
+                self.log_result("Professional Chemistry Cards - POST", False, f"POST failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Professional Chemistry Cards", False, f"Chemistry cards test failed: {str(e)}")
+            return False
+    
+    def test_professional_demo_data_population(self):
+        """Test Professional Demo Data Population"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional Demo Data Population", False, "No auth tokens available")
+                return False
+            
+            professional_token = self.auth_tokens.get("professional") or self.auth_tokens.get("admin")
+            if not professional_token:
+                self.log_result("Professional Demo Data Population", False, "No professional token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {professional_token}"}
+            
+            # Test POST /api/professional/populate-demo-data
+            response = self.session.post(f"{BACKEND_URL}/professional/populate-demo-data", headers=headers)
+            if response.status_code == 200:
+                demo_data = response.json()
+                required_fields = ["clients_created", "formulas_created", "appointments_created", "inventory_items_created"]
+                missing_fields = [field for field in required_fields if field not in demo_data]
+                
+                if not missing_fields:
+                    self.log_result("Professional Demo Data Population", True, 
+                                  f"Demo data populated: {demo_data.get('clients_created', 0)} clients, "
+                                  f"{demo_data.get('formulas_created', 0)} formulas, "
+                                  f"{demo_data.get('appointments_created', 0)} appointments, "
+                                  f"{demo_data.get('inventory_items_created', 0)} inventory items")
+                else:
+                    self.log_result("Professional Demo Data Population", False, 
+                                  f"Missing demo data fields: {missing_fields}")
+                    return False
+            else:
+                self.log_result("Professional Demo Data Population", False, 
+                              f"Demo data population failed: {response.status_code}")
+                return False
+            
+            return True
+                
+        except Exception as e:
+            self.log_result("Professional Demo Data Population", False, f"Demo data population test failed: {str(e)}")
+            return False
+
     # ===== CRM SYSTEM TESTS =====
     
     def test_crm_demo_data_population(self):
