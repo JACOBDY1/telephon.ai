@@ -2280,6 +2280,16 @@ class APITester:
                 self.test_users_professional_endpoint,
                 self.test_user_type_system
             ]),
+            ("HAIRPRO PROFESSIONAL SYSTEM TESTS", [
+                self.test_professional_clients_crud,
+                self.test_professional_formulas_crud,
+                self.test_professional_inventory_management,
+                self.test_professional_appointments_system,
+                self.test_professional_scale_integration,
+                self.test_professional_analytics_dashboard,
+                self.test_professional_chemistry_cards,
+                self.test_professional_demo_data_population
+            ]),
             ("AUTHENTICATION SYSTEM TESTS", [
                 self.test_demo_data_creation,
                 self.test_user_registration,
