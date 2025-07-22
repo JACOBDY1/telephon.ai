@@ -282,6 +282,11 @@ const BarberProfessionalApp = ({ user }) => {
     return () => clearInterval(timer);
   }, []);
 
+  // עדכון יעדים אוטומטי לפי יומן
+  useEffect(() => {
+    updateDailyGoals();
+  }, []);
+
   // Load comprehensive professional data
   useEffect(() => {
     if (user?.user_type === 'professional' || user?.user_type === 'barber') {
