@@ -1569,10 +1569,12 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
             full_name=user.full_name,
             phone=user.phone,
             role=user.role,
+            user_type=user.user_type or "client",
             is_active=user.is_active,
             created_at=user.created_at,
             last_login=datetime.utcnow(),
-            preferences=user.preferences
+            preferences=user.preferences or {},
+            subscription=user.subscription or {}
         )
         
         return Token(access_token=access_token, token_type="bearer", user=user_response)
