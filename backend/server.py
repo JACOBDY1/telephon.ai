@@ -5248,7 +5248,7 @@ async def get_professional_attendance_status(
         if current_user.user_type not in ["professional", "barber", "therapist"]:
             raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
         
-        current_date = datetime.utcnow().date()
+        current_date = datetime.utcnow().date().isoformat()  # Convert to string
         
         # מציאת רשומת הנוכחות של היום
         attendance_record = attendance_collection.find_one({
