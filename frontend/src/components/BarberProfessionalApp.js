@@ -6,6 +6,8 @@ import {
   Droplets, TrendingUp, PieChart, Beaker
 } from 'lucide-react';
 
+import AdvancedFormulaManager from './AdvancedFormulaManager';
+
 // מאגר צבעים מורחב עבור HairPro IL Advanced
 const colorDatabase = {
   schwarzkopf: {
