@@ -68,7 +68,8 @@ const LoginPage = () => {
   const demoUsers = [
     { username: 'admin', password: 'admin123', role: 'מנהל מערכת' },
     { username: 'manager', password: 'manager123', role: 'מנהל' },
-    { username: 'demo', password: 'demo123', role: 'משתמש דמו' }
+    { username: 'demo', password: 'demo123', role: 'משתמש דמו' },
+    { username: 'professional', password: 'pro123', role: '🔥 בעל מקצוע - HairPro' }
   ];
 
   const fillDemoUser = (demoUser) => {
