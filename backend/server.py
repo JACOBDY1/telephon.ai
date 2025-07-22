@@ -1472,6 +1472,7 @@ async def register_user(user_data: UserCreate):
             "full_name": user_data.full_name,
             "phone": user_data.phone,
             "role": "user",
+            "user_type": user_data.user_type or "client",
             "is_active": True,
             "created_at": datetime.utcnow(),
             "last_login": None,
@@ -1479,6 +1480,16 @@ async def register_user(user_data: UserCreate):
                 "language": "he",
                 "theme": "light",
                 "notifications": True
+            },
+            "subscription": {
+                "plan_id": "free_trial",
+                "plan_name": "ניסיון חינם",
+                "status": "trial",
+                "start_date": datetime.utcnow(),
+                "end_date": datetime.utcnow() + timedelta(days=7),
+                "trial_end_date": datetime.utcnow() + timedelta(days=7),
+                "auto_renew": False,
+                "features": ["basic_calls", "basic_crm", "web_dialer"]
             }
         }
         
