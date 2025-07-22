@@ -1141,6 +1141,7 @@ const BarberProfessionalApp = ({ user }) => {
         <div className="grid grid-cols-4 py-2">
           {[
             { id: 'dashboard', icon: BarChart3, label: 'דשבורד' },
+            { id: 'formulas', icon: Beaker, label: 'פורמולות' },
             { id: 'colors', icon: Palette, label: 'צבעים' },
             { id: 'clients', icon: Users, label: 'לקוחות' },
             { id: 'inventory', icon: Package, label: 'מלאי' }
