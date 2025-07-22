@@ -455,6 +455,174 @@ class ProfessionalMetrics(BaseModel):
 # Legacy model for backward compatibility
 ProductInventory = SmartInventoryItem
 
+# ===== PROFESSIONAL CALCULATION ENGINES =====
+
+class FormulaCalculator:
+    def __init__(self, color_database):
+        self.color_database = color_database
+        self.developer_cost_per_ml = 0.05  # 5 agorot per ml
+    
+    def calculate_formula_cost(self, formula_data):
+        """Calculate comprehensive formula cost including waste and efficiency"""
+        color_cost = 0
+        total_planned_weight = 0
+        total_actual_weight = 0
+        
+        for color in formula_data.get('colors_used', []):
+            color_info = self.find_color_in_database(color['brand'], color['code'])
+            if color_info:
+                cost_per_gram = color_info['price'] / 60  # Assuming 60g tubes
+                planned_weight = color.get('planned_weight', 0)
+                actual_weight = color.get('actual_weight', planned_weight)
+                
+                color_cost += actual_weight * cost_per_gram
+                total_planned_weight += planned_weight
+                total_actual_weight += actual_weight
+        
+        # Developer cost
+        developer_amount = formula_data.get('developer', {}).get('actual_amount_ml', 0)
+        developer_cost = developer_amount * self.developer_cost_per_ml
+        
+        # Calculate waste and efficiency
+        waste_grams = max(0, total_planned_weight - total_actual_weight)
+        waste_percentage = (waste_grams / total_planned_weight * 100) if total_planned_weight > 0 else 0
+        waste_cost = waste_grams * (color_cost / total_actual_weight) if total_actual_weight > 0 else 0
+        
+        total_material_cost = color_cost + developer_cost
+        efficiency_score = max(0, 100 - waste_percentage)
+        
+        return {
+            "color_cost": round(color_cost, 2),
+            "developer_cost": round(developer_cost, 2),
+            "total_material_cost": round(total_material_cost, 2),
+            "waste_cost": round(waste_cost, 2),
+            "waste_grams": round(waste_grams, 2),
+            "waste_percentage": round(waste_percentage, 2),
+            "efficiency_score": round(efficiency_score, 2),
+            "profit_margin": 0  # Will be calculated with service_price
+        }
+    
+    def find_color_in_database(self, brand, code):
+        """Find color information in the color database"""
+        if brand not in self.color_database:
+            return None
+            
+        brand_data = self.color_database[brand]
+        for series_key, series_data in brand_data.get('series', {}).items():
+            for color in series_data.get('colors', []):
+                if color.get('code') == code:
+                    return color
+        return None
+    
+    def calculate_profit_margin(self, material_cost, service_price):
+        """Calculate profit margin percentage"""
+        if service_price <= 0:
+            return 0
+        return round(((service_price - material_cost) / service_price) * 100, 2)
+
+class SmartInventoryManager:
+    def __init__(self):
+        self.low_stock_threshold_days = 7
+    
+    def calculate_days_until_empty(self, current_stock, daily_usage):
+        """Calculate how many days until product runs out"""
+        if daily_usage <= 0:
+            return 999  # Essentially infinite
+        return max(0, int(current_stock / daily_usage))
+    
+    def get_reorder_recommendation(self, item):
+        """Get smart reorder recommendations"""
+        days_until_empty = self.calculate_days_until_empty(
+            item.current_stock, 
+            item.average_daily_usage
+        )
+        
+        if days_until_empty <= 3:
+            urgency = "CRITICAL"
+            message = "הזמן מיידית! נותרו פחות מ-3 ימים"
+        elif days_until_empty <= 7:
+            urgency = "HIGH" 
+            message = f"נדרש להזמין בקרוב - נותרו {days_until_empty} ימים"
+        elif days_until_empty <= 14:
+            urgency = "MEDIUM"
+            message = f"כדאי להזמין השבוע - נותרו {days_until_empty} ימים"
+        else:
+            urgency = "LOW"
+            message = f"מלאי תקין - נותרו {days_until_empty} ימים"
+        
+        recommended_quantity = max(
+            item.maximum_stock - item.current_stock,
+            item.average_daily_usage * 30  # 30 days supply
+        )
+        
+        return {
+            "urgency": urgency,
+            "message": message,
+            "days_until_empty": days_until_empty,
+            "recommended_quantity": round(recommended_quantity, 2),
+            "estimated_cost": round(recommended_quantity * item.cost_per_unit, 2)
+        }
+    
+    def update_usage_history(self, item_id, amount_used, client_id=None, formula_id=None):
+        """Update product usage history and recalculate daily average"""
+        usage_entry = {
+            "date": datetime.utcnow().isoformat(),
+            "amount_used": amount_used,
+            "client_id": client_id,
+            "formula_id": formula_id
+        }
+        return usage_entry
+
+class BluetoothScaleManager:
+    def __init__(self):
+        self.connected = False
+        self.current_reading = 0
+        self.readings_history = []
+        self.tolerance_grams = 2  # ±2g tolerance
+    
+    def connect_scale(self):
+        """Simulate bluetooth scale connection"""
+        # In real implementation, this would use Web Bluetooth API
+        self.connected = True
+        return {"status": "connected", "device": "Professional Scale Pro"}
+    
+    def get_weight_reading(self):
+        """Get current weight from scale"""
+        # Simulated reading - in real app this comes from Bluetooth
+        import random
+        self.current_reading = round(random.uniform(0, 100), 1)
+        
+        self.readings_history.append({
+            "weight": self.current_reading,
+            "timestamp": datetime.utcnow().isoformat(),
+            "stable": True
+        })
+        
+        return self.current_reading
+    
+    def validate_measurement(self, expected_weight, actual_weight):
+        """Validate if measurement is within acceptable tolerance"""
+        variance = abs(expected_weight - actual_weight)
+        within_tolerance = variance <= self.tolerance_grams
+        
+        return {
+            "within_tolerance": within_tolerance,
+            "variance": round(variance, 2),
+            "variance_percentage": round((variance / expected_weight * 100), 2) if expected_weight > 0 else 0,
+            "recommendation": self.get_measurement_recommendation(variance)
+        }
+    
+    def get_measurement_recommendation(self, variance):
+        """Get recommendation based on measurement variance"""
+        if variance <= 1:
+            return "מדידה מעולה - המשך"
+        elif variance <= 2:
+            return "מדידה טובה - קבילה"
+        elif variance <= 5:
+            return "שקול למדוד שוב"
+        else:
+            return "מדידה לא מדויקת - מדוד מחדש"
+
 # ===== AUTHENTICATION FUNCTIONS =====
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
