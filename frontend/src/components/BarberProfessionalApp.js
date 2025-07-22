@@ -952,6 +952,101 @@ const BarberProfessionalApp = ({ user }) => {
               </div>
             </div>
 
+            {/* אנליטיקה וטיפים מתקדמים */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 bg-white rounded-xl p-6 shadow-lg border">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <BarChart3 className="w-6 h-6 text-blue-500" />
+                  אנליטיקה וביצועים
+                </h3>
+                
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">טיפים השבוע</p>
+                        <p className="text-2xl font-bold text-green-600">₪{workTime.isActive ? (890 + Math.floor(Math.random() * 200)) : 890}</p>
+                      </div>
+                      <DollarSign className="w-8 h-8 text-green-500" />
+                    </div>
+                    <p className="text-xs text-green-600 mt-1">+15% מהשבוע שעבר</p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">דירוג ביקורות</p>
+                        <p className="text-2xl font-bold text-blue-600">4.9/5</p>
+                      </div>
+                      <Star className="w-8 h-8 text-blue-500" />
+                    </div>
+                    <p className="text-xs text-blue-600 mt-1">23 ביקורות חדשות</p>
+                  </div>
+                </div>
+                
+                {/* גרף יעילות פשוט */}
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>יעילות יומית</span>
+                      <span>88%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-500 h-2 rounded-full" style={{width: '88%'}}></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>חיסכון בבזבוז</span>
+                      <span>22%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-purple-500 h-2 rounded-full" style={{width: '22%'}}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* שיתוף סושיאל וביקורות */}
+              <div className="bg-white rounded-xl p-6 shadow-lg border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Share2 className="w-5 h-5 text-purple-500" />
+                  שיתוף וביקורות
+                </h3>
+                
+                <div className="space-y-4">
+                  <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                    <Share2 className="w-4 h-4" />
+                    שתף באינסטגרם
+                  </button>
+                  
+                  <button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                    <MessageCircle className="w-4 h-4" />
+                    שלח לביקורת Google
+                  </button>
+                  
+                  <button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white p-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                    <Star className="w-4 h-4" />
+                    בקש משוב
+                  </button>
+                  
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-2">ביקורות אחרונות:</p>
+                    <div className="space-y-2">
+                      <div className="bg-white p-2 rounded text-xs">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Star className="w-3 h-3 text-yellow-500" />
+                          <span className="font-semibold">שרה כהן</span>
+                        </div>
+                        <p>"שירות מעולה! ממליצה!"</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* גישה מהירה לתכונות */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button 
