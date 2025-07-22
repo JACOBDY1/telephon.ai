@@ -749,10 +749,14 @@ const BarberProfessionalApp = ({ user }) => {
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
       {/* שעון פעילות צף */}
-      <FloatingActivityClock 
+      <CompactFloatingClock 
         workStatus={workStatus}
-        currentClient={currentClient}
+        workTime={workTime}
         onStatusChange={setWorkStatus}
+        onStartDay={startWorkDay}
+        onEndDay={endWorkDay}
+        onTakeBreak={takeBreak}
+        onResumeWork={resumeWork}
       />
       
       {/* התראות */}
