@@ -1141,7 +1141,7 @@ const BarberProfessionalApp = ({ user }) => {
             { id: 'dashboard', icon: BarChart3, label: 'דשבורד' },
             { id: 'colors', icon: Palette, label: 'צבעים' },
             { id: 'clients', icon: Users, label: 'לקוחות' },
-            { id: 'stats', icon: Target, label: 'דוחות' }
+            { id: 'inventory', icon: Package, label: 'מלאי' }
           ].map(({ id, icon: Icon, label }) => (
             <button
               key={id}
