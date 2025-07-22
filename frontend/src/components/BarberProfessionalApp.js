@@ -3,7 +3,7 @@ import {
   Home, Package, Users, BarChart3, Settings, DollarSign, Activity,
   Scissors, Timer, Star, Gift, Target, Calendar, Plus, Search, User,
   Phone, Mail, Palette, AlertCircle, Edit, CheckCircle, Bell, X,
-  Droplets, TrendingUp, PieChart, Beaker
+  Droplets, TrendingUp, PieChart, Beaker, MessageCircle, Share2
 } from 'lucide-react';
 
 import AdvancedFormulaManager from './AdvancedFormulaManager';
