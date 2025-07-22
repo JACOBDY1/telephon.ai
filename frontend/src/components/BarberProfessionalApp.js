@@ -1,4 +1,195 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Home, Package, Users, BarChart3, Settings, DollarSign, Activity,
+  Scissors, Timer, Star, Gift, Target, Calendar, Plus, Search, User,
+  Phone, Mail, Palette, AlertCircle, Edit, CheckCircle, Bell, X,
+  Droplets, TrendingUp, PieChart, Beaker
+} from 'lucide-react';
 
+// מאגר צבעים מורחב עבור HairPro IL Advanced
+const colorDatabase = {
+  schwarzkopf: {
+    name: "שוורצקוף",
+    logo: "🎨",
+    series: {
+      igoraRoyal: {
+        name: "IGORA ROYAL",
+        description: "צבע קבוע מקצועי עם כיסוי של עד 100% שיער לבן",
+        colors: [
+          { code: "1-0", name: "שחור", base: 1, primary: 0, secondary: 0, hex: "#1a1a1a", price: 28 },
+          { code: "3-0", name: "חום כהה", base: 3, primary: 0, secondary: 0, hex: "#3e2723", price: 28 },
+          { code: "4-0", name: "חום בינוני", base: 4, primary: 0, secondary: 0, hex: "#5d4037", price: 28 },
+          { code: "5-0", name: "חום בהיר", base: 5, primary: 0, secondary: 0, hex: "#6d4c41", price: 28 },
+          { code: "6-0", name: "בלונד כהה", base: 6, primary: 0, secondary: 0, hex: "#8d6e63", price: 28 },
+          { code: "7-0", name: "בלונד בינוני", base: 7, primary: 0, secondary: 0, hex: "#a1887f", price: 28 },
+          { code: "8-0", name: "בלונד בהיר", base: 8, primary: 0, secondary: 0, hex: "#bcaaa4", price: 28 },
+          { code: "9-0", name: "בלונד בהיר מאוד", base: 9, primary: 0, secondary: 0, hex: "#d7ccc8", price: 28 },
+          { code: "10-0", name: "בלונד פלטינה", base: 10, primary: 0, secondary: 0, hex: "#efebe9", price: 32 },
+          { code: "4-65", name: "חום בינוני שוקולד נחושת", base: 4, primary: 6, secondary: 5, hex: "#6d4c41", price: 30 },
+          { code: "5-88", name: "חום בהיר אדום אינטנסיבי", base: 5, primary: 8, secondary: 8, hex: "#8e5a4a", price: 30 },
+          { code: "6-12", name: "בלונד כהה אפרפר פנינה", base: 6, primary: 1, secondary: 2, hex: "#9e9e9e", price: 30 },
+          { code: "7-31", name: "בלונד בינוני מט זהוב", base: 7, primary: 3, secondary: 1, hex: "#c9a961", price: 30 },
+          { code: "8-77", name: "בלונד בהיר נחושת אינטנסיבי", base: 8, primary: 7, secondary: 7, hex: "#d4a574", price: 32 },
+          { code: "9-55", name: "בלונד בהיר מאוד מהגוני אינטנסיבי", base: 9, primary: 5, secondary: 5, hex: "#c8928a", price: 32 }
+        ],
+        mixing: "1:1 עם חמצן",
+        timing: "30-45 דקות",
+        developer: [
+          { vol: "10vol (3%)", description: "טון על טון או כהייה", price: 0.05 },
+          { vol: "20vol (6%)", description: "כיסוי שיער לבן, הבהרה 1-2 טונים", price: 0.05 },
+          { vol: "30vol (9%)", description: "הבהרה 2-3 טונים", price: 0.06 },
+          { vol: "40vol (12%)", description: "הבהרה 3-4 טונים", price: 0.07 }
+        ]
+      },
+      igoraAbsolutes: {
+        name: "IGORA ABSOLUTES",
+        description: "צבע מיוחד לשיער בוגר עם Pro-Age Complex",
+        colors: [
+          { code: "4-60", name: "חום בינוני שוקולד טבעי", hex: "#5d4037", price: 35 },
+          { code: "5-50", name: "חום בהיר זהב טבעי", hex: "#8d6e63", price: 35 },
+          { code: "6-70", name: "בלונד כהה נחושת טבעי", hex: "#a1887f", price: 35 },
+          { code: "7-10", name: "בלונד בינוני אפרפר טבעי", hex: "#b0bec5", price: 35 },
+          { code: "8-60", name: "בלונד בהיר שוקולד טבעי", hex: "#bcaaa4", price: 35 },
+          { code: "9-40", name: "בלונד בהיר מאוד בז' טבעי", hex: "#e0d4c8", price: 35 }
+        ],
+        mixing: "1:1 עם חמצן 9% בלבד",
+        timing: "45 דקות",
+        features: ["100% כיסוי שיער לבן", "פורמולה דלת ריח", "Pro-Age Complex"]
+      }
+    }
+  },
+  indola: {
+    name: "אינדולה",
+    logo: "🌈",
+    series: {
+      pcc: {
+        name: "Permanent Caring Color",
+        description: "צבע קבוע עם קומפלקס טיפולי",
+        colors: [
+          { code: "1.0", name: "שחור", hex: "#000000", price: 22 },
+          { code: "2.0", name: "חום כהה מאוד", hex: "#2e1a1a", price: 22 },
+          { code: "3.0", name: "חום כהה", hex: "#3e2723", price: 22 },
+          { code: "4.0", name: "חום בינוני", hex: "#5d4037", price: 22 },
+          { code: "5.0", name: "חום בהיר", hex: "#6d4c41", price: 22 },
+          { code: "6.0", name: "בלונד כהה", hex: "#8d6e63", price: 22 },
+          { code: "7.0", name: "בלונד בינוני", hex: "#a1887f", price: 22 },
+          { code: "8.0", name: "בלונד בהיר", hex: "#bcaaa4", price: 22 },
+          { code: "9.0", name: "בלונד בהיר מאוד", hex: "#d7ccc8", price: 22 },
+          { code: "10.0", name: "בלונד פלטינה", hex: "#f5f5f5", price: 25 }
+        ],
+        mixing: "1:1 עם Cream Developer",
+        timing: "30-35 דקות",
+        features: ["מולקולות מיקרו-צבע", "חומצות אמינו", "עד 100% כיסוי"]
+      }
+    }
+  },
+  loreal: {
+    name: "לוריאל פרופסיונל",
+    logo: "✨",
+    series: {
+      majirel: {
+        name: "MAJIREL",
+        description: "צבע קבוע עם טכנולוגיית Ionène G + Incell",
+        colors: [
+          { code: "1", name: "שחור", hex: "#000000", price: 32 },
+          { code: "3", name: "חום כהה", hex: "#3e2723", price: 32 },
+          { code: "4", name: "חום בינוני", hex: "#5d4037", price: 32 },
+          { code: "5", name: "חום בהיר", hex: "#6d4c41", price: 32 },
+          { code: "6", name: "בלונד כהה", hex: "#8d6e63", price: 32 },
+          { code: "7", name: "בלונד", hex: "#a1887f", price: 32 },
+          { code: "8", name: "בלונד בהיר", hex: "#bcaaa4", price: 32 },
+          { code: "9", name: "בלונד בהיר מאוד", hex: "#d7ccc8", price: 32 },
+          { code: "10", name: "בלונד בהיר במיוחד", hex: "#f5f5f5", price: 35 }
+        ],
+        mixing: "1:1.5 עם Oxydant Crème",
+        timing: "35 דקות",
+        features: ["כיסוי מושלם", "צבע עמיד", "טיפול בשיער"]
+      }
+    }
+  }
+};
+
+// רכיב שעון פעילות צף
+const FloatingActivityClock = ({ workStatus, currentClient, onStatusChange }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="fixed top-4 right-4 z-50">
+      <div className={`bg-white rounded-2xl shadow-2xl transition-all duration-300 ${
+        isExpanded ? 'w-80 p-6' : 'w-16 h-16 flex items-center justify-center cursor-pointer'
+      }`}>
+        {!isExpanded ? (
+          <div 
+            onClick={() => setIsExpanded(true)}
+            className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              workStatus === 'working' ? 'bg-green-500' :
+              workStatus === 'break' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`}
+          >
+            <Timer className="w-6 h-6 text-white" />
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-800">שעון פעילות</h3>
+              <button 
+                onClick={() => setIsExpanded(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="text-center mb-4">
+              <div className="text-2xl font-mono text-gray-800">
+                {currentTime.toLocaleTimeString('he-IL')}
+              </div>
+              <div className="text-sm text-gray-500">
+                {currentTime.toLocaleDateString('he-IL')}
+              </div>
+            </div>
+            
+            <div className={`p-4 rounded-xl mb-4 text-center ${
+              workStatus === 'working' ? 'bg-green-50 text-green-800' :
+              workStatus === 'break' ? 'bg-yellow-50 text-yellow-800' :
+              'bg-blue-50 text-blue-800'
+            }`}>
+              <div className="font-medium mb-1">
+                {workStatus === 'working' ? '🔥 עובד עם לקוח' :
+                 workStatus === 'break' ? '☕ בהפסקה' : 
+                 '✨ מוכן ללקוח הבא'}
+              </div>
+              {currentClient && (
+                <div className="text-sm opacity-80">
+                  {currentClient.clientName}
+                </div>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => onStatusChange('working')}
+                className={`px-3 py-2 text-xs rounded-lg transition-colors ${
+                  workStatus === 'working' 
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-gray-100 hover:bg-green-100 text-gray-700'
+                }`}
+              >
+                עבודה
+              </button>
+              <button
+                onClick={() => onStatusChange('break')}
+                className={`px-3 py-2 text-xs rounded-lg transition-colors ${
+                  workStatus === 'break' 
+                    ? 'bg-yellow-500 text-white' 
+                    : 'bg-gray-100 hover:bg-yellow-100 text-gray-700'
+                }`}
               >
                 הפסקה
               </button>
@@ -381,128 +572,29 @@ const BarberProfessionalApp = () => {
         ))}
       </div>
 
-      {/* יעדים יומיים מתקדמים עם תכונות HairPro */}
+      {/* מאגר צבעים מתקדם */}
       <div className="bg-white rounded-xl p-6 shadow-lg border">
         <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-          <Target className="w-6 h-6 text-green-500" />
-          יעדים יומיים - HairPro IL Advanced
+          <Package className="w-6 h-6 text-purple-500" />
+          מאגר צבעים מקצועי - HairPro IL
         </h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {Object.entries(dailyGoals).map(([key, goal]) => (
-            <div key={key} className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-700">
-                  {key === 'appointments' ? '🧑‍🦱 טיפולים' :
-                   key === 'revenue' ? '💰 הכנסות' :
-                   key === 'tips' ? '🎁 טיפים' :
-                   key === 'newCustomers' ? '👥 לקוחות חדשים' :
-                   key === 'satisfaction' ? '⭐ שביעות רצון' :
-                   key === 'colorEfficiency' ? '🎨 יעילות צבע' :
-                   key === 'wasteReduction' ? '♻️ הפחתת בזבוז' : key}
-                </span>
-                <div className="text-sm text-gray-600 font-semibold">
-                  {goal?.current || 0}/{goal?.target || 0}
-                  {key === 'satisfaction' && ' ⭐'}
-                  {key === 'colorEfficiency' && '%'}
-                  {key === 'wasteReduction' && '%'}
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Object.entries(colorDatabase).map(([brandKey, brand]) => (
+            <div key={brandKey} className="bg-gray-50 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">{brand.logo}</span>
+                <h4 className="font-bold text-gray-800">{brand.name}</h4>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className={`h-3 rounded-full transition-all duration-500 ${
-                    (goal?.percentage || 0) >= 100 ? 'bg-gradient-to-r from-green-400 to-green-600' :
-                    (goal?.percentage || 0) >= 80 ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
-                    (goal?.percentage || 0) >= 60 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-gradient-to-r from-red-400 to-red-600'
-                  }`}
-                  style={{ width: `${Math.min(goal?.percentage || 0, 100)}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className={`font-medium ${
-                  (goal?.percentage || 0) >= 100 ? 'text-green-600' :
-                  (goal?.percentage || 0) >= 80 ? 'text-blue-600' :
-                  (goal?.percentage || 0) >= 60 ? 'text-orange-600' : 'text-red-600'
-                }`}>
-                  {(goal?.percentage || 0) >= 100 ? '🎉 יעד הושג!' :
-                   (goal?.percentage || 0) >= 80 ? '💪 כמעט שם!' :
-                   (goal?.percentage || 0) >= 60 ? '⚡ בדרך!' : '🚀 בואו נתחיל!'}
-                </span>
-                <span className="text-gray-500">{goal?.percentage || 0}%</span>
+              <div className="space-y-2">
+                {Object.entries(brand.series).map(([seriesKey, series]) => (
+                  <div key={seriesKey} className="text-sm">
+                    <div className="font-semibold text-gray-700">{series.name}</div>
+                    <div className="text-gray-600">{series.colors.length} צבעים זמינים</div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* גרפים וניתוחים עסקיים */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-lg border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <PieChart className="w-5 h-5 text-purple-500" />
-            צריכת צבעים - HairPro Analytics
-          </h3>
-          <div className="space-y-3">
-            {Object.entries(analyticsData.colorUsage || {}).map(([color, percentage]) => (
-              <div key={color} className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="font-medium">{color}</span>
-                  <span className="text-gray-600">{percentage}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full ${
-                      color === 'בלונדים' ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
-                      color === 'חומים' ? 'bg-gradient-to-r from-amber-600 to-amber-800' :
-                      color === 'שחורים' ? 'bg-gradient-to-r from-gray-700 to-gray-900' :
-                      'bg-gradient-to-r from-red-500 to-red-700'
-                    }`}
-                    style={{ width: `${percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-lg border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-blue-500" />
-            תובנות עסקיות - HairPro Smart
-          </h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm font-medium">חיסכון בצבע</span>
-              </div>
-              <span className="text-green-600 font-bold">{analyticsData.wasteReduction || 0}%</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm font-medium">יעילות כללית</span>
-              </div>
-              <span className="text-blue-600 font-bold">{analyticsData.efficiency || 0}%</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span className="text-sm font-medium">צבע פופולרי</span>
-              </div>
-              <span className="text-purple-600 font-bold">
-                {analyticsData.trends?.popularColors?.[0] || 'N/A'}
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span className="text-sm font-medium">הכנסה חודשית</span>
-              </div>
-              <span className="text-orange-600 font-bold">
-                ₪{(analyticsData.revenue?.monthly || 0).toLocaleString()}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -552,391 +644,8 @@ const BarberProfessionalApp = () => {
     </div>
   );
 
-  // Dashboard View (מתוחזק לתאימות)
-  const DashboardView = () => (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white p-6 rounded-2xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">שלום, מאסטר ספר! ✂️</h1>
-            <p className="text-blue-100">{currentTime.toLocaleDateString('he-IL')} • {currentTime.toLocaleTimeString('he-IL')}</p>
-          </div>
-          <div className="text-right">
-            <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-              workStatus === 'working' ? 'bg-green-500' : 
-              workStatus === 'break' ? 'bg-yellow-500' : 'bg-blue-500'
-            }`}>
-              <Scissors className="w-4 h-4 ml-2" />
-              {workStatus === 'working' ? 'עובד עם לקוח' : 
-               workStatus === 'break' ? 'בהפסקה' : 'מוכן ללקוח הבא'}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Today's Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { 
-            title: 'לקוחות היום', 
-            value: todayStats.appointmentsCompleted || 0, 
-            icon: Users, 
-            color: 'bg-blue-500',
-            suffix: 'לקוחות'
-          },
-          { 
-            title: 'הכנסות היום', 
-            value: `₪${(todayStats.totalRevenue || 0).toLocaleString()}`, 
-            icon: DollarSign, 
-            color: 'bg-green-500'
-          },
-          { 
-            title: 'טיפים היום', 
-            value: `₪${(todayStats.tips || 0).toLocaleString()}`, 
-            icon: Gift, 
-            color: 'bg-purple-500'
-          },
-          { 
-            title: 'דירוג שביעות רצון', 
-            value: `${todayStats.customerSatisfaction || 0}`, 
-            icon: Star, 
-            color: 'bg-yellow-500',
-            suffix: '⭐'
-          }
-        ].map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm border">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-lg ${stat.color}`}>
-                <stat.icon className="w-6 h-6 text-white" />
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-600 mb-1">{stat.title}</h3>
-              <div className="text-2xl font-bold text-gray-900">
-                {stat.value}
-                {stat.suffix && <span className="text-sm text-gray-500 mr-1">{stat.suffix}</span>}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Daily Goals Progress */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Target className="w-5 h-5 text-green-500" />
-          יעדים יומיים
-        </h3>
-        <div className="space-y-4">
-          {Object.entries(dailyGoals).map(([key, goal]) => (
-            <div key={key} className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">
-                  {key === 'appointments' ? 'טיפולים' :
-                   key === 'revenue' ? 'הכנסות' :
-                   key === 'tips' ? 'טיפים' :
-                   key === 'newCustomers' ? 'לקוחות חדשים' :
-                   key === 'satisfaction' ? 'שביעות רצון' :
-                   key === 'colorEfficiency' ? 'יעילות צבע' :
-                   key === 'wasteReduction' ? 'הפחתת בזבוז' : key}
-                </span>
-                <div className="text-sm text-gray-600">
-                  {goal?.current || 0}/{goal?.target || 0}
-                </div>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className={`h-3 rounded-full transition-all ${
-                    (goal?.percentage || 0) >= 100 ? 'bg-green-500' :
-                    (goal?.percentage || 0) >= 80 ? 'bg-blue-500' :
-                    (goal?.percentage || 0) >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-                  }`}
-                  style={{ width: `${Math.min(goal?.percentage || 0, 100)}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className={`font-medium ${
-                  (goal?.percentage || 0) >= 100 ? 'text-green-600' :
-                  (goal?.percentage || 0) >= 80 ? 'text-blue-600' :
-                  (goal?.percentage || 0) >= 60 ? 'text-yellow-600' : 'text-red-600'
-                }`}>
-                  {(goal?.percentage || 0) >= 100 ? '🎉 יעד הושג!' :
-                   (goal?.percentage || 0) >= 80 ? '💪 כמעט שם!' :
-                   (goal?.percentage || 0) >= 60 ? '⚡ בדרך!' : '🚀 בואו נתחיל!'}
-                </span>
-                <span className="text-gray-500">{goal?.percentage || 0}%</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-4">
-        <button
-          onClick={() => setActiveView('appointments')}
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl flex items-center gap-3 hover:shadow-lg transition-all"
-        >
-          <Calendar className="w-8 h-8" />
-          <div className="text-right">
-            <div className="font-semibold">היומן שלי</div>
-            <div className="text-sm opacity-80">ניהול תורים</div>
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveView('clients')}
-          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl flex items-center gap-3 hover:shadow-lg transition-all"
-        >
-          <Users className="w-8 h-8" />
-          <div className="text-right">
-            <div className="font-semibold">הלקוחות שלי</div>
-            <div className="text-sm opacity-80">רשימת לקוחות</div>
-          </div>
-        </button>
-      </div>
-    </div>
-  );
-
-  // רכיב ניהול לקוחות מתקדם עם כרטיסי כימיה
-  const AdvancedClientsView = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Users className="w-8 h-8 text-purple-600" />
-          HairPro - ניהול לקוחות מתקדם
-        </h2>
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="חיפוש לקוחות..."
-              className="pl-4 pr-10 py-2 border rounded-lg w-64"
-            />
-          </div>
-          <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            לקוחה חדשה
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {clients.map(client => (
-          <div key={client.id} className="bg-white rounded-xl shadow-lg border p-6 hover:shadow-xl transition-shadow">
-            {/* פרופיל לקוחה */}
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
-                <User className="w-8 h-8 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-900">{client.name}</h3>
-                <div className="text-sm text-gray-600 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    {client.phone}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    {client.email}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* פרופיל שיער */}
-            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <h4 className="font-semibold mb-2 flex items-center gap-2">
-                <Palette className="w-4 h-4 text-purple-500" />
-                פרופיל שיער
-              </h4>
-              <div className="space-y-1 text-sm">
-                <div>צבע טבעי: <span className="font-medium">{client.hairProfile?.naturalColor}</span></div>
-                <div>צבע נוכחי: <span className="font-medium">{client.hairProfile?.currentColor}</span></div>
-                <div>סוג שיער: <span className="font-medium">{client.hairProfile?.hairType}</span></div>
-              </div>
-            </div>
-
-            {/* כרטיס כימיה */}
-            {client.chemistryCard && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <h4 className="font-semibold mb-2 flex items-center gap-2 text-red-700">
-                  <AlertCircle className="w-4 h-4" />
-                  כרטיס כימיה
-                </h4>
-                {client.chemistryCard.allergies?.length > 0 && (
-                  <div className="text-sm text-red-600">
-                    <strong>אלרגיות:</strong> {client.chemistryCard.allergies.join(', ')}
-                  </div>
-                )}
-                {client.chemistryCard.sensitivities?.length > 0 && (
-                  <div className="text-sm text-orange-600 mt-1">
-                    <strong>רגישויות:</strong> {client.chemistryCard.sensitivities.join(', ')}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* מדדים */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{client.metrics?.totalVisits || 0}</div>
-                <div className="text-xs text-blue-500">ביקורים</div>
-              </div>
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">₪{(client.metrics?.totalSpent || 0).toLocaleString()}</div>
-                <div className="text-xs text-green-500">סה"כ הוצאות</div>
-              </div>
-            </div>
-
-            {/* פעולות */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => startAppointment(client.id)}
-                className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 text-sm font-medium"
-              >
-                טיפול חדש
-              </button>
-              <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">
-                <Edit className="w-4 h-4" />
-              </button>
-              <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">
-                <Phone className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  // Appointments View
-  const AppointmentsView = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">היומן שלי - היום</h2>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          תור חדש
-        </button>
-      </div>
-
-      <div className="space-y-4">
-        {todayAppointments.map((appointment) => (
-          <div key={appointment.id} className={`bg-white rounded-xl p-6 shadow-sm border-r-4 ${
-            appointment.status === 'completed' ? 'border-green-500' :
-            appointment.status === 'in-progress' ? 'border-blue-500' :
-            'border-yellow-500'
-          }`}>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`w-3 h-3 rounded-full ${
-                    appointment.status === 'completed' ? 'bg-green-500' :
-                    appointment.status === 'in-progress' ? 'bg-blue-500' :
-                    'bg-yellow-500'
-                  }`}></div>
-                  <h3 className="text-xl font-semibold text-gray-900">{appointment.clientName}</h3>
-                  <span className="text-sm text-gray-500">{appointment.time}</span>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-gray-600 mb-1">{appointment.service}</p>
-                    <p className="text-lg font-bold text-green-600">₪{appointment.price}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">משך זמן: {appointment.duration} דק׳</p>
-                    {appointment.tip > 0 && (
-                      <p className="text-purple-600 font-medium">טיפ: ₪{appointment.tip}</p>
-                    )}
-                  </div>
-                </div>
-                
-                {appointment.notes && (
-                  <p className="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg mb-4">
-                    📝 {appointment.notes}
-                  </p>
-                )}
-                
-                {appointment.satisfaction > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm text-gray-500">דירוג:</span>
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`w-4 h-4 ${
-                        i < appointment.satisfaction ? 'text-yellow-500 fill-current' : 'text-gray-300'
-                      }`} />
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              {/* Action buttons */}
-              <div className="flex flex-col gap-2">
-                {appointment.status === 'upcoming' && (
-                  <button 
-                    onClick={() => startAppointment(appointment.id)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 flex items-center gap-2"
-                  >
-                    <Timer className="w-4 h-4" />
-                    התחל
-                  </button>
-                )}
-                
-                {appointment.status === 'in-progress' && (
-                  <button 
-                    onClick={() => completeAppointment(appointment.id, 25, 5)}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 flex items-center gap-2"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    סיים
-                  </button>
-                )}
-                
-                {appointment.phone && (
-                  <button className="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    התקשר
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  // Navigation
-  const Navigation = () => (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-bottom">
-      <div className="grid grid-cols-4 py-2">
-        {[
-          { id: 'dashboard', icon: BarChart3, label: 'דשבורד' },
-          { id: 'appointments', icon: Calendar, label: 'יומן' },
-          { id: 'clients', icon: Users, label: 'לקוחות' },
-          { id: 'stats', icon: Target, label: 'סטטיסטיקות' }
-        ].map(({ id, icon: Icon, label }) => (
-          <button
-            key={id}
-            onClick={() => setActiveView(id)}
-            className={`flex flex-col items-center py-3 px-2 ${
-              activeView === id 
-                ? 'text-blue-600 bg-blue-50' 
-                : 'text-gray-600'
-            }`}
-          >
-            <Icon className="w-5 h-5 mb-1" />
-            <span className="text-xs font-medium">{label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" dir="rtl">
       {/* שעון פעילות צף */}
       <FloatingActivityClock 
         workStatus={workStatus}
@@ -1008,30 +717,7 @@ const BarberProfessionalApp = () => {
 
       {/* Main Content */}
       <div className="p-4 pb-20">
-        {activeView === 'dashboard' && <AdvancedDashboard />}
-        {activeView === 'appointments' && <AppointmentsView />}
-        {activeView === 'clients' && <AdvancedClientsView />}
-        {activeView === 'formula' && (
-          <div className="text-center py-12">
-            <Beaker className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">פורמולות חכמות</h3>
-            <p className="text-gray-600">שקילה דיגיטלית מתקדמת בפיתוח...</p>
-          </div>
-        )}
-        {activeView === 'inventory' && (
-          <div className="text-center py-12">
-            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">מלאי חכם</h3>
-            <p className="text-gray-600">ניהול מלאי עם AI בפיתוח...</p>
-          </div>
-        )}
-        {activeView === 'stats' && (
-          <div className="text-center py-12">
-            <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">דוחות מתקדמים</h3>
-            <p className="text-gray-600">אנליטיקה עסקית בפיתוח...</p>
-          </div>
-        )}
+        <AdvancedDashboard />
       </div>
 
       {/* Navigation */}
