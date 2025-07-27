@@ -289,7 +289,57 @@ const BarberProfessionalApp = ({ user }) => {
 
   // Load comprehensive professional data
   useEffect(() => {
-    if (user?.user_type === 'professional' || user?.user_type === 'barber') {
+    if (user) { // עבור כל המשתמשים, לא רק מקצועיים
+      const fetchData = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          
+          // טען נתוני לקוחות
+          const clientsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/clients`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (clientsResponse.ok) {
+            const clientsData = await clientsResponse.json();
+            setClients(clientsData.clients || []);
+          }
+
+          // טען נתוני פורמולות
+          const formulasResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/formulas`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (formulasResponse.ok) {
+            const formulasData = await formulasResponse.json();
+            setTreatments(formulasData.formulas || []);
+          }
+
+          // טען נתוני תורים
+          const appointmentsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/appointments`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (appointmentsResponse.ok) {
+            const appointmentsData = await appointmentsResponse.json();
+            setAppointments(appointmentsData.appointments || []);
+          }
+
+          // טען נתוני מלאי
+          const inventoryResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/professional/inventory`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (inventoryResponse.ok) {
+            const inventoryData = await inventoryResponse.json();
+            setInventory(inventoryData.inventory || []);
+          }
+          
+        } catch (error) {
+          console.error('Error loading professional data:', error);
+          // יצירת דמו דאטה בעיה בטעינה
+          createDemoData();
+        }
+      };
+
+      fetchData();
+    }
+  }, [user]);
       loadProfessionalData();
     }
   }, [user]);
