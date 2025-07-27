@@ -337,9 +337,9 @@ const BarberProfessionalApp = ({ user }) => {
         }
       };
 
-      fetchData();
-    }
-  }, [user]);
+  // Load comprehensive data for all users
+  useEffect(() => {
+    if (user) { // עבור כל המשתמשים
       loadProfessionalData();
     }
   }, [user]);
