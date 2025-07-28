@@ -5288,10 +5288,9 @@ async def get_professional_attendance_status(
 async def get_professional_goals(
     current_user: User = Depends(get_current_active_user)
 ):
-    """קבלת יעדים של המשתמש המקצועי"""
+    """קבלת יעדים עבור כל המשתמשים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכת היעדים
         
         # מציאת יעדים קיימים
         goals = goals_collection.find_one({"professional_id": current_user.id})
@@ -5333,7 +5332,7 @@ async def get_professional_goals(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error getting professional goals: {str(e)}")
+        logger.error(f"Error getting goals for user {current_user.id}: {str(e)}")
         raise HTTPException(status_code=500, detail="שגיאה בקבלת יעדים")
 
 # ===== EMAIL INTEGRATION FOR DOCUMENTS =====
