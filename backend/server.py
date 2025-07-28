@@ -2335,10 +2335,9 @@ async def create_client(
 async def get_professional_clients(
     current_user: User = Depends(get_current_active_user)
 ):
-    """קבלת כל הלקוחות של המשתמש המקצועי"""
+    """קבלת רשימת לקוחות עבור כל המשתמשים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכת הלקוחות
         
         clients = list(clients_collection.find({
             "professional_id": current_user.id,
