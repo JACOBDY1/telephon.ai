@@ -5139,12 +5139,10 @@ async def start_professional_attendance(
     attendance_data: dict,
     current_user: User = Depends(get_current_active_user)
 ):
-    """התחלת יום עבודה למשתמש מקצועי"""
+    """התחלת יום עבודה לכל המשתמשים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
-        
-        current_date = datetime.utcnow().date().isoformat()  # Convert to string
+        # הסרת הגבלה - כל המשתמשים יכולים להשתמש במערכת הנוכחות
+        current_date = datetime.utcnow().date().isoformat()
         start_time = datetime.utcnow()
         
         # בדיקה אם כבר יש רשומת נוכחות היום
