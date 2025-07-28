@@ -1260,6 +1260,43 @@ class APITester:
             self.log_result("Goals System All Users", False, f"Goals system test failed: {str(e)}")
             return False
     
+    def test_clients_system_all_users(self):
+        """Test clients system now works for all users (no user_type restrictions)"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Clients System All Users", False, "No auth tokens available")
+                return False
+            
+            # Test with demo user (regular user)
+            demo_token = self.auth_tokens.get("demo")
+            if not demo_token:
+                self.log_result("Clients System All Users", False, "No demo token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {demo_token}"}
+            
+            # Test GET /api/professional/clients (now available for all users)
+            response = self.session.get(f"{BACKEND_URL}/professional/clients", headers=headers)
+            if response.status_code == 200:
+                clients_data = response.json()
+                if isinstance(clients_data, list):
+                    self.log_result("Clients System - Demo User", True, 
+                                  f"Demo user can access clients system: {len(clients_data)} clients (no user_type restriction)")
+                    return True
+                else:
+                    self.log_result("Clients System - Demo User", False, f"Invalid clients response format: {type(clients_data)}")
+                    return False
+            elif response.status_code == 403:
+                self.log_result("Clients System - Demo User", False, "Demo user still restricted from clients system (user_type restriction not removed)")
+                return False
+            else:
+                self.log_result("Clients System - Demo User", False, f"Clients system failed for demo user: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Clients System All Users", False, f"Clients system test failed: {str(e)}")
+            return False
+    
     def test_professional_system_access_demo_user(self):
         """Test that demo user can access professional systems"""
         try:
