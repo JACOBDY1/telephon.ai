@@ -5239,12 +5239,10 @@ async def end_professional_attendance(
 async def get_professional_attendance_status(
     current_user: User = Depends(get_current_active_user)
 ):
-    """קבלת סטטוס נוכחות נוכחי"""
+    """קבלת סטטוס נוכחות נוכחי לכל המשתמשים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
-        
-        current_date = datetime.utcnow().date().isoformat()  # Convert to string
+        # הסרת הגבלה - כל המשתמשים יכולים לראות סטטוס נוכחות
+        current_date = datetime.utcnow().date().isoformat()
         
         # מציאת רשומת הנוכחות של היום
         attendance_record = attendance_collection.find_one({
