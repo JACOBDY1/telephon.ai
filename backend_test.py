@@ -1129,6 +1129,180 @@ class APITester:
         except Exception as e:
             self.log_result("Error Handling", False, f"Error handling test failed: {str(e)}")
     
+    # ===== REVIEW REQUEST FOCUSED TESTS - מערכת יעדים וטיפים לכל המשתמשים =====
+    
+    def test_demo_user_login(self):
+        """Test demo user login for review request"""
+        try:
+            login_data = {
+                "username": "demo",
+                "password": "demo123"
+            }
+            
+            response = self.session.post(
+                f"{BACKEND_URL}/auth/login", 
+                data=login_data,
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "access_token" in data and "user" in data:
+                    self.auth_tokens["demo"] = data["access_token"]
+                    user_info = data["user"]
+                    self.log_result("Demo User Login", True, 
+                                  f"Demo user logged in successfully with user_type: {user_info.get('user_type', 'client')}")
+                    return True
+                else:
+                    self.log_result("Demo User Login", False, "Missing token or user data in demo login response")
+                    return False
+            else:
+                self.log_result("Demo User Login", False, f"Demo login failed with status {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Demo User Login", False, f"Demo login test failed: {str(e)}")
+            return False
+    
+    def test_attendance_system_all_users(self):
+        """Test attendance system now works for all users (no user_type restrictions)"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Attendance System All Users", False, "No auth tokens available")
+                return False
+            
+            # Test with demo user (regular user)
+            demo_token = self.auth_tokens.get("demo")
+            if not demo_token:
+                self.log_result("Attendance System All Users", False, "No demo token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {demo_token}"}
+            
+            # Test POST /api/professional/attendance/start (now available for all users)
+            start_data = {
+                "start_time": datetime.now().strftime("%H:%M:%S"),
+                "location": "משרד ראשי",
+                "notes": "התחלת יום עבודה - משתמש רגיל"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/professional/attendance/start", json=start_data, headers=headers)
+            if response.status_code == 200:
+                self.log_result("Attendance Start - Demo User", True, "Demo user can start attendance (no user_type restriction)")
+                
+                # Test GET /api/professional/attendance/status
+                response = self.session.get(f"{BACKEND_URL}/professional/attendance/status", headers=headers)
+                if response.status_code == 200:
+                    status_data = response.json()
+                    self.log_result("Attendance Status - Demo User", True, f"Demo user can check status: {status_data.get('status', 'working')}")
+                    
+                    # Test POST /api/professional/attendance/end
+                    end_data = {
+                        "end_time": datetime.now().strftime("%H:%M:%S"),
+                        "notes": "סיום יום עבודה - משתמש רגיל"
+                    }
+                    
+                    response = self.session.post(f"{BACKEND_URL}/professional/attendance/end", json=end_data, headers=headers)
+                    if response.status_code == 200:
+                        self.log_result("Attendance End - Demo User", True, "Demo user can end attendance (no user_type restriction)")
+                        return True
+                    else:
+                        self.log_result("Attendance End - Demo User", False, f"Demo user cannot end attendance: {response.status_code}")
+                        return False
+                else:
+                    self.log_result("Attendance Status - Demo User", False, f"Demo user cannot check status: {response.status_code}")
+                    return False
+            else:
+                self.log_result("Attendance Start - Demo User", False, f"Demo user cannot start attendance: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Attendance System All Users", False, f"Attendance system test failed: {str(e)}")
+            return False
+    
+    def test_goals_system_all_users(self):
+        """Test goals system now works for all users (no user_type restrictions)"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Goals System All Users", False, "No auth tokens available")
+                return False
+            
+            # Test with demo user (regular user)
+            demo_token = self.auth_tokens.get("demo")
+            if not demo_token:
+                self.log_result("Goals System All Users", False, "No demo token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {demo_token}"}
+            
+            # Test GET /api/professional/goals (now available for all users)
+            response = self.session.get(f"{BACKEND_URL}/professional/goals", headers=headers)
+            if response.status_code == 200:
+                goals_data = response.json()
+                if isinstance(goals_data, list):
+                    self.log_result("Goals System - Demo User", True, 
+                                  f"Demo user can access goals system: {len(goals_data)} goals (no user_type restriction)")
+                    return True
+                else:
+                    self.log_result("Goals System - Demo User", False, f"Invalid goals response format: {type(goals_data)}")
+                    return False
+            elif response.status_code == 405:
+                self.log_result("Goals System - Demo User", False, "Goals GET endpoint not implemented (only POST exists)")
+                return False
+            elif response.status_code == 403:
+                self.log_result("Goals System - Demo User", False, "Demo user still restricted from goals system (user_type restriction not removed)")
+                return False
+            else:
+                self.log_result("Goals System - Demo User", False, f"Goals system failed for demo user: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Goals System All Users", False, f"Goals system test failed: {str(e)}")
+            return False
+    
+    def test_professional_system_access_demo_user(self):
+        """Test that demo user can access professional systems"""
+        try:
+            if not self.auth_tokens:
+                self.log_result("Professional System Access Demo User", False, "No auth tokens available")
+                return False
+            
+            demo_token = self.auth_tokens.get("demo")
+            if not demo_token:
+                self.log_result("Professional System Access Demo User", False, "No demo token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {demo_token}"}
+            success_count = 0
+            total_tests = 3
+            
+            # Test access to professional endpoints with demo user
+            professional_endpoints = [
+                ("/professional/clients", "Clients"),
+                ("/professional/formulas", "Formulas"),
+                ("/professional/inventory", "Inventory")
+            ]
+            
+            for endpoint, name in professional_endpoints:
+                response = self.session.get(f"{BACKEND_URL}{endpoint}", headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    self.log_result(f"Professional {name} - Demo User", True, 
+                                  f"Demo user can access {name.lower()}: {len(data) if isinstance(data, list) else 'data available'}")
+                    success_count += 1
+                elif response.status_code == 403:
+                    self.log_result(f"Professional {name} - Demo User", False, 
+                                  f"Demo user still restricted from {name.lower()} (user_type restriction not removed)")
+                else:
+                    self.log_result(f"Professional {name} - Demo User", False, 
+                                  f"Demo user cannot access {name.lower()}: {response.status_code}")
+            
+            return success_count >= 2  # At least 2 out of 3 should work
+            
+        except Exception as e:
+            self.log_result("Professional System Access Demo User", False, f"Professional system access test failed: {str(e)}")
+            return False
+
     # ===== HAIRPRO IL ADVANCED REVIEW REQUEST TESTS =====
     
     def test_professional_attendance_system(self):
