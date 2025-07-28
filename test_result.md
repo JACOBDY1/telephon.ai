@@ -393,11 +393,11 @@ frontend:
 
   - task: "Professional Goals GET Endpoint"
     implemented: true
-    working: true
+    working: false
     file: "backend/server.py"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
     status_history:
         - working: false
           agent: "testing"
@@ -405,6 +405,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "✅ WORKING: GET /api/professional/goals endpoint is actually implemented and working correctly! Returns goals data successfully. Previous test may have had authentication issues. Professional goals retrieval system fully functional."
+        - working: false
+          agent: "testing"
+          comment: "❌ REVIEW REQUEST ISSUE: Goals system still has user_type restrictions! Demo user (demo/demo123) gets 403 Forbidden when accessing GET /api/professional/goals. Review request specifically asks for goals system to work for ALL USERS without user_type restrictions. Need to remove user_type checks from goals endpoints."
 
 metadata:
   created_by: "testing_agent"
