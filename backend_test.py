@@ -3137,9 +3137,9 @@ def run_review_request_tests():
         tester.test_demo_user_login,
         
         # Review Request Focus Tests
-        tester.test_attendance_system_all_users,
         tester.test_goals_system_all_users,
-        tester.test_professional_system_access_demo_user,
+        tester.test_clients_system_all_users,
+        tester.test_attendance_system_all_users,
         
         # Quick verification of existing systems
         tester.test_professional_user_login,
