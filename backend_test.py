@@ -3082,9 +3082,66 @@ class APITester:
         
         return self.results
 
-if __name__ == "__main__":
+def run_review_request_tests():
+    """Run focused tests for review request - Quick 5-minute verification"""
     tester = APITester()
-    results = tester.run_all_tests()
+    
+    print("🚀 QUICK REVIEW VERIFICATION - מערכת יעדים וטיפים לכל המשתמשים")
+    print("=" * 80)
+    print("Testing attendance and goals system for all users (now without user_type restrictions)")
+    print()
+    
+    # Focused test sequence for review request
+    test_functions = [
+        # Core Health Check
+        tester.test_health_check,
+        
+        # Authentication - Focus on demo user
+        tester.test_demo_user_login,
+        
+        # Review Request Focus Tests
+        tester.test_attendance_system_all_users,
+        tester.test_goals_system_all_users,
+        tester.test_professional_system_access_demo_user,
+        
+        # Quick verification of existing systems
+        tester.test_professional_user_login,
+        tester.test_existing_professional_endpoints
+    ]
+    
+    # Run tests
+    passed_tests = 0
+    total_tests = len(test_functions)
+    
+    for i, test_func in enumerate(test_functions, 1):
+        print(f"\n[{i}/{total_tests}] Running {test_func.__name__}...")
+        try:
+            success = test_func()
+            if success:
+                passed_tests += 1
+        except Exception as e:
+            tester.log_result(test_func.__name__, False, f"Test crashed: {str(e)}")
+    
+    # Print summary
+    print(f"\n{'='*80}")
+    print(f"🎯 REVIEW REQUEST TEST SUMMARY")
+    print(f"{'='*80}")
+    print(f"✅ PASSED: {passed_tests}/{total_tests} tests ({(passed_tests/total_tests)*100:.1f}%)")
+    
+    failed_tests = [r for r in tester.results if not r["success"]]
+    if failed_tests:
+        print(f"❌ FAILED: {len(failed_tests)} tests")
+        print("\nFAILED TESTS:")
+        print("-" * 40)
+        for result in failed_tests:
+            print(f"  ❌ {result['test']}: {result['message']}")
+    else:
+        print("  🎉 All tests passed!")
+    
+    return tester.results
+
+if __name__ == "__main__":
+    results = run_review_request_tests()
     
     # Exit with error code if any tests failed
     failed_tests = [r for r in results if not r["success"]]
