@@ -409,6 +409,18 @@ frontend:
           agent: "testing"
           comment: "❌ REVIEW REQUEST ISSUE: Goals system still has user_type restrictions! Demo user (demo/demo123) gets 403 Forbidden when accessing GET /api/professional/goals. Review request specifically asks for goals system to work for ALL USERS without user_type restrictions. Need to remove user_type checks from goals endpoints."
 
+  - task: "Remove User Type Restrictions for All Professional Endpoints"
+    implemented: false
+    working: false
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL ISSUE: Review request asks for professional systems to work for ALL USERS without user_type restrictions, but demo user (demo/demo123) still gets 403 Forbidden errors for: GET /api/professional/goals, GET /api/professional/clients, GET /api/professional/formulas, GET /api/professional/inventory. Need to remove user_type='professional' checks from all professional endpoints to allow access for all authenticated users."
+
 metadata:
   created_by: "testing_agent"
   version: "1.2"
