@@ -419,13 +419,167 @@ const BarberProfessionalApp = ({ user }) => {
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-2xl">
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 <Package className="w-8 h-8" />
-                ניהול מלאי 📦
+                ניהול מלאי חכם 📦
               </h1>
-              <p className="text-indigo-100 mt-1">מערכת מלאי חכמה עם ניבוי AI</p>
+              <p className="text-indigo-100 mt-1">מערכת מלאי חכמה עם ניבוי AI - זמין לכל המשתמשים</p>
             </div>
             
+            {/* סטטיסטיקות מלאי */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Package className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">פריטים במלאי</div>
+                    <div className="text-xl font-bold">247</div>
+                    <div className="text-xs text-green-600">+12 השבוע</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-100 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">מלאי נמוך</div>
+                    <div className="text-xl font-bold">8</div>
+                    <div className="text-xs text-red-600">דורש הזמנה</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <DollarSign className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">ערך מלאי</div>
+                    <div className="text-xl font-bold">₪18,450</div>
+                    <div className="text-xs text-blue-600">עלויות נוכחיות</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">תחזית צריכה</div>
+                    <div className="text-xl font-bold">92%</div>
+                    <div className="text-xs text-yellow-600">דיוק ניבוי</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* רשימת מוצרים במלאי */}
             <div className="bg-white rounded-xl p-6 shadow-lg border">
-              <p className="text-gray-600 text-center">מערכת המלאי זמינה לכל המשתמשים</p>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <Package className="w-6 h-6 text-indigo-500" />
+                  מוצרים במלאי
+                </h3>
+                <button className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  הוסף מוצר
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {/* מוצר 1 */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
+                      <Droplets className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900">Schwarzkopf 7.0 - בלונד בינוני</div>
+                      <div className="text-sm text-gray-600">קוד: SCH-70-500</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-green-600">15 יחידות</div>
+                    <div className="text-sm text-gray-600">₪85 ליחידה</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">במלאי</span>
+                    <Edit className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                  </div>
+                </div>
+
+                {/* מוצר 2 - מלאי נמוך */}
+                <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-red-400 to-pink-500 rounded-lg flex items-center justify-center">
+                      <Droplets className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900">L'Oreal 6.66 - בלונד כהה אדום</div>
+                      <div className="text-sm text-gray-600">קוד: LOR-666-500</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-red-600">2 יחידות</div>
+                    <div className="text-sm text-gray-600">₪90 ליחידה</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">מלאי נמוך</span>
+                    <AlertCircle className="w-4 h-4 text-red-500" />
+                    <Edit className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                  </div>
+                </div>
+
+                {/* מוצר 3 */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center">
+                      <Droplets className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900">Indola 9.2 - בלונד עמוק כסף</div>
+                      <div className="text-sm text-gray-600">קוד: IND-92-500</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-green-600">8 יחידות</div>
+                    <div className="text-sm text-gray-600">₪92 ליחידה</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">במלאי</span>
+                    <Edit className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* כלים לניהול מלאי */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <button className="bg-white p-4 rounded-lg shadow border hover:shadow-lg transition-shadow">
+                <Search className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">חיפוש מוצר</div>
+              </button>
+              
+              <button className="bg-white p-4 rounded-lg shadow border hover:shadow-lg transition-shadow">
+                <Plus className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">הוסף מוצר</div>
+              </button>
+              
+              <button className="bg-white p-4 rounded-lg shadow border hover:shadow-lg transition-shadow">
+                <AlertCircle className="w-6 h-6 text-red-500 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">מלאי נמוך</div>
+              </button>
+              
+              <button className="bg-white p-4 rounded-lg shadow border hover:shadow-lg transition-shadow">
+                <BarChart3 className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">דוחות מלאי</div>
+              </button>
             </div>
           </div>
         )}
