@@ -271,11 +271,129 @@ const BarberProfessionalApp = ({ user }) => {
                 <Palette className="w-8 h-8" />
                 מאגר צבעים מקצועי 🎨
               </h1>
-              <p className="text-purple-100 mt-1">127 צבעים מ-3 מותגים מקצועיים</p>
+              <p className="text-purple-100 mt-1">127 צבעים מ-3 מותגים מקצועיים - זמין לכל המשתמשים</p>
             </div>
             
+            {/* מאגר צבעים מקצועי */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Schwarzkopf */}
+              <div className="bg-white rounded-xl p-6 shadow-lg border">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-black rounded-full"></div>
+                  Schwarzkopf Professional
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-amber-800 rounded-full"></div>
+                      <span className="font-medium">7.0 בלונד בינוני</span>
+                    </div>
+                    <span className="text-green-600 font-bold">₪85</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-red-600 rounded-full"></div>
+                      <span className="font-medium">6.66 בלונד כהה אדום</span>
+                    </div>
+                    <span className="text-green-600 font-bold">₪90</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-amber-600 rounded-full"></div>
+                      <span className="font-medium">8.3 בלונד בהיר זהב</span>
+                    </div>
+                    <span className="text-green-600 font-bold">₪88</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* L'Oreal Professional */}
+              <div className="bg-white rounded-xl p-6 shadow-lg border">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-orange-500 rounded-full"></div>
+                  L'Oreal Professional
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-purple-700 rounded-full"></div>
+                      <span className="font-medium">5.35 חום בהיר זהב</span>
+                    </div>
+                    <span className="text-green-600 font-bold">₪82</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-red-800 rounded-full"></div>
+                      <span className="font-medium">4.56 חום בינוני אדום</span>
+                    </div>
+                    <span className="text-green-600 font-bold">₪86</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-black rounded-full"></div>
+                      <span className="font-medium">2.0 שחור טבעי</span>
+                    </div>
+                    <span className="text-green-600 font-bold">₪78</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Indola */}
+              <div className="bg-white rounded-xl p-6 shadow-lg border">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-600 rounded-full"></div>
+                  Indola Professional
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-blue-400 rounded-full"></div>
+                      <span className="font-medium">9.2 בלונד עמוק כסף</span>
+                    </div>
+                    <span className="text-green-600 font-bold">₪92</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-pink-500 rounded-full"></div>
+                      <span className="font-medium">7.23 בלונד בינוני בז'</span>
+                    </div>
+                    <span className="text-green-600 font-bold">₪87</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-violet-600 rounded-full"></div>
+                      <span className="font-medium">6.77 בלונד כהה סגול</span>
+                    </div>
+                    <span className="text-green-600 font-bold">₪89</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* כלים נוספים */}
             <div className="bg-white rounded-xl p-6 shadow-lg border">
-              <p className="text-gray-600 text-center">מאגר הצבעים המקצועי זמין לכל המשתמשים</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">כלים מקצועיים</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button className="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                  <Search className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                  <div className="text-sm font-medium text-gray-900">חיפוש צבע</div>
+                </button>
+                
+                <button className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                  <Plus className="w-6 h-6 text-green-600 mx-auto mb-2" />
+                  <div className="text-sm font-medium text-gray-900">הוסף צבע</div>
+                </button>
+                
+                <button className="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                  <Palette className="w-6 h-6 text-purple-600 mx-auto mb-2" />
+                  <div className="text-sm font-medium text-gray-900">מיקס צבעים</div>
+                </button>
+                
+                <button className="p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+                  <BarChart3 className="w-6 h-6 text-orange-600 mx-auto mb-2" />
+                  <div className="text-sm font-medium text-gray-900">ניתוח שימוש</div>
+                </button>
+              </div>
             </div>
           </div>
         )}
