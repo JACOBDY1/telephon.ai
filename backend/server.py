@@ -2314,8 +2314,7 @@ async def create_client(
 ):
     """יצירת לקוח חדש"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         client_data.professional_id = current_user.id
         client_dict = client_data.dict()
@@ -2362,8 +2361,7 @@ async def get_client_details(
 ):
     """קבלת פרטי לקוח מפורטים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         # קבלת פרטי לקוח
         client = clients_collection.find_one({
@@ -2418,8 +2416,7 @@ async def update_client(
 ):
     """עדכון פרטי לקוח"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         client_updates["updated_at"] = datetime.utcnow()
         
@@ -2448,8 +2445,7 @@ async def create_treatment_record(
 ):
     """יצירת רשומת טיפול"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         treatment_data.professional_id = current_user.id
         treatment_dict = treatment_data.dict()
@@ -2483,8 +2479,7 @@ async def get_treatments(
 ):
     """קבלת רשומות טיפולים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         query = {"professional_id": current_user.id}
         if client_id:
@@ -2514,8 +2509,7 @@ async def create_appointment(
 ):
     """יצירת תור חדש"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         appointment_data.professional_id = current_user.id
         appointment_dict = appointment_data.dict()
@@ -2540,8 +2534,7 @@ async def get_appointments(
 ):
     """קבלת תורים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         query = {"professional_id": current_user.id}
         
@@ -2579,8 +2572,7 @@ async def set_schedule(
 ):
     """הגדרת לוח זמנים יומי"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         schedule_data.professional_id = current_user.id
         schedule_dict = schedule_data.dict()
@@ -2608,8 +2600,7 @@ async def get_schedule(
 ):
     """קבלת לוח זמנים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         query = {"professional_id": current_user.id}
         
@@ -2643,8 +2634,7 @@ async def set_goals(
 ):
     """הגדרת יעדים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         goals_data.professional_id = current_user.id
         goals_dict = goals_data.dict()
@@ -2667,8 +2657,7 @@ async def get_professional_analytics(
 ):
     """קבלת אנליטיקה מקצועית"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         # חישוב תקופת זמן
         now = datetime.utcnow()
@@ -2741,8 +2730,7 @@ async def add_product_to_inventory(
 ):
     """הוספת מוצר למלאי"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         product_data.professional_id = current_user.id
         product_dict = product_data.dict()
@@ -2766,8 +2754,7 @@ async def get_inventory(
 ):
     """קבלת מלאי"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         query = {"professional_id": current_user.id}
         
@@ -2798,8 +2785,7 @@ async def update_product_stock(
 ):
     """עדכון מלאי מוצר"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         update_data = {
             "current_stock": stock_data.get("new_stock", 0),
@@ -2841,8 +2827,7 @@ async def log_communication(
 ):
     """תיעוד תקשורת עם לקוח"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         comm_data.professional_id = current_user.id
         comm_dict = comm_data.dict()
@@ -2865,8 +2850,7 @@ async def get_client_communications(
 ):
     """קבלת היסטוריית תקשורת עם לקוח"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         communications = list(communications_collection.find({
             "client_id": client_id,
@@ -2892,8 +2876,7 @@ async def get_professional_dashboard(
 ):
     """קבלת נתוני דשבורד מקיפים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
         tomorrow = today + timedelta(days=1)
@@ -2983,8 +2966,7 @@ async def populate_professional_demo_data(
 ):
     """יצירת נתוני דמו מקיפים למערכת מקצועית"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         professional_id = current_user.id
         
@@ -3321,8 +3303,7 @@ async def create_color_formula(
 ):
     """יצירת פורמולת צבע עם חישובי עלות מדויקים"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         formula_data.professional_id = current_user.id
         
@@ -3375,8 +3356,7 @@ async def get_formulas(
 ):
     """קבלת פורמולות צבע עם סינון"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         query = {"professional_id": current_user.id}
         
@@ -3413,8 +3393,7 @@ async def get_formula_cost_analysis(
 ):
     """ניתוח עלויות מפורט לפורמולה"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         formula = formulas_collection.find_one({
             "id": formula_id,
@@ -3467,8 +3446,7 @@ async def connect_bluetooth_scale(
 ):
     """חיבור למשקל בלוטות'"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         connection_result = scale_manager.connect_scale()
         return connection_result
@@ -3486,8 +3464,7 @@ async def get_scale_reading(
 ):
     """קריאת משקל נוכחי"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         current_weight = scale_manager.get_weight_reading()
         
@@ -3527,8 +3504,7 @@ async def validate_measurement(
 ):
     """אימות מדידה מול משקל מתוכנן"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         validation = scale_manager.validate_measurement(expected_weight, actual_weight)
         return validation
@@ -3546,8 +3522,7 @@ async def create_chemistry_card(
 ):
     """יצירת כרטיס כימיה ללקוח"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         card_data.professional_id = current_user.id
         card_dict = card_data.dict()
@@ -3570,8 +3545,7 @@ async def get_client_chemistry_card(
 ):
     """קבלת כרטיס כימיה של לקוח"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         card = chemistry_cards_collection.find_one({
             "client_id": client_id,
@@ -3598,8 +3572,7 @@ async def get_smart_inventory_analysis(
 ):
     """ניתוח מלאי חכם עם המלצות"""
     try:
-        if current_user.user_type not in ["professional", "barber", "therapist"]:
-            raise HTTPException(status_code=403, detail="גישה מוגבלת למשתמשים מקצועיים בלבד")
+        # הסרת הגבלה - כל המשתמשים יכולים לגשת למערכות המקצועיות
         
         inventory_items = list(inventory_collection.find({
             "professional_id": current_user.id
