@@ -403,13 +403,178 @@ const BarberProfessionalApp = ({ user }) => {
             <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-6 rounded-2xl">
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 <Users className="w-8 h-8" />
-                ניהול לקוחות 👥
+                ניהול לקוחות מתקדם 👥
               </h1>
-              <p className="text-blue-100 mt-1">מערכת CRM מתקדמת לניהול לקוחות</p>
+              <p className="text-blue-100 mt-1">מערכת CRM מתקדמת לניהול לקוחות - זמין לכל המשתמשים</p>
             </div>
             
+            {/* סטטיסטיקות לקוחות */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Users className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">סה"כ לקוחות</div>
+                    <div className="text-xl font-bold">342</div>
+                    <div className="text-xs text-blue-600">+23 השבוע</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">לקוחות פעילים</div>
+                    <div className="text-xl font-bold">89</div>
+                    <div className="text-xs text-green-600">השبוע</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <Star className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">לקוחות VIP</div>
+                    <div className="text-xl font-bold">12</div>
+                    <div className="text-xs text-yellow-600">מעל 10 טיפולים</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Calendar className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">תורים השבוע</div>
+                    <div className="text-xl font-bold">45</div>
+                    <div className="text-xs text-purple-600">מתוכננים</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* רשימת לקוחות */}
             <div className="bg-white rounded-xl p-6 shadow-lg border">
-              <p className="text-gray-600 text-center">מערכת ניהול הלקוחות זמינה לכל המשתמשים</p>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <Users className="w-6 h-6 text-blue-500" />
+                  רשימת לקוחות
+                </h3>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  לקוח חדש
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {/* לקוח 1 - VIP */}
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border border-yellow-200">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        שרה כהן
+                        <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">VIP</span>
+                      </div>
+                      <div className="text-sm text-gray-600">050-123-4567 | sara@email.com</div>
+                      <div className="text-xs text-gray-500">טיפול אחרון: לפני 3 ימים</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-yellow-600">15 טיפולים</div>
+                    <div className="text-sm text-gray-600">לקוחה מ-2022</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-green-500 cursor-pointer hover:text-green-600" />
+                    <Mail className="w-4 h-4 text-blue-500 cursor-pointer hover:text-blue-600" />
+                    <Edit className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                  </div>
+                </div>
+
+                {/* לקוח 2 - רגיל */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900">רחל אברהם</div>
+                      <div className="text-sm text-gray-600">052-987-6543 | rachel@email.com</div>
+                      <div className="text-xs text-gray-500">טיפול אחרון: לפני שבוע</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-blue-600">6 טיפולים</div>
+                    <div className="text-sm text-gray-600">לקוחה מ-2023</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-green-500 cursor-pointer hover:text-green-600" />
+                    <Mail className="w-4 h-4 text-blue-500 cursor-pointer hover:text-blue-600" />
+                    <Edit className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                  </div>
+                </div>
+
+                {/* לקוח 3 - חדש */}
+                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        מיכל לוי
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">חדש</span>
+                      </div>
+                      <div className="text-sm text-gray-600">054-555-7777 | michal@email.com</div>
+                      <div className="text-xs text-gray-500">נרשמה היום</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-green-600">טיפול ראשון</div>
+                    <div className="text-sm text-gray-600">מחר בשעה 14:00</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-green-500 cursor-pointer hover:text-green-600" />
+                    <Mail className="w-4 h-4 text-blue-500 cursor-pointer hover:text-blue-600" />
+                    <Edit className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* כלים לניהול לקוחות */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <button className="bg-white p-4 rounded-lg shadow border hover:shadow-lg transition-shadow">
+                <Search className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">חיפוש לקוח</div>
+              </button>
+              
+              <button className="bg-white p-4 rounded-lg shadow border hover:shadow-lg transition-shadow">
+                <Plus className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">לקוח חדש</div>
+              </button>
+              
+              <button className="bg-white p-4 rounded-lg shadow border hover:shadow-lg transition-shadow">
+                <Star className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">לקוחות VIP</div>
+              </button>
+              
+              <button className="bg-white p-4 rounded-lg shadow border hover:shadow-lg transition-shadow">
+                <BarChart3 className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">דוח לקוחות</div>
+              </button>
             </div>
           </div>
         )}
