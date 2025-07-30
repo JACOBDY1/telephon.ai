@@ -312,7 +312,7 @@ const BarberProfessionalApp = ({ user }) => {
               <p className="text-blue-100 mt-1">ניהול מתקדם של פורמולות צבע עם חישובי עלויות בזמן אמת</p>
             </div>
             
-            <AdvancedFormulaManager user={user} />
+            <AdvancedFormulaManager user={user} colorDatabase={colorDatabase} />
           </div>
         )}
 
