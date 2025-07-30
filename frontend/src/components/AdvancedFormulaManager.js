@@ -399,9 +399,9 @@ const AdvancedFormulaManager = ({ user, colorDatabase }) => {
           <div className="mb-6">
             <h4 className="text-sm font-medium text-gray-700 mb-2">הוסף צבע:</h4>
             <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-              {Object.entries(colorDatabase).map(([brandKey, brand]) =>
-                Object.entries(brand.series).map(([seriesKey, series]) =>
-                  series.colors.slice(0, 6).map(color => (
+              {colorDatabase && Object.entries(colorDatabase).map(([brandKey, brand]) =>
+                brand.series && Object.entries(brand.series).map(([seriesKey, series]) =>
+                  series.colors && series.colors.slice(0, 6).map(color => (
                     <button
                       key={`${brandKey}-${color.code}`}
                       onClick={() => addColorToFormula(brandKey, color.code)}
@@ -409,12 +409,17 @@ const AdvancedFormulaManager = ({ user, colorDatabase }) => {
                     >
                       <div
                         className="w-4 h-4 rounded-full border"
-                        style={{ backgroundColor: color.hex }}
+                        style={{ backgroundColor: color.hex || '#ccc' }}
                       />
                       <span>{color.code}</span>
                     </button>
                   ))
                 )
+              )}
+              {!colorDatabase && (
+                <div className="col-span-2 text-center text-gray-500 py-4">
+                  מאגר צבעים טוען...
+                </div>
               )}
             </div>
           </div>
