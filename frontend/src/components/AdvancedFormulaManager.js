@@ -132,12 +132,14 @@ const AdvancedFormulaManager = ({ user, colorDatabase }) => {
   };
 
   const findColorInDatabase = (brand, code) => {
-    if (!colorDatabase[brand]) return null;
+    if (!colorDatabase || !colorDatabase[brand]) return null;
     
     for (const seriesKey in colorDatabase[brand].series) {
       const series = colorDatabase[brand].series[seriesKey];
-      const color = series.colors.find(c => c.code === code);
-      if (color) return color;
+      if (series && series.colors) {
+        const color = series.colors.find(c => c.code === code);
+        if (color) return color;
+      }
     }
     return null;
   };
