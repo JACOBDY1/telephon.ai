@@ -53,7 +53,13 @@ const Dashboard = ({
           <div className="text-center text-white">
             <h2 className="text-4xl font-bold mb-4">פלטפורמת טלפוניה חכמה</h2>
             <p className="text-xl mb-6">תמלולים, ניתוח רגשות ותובנות מתקדמות</p>
-            <div className="flex justify-center space-x-4">
+            <div className="flex justify-center space-x-4 rtl:space-x-reverse">
+              <button 
+                onClick={() => setActiveTab('hairpro')}
+                className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-blue-700 transition-all shadow-lg"
+              >
+                🚀 HairPro IL Advanced
+              </button>
               <button className="bg-white text-blue-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                 התחל עכשיו
               </button>
