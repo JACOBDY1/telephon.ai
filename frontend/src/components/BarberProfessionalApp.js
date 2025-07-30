@@ -8,7 +8,7 @@ import {
 
 import AdvancedFormulaManager from './AdvancedFormulaManager';
 
-const BarberProfessionalApp = ({ user }) => {
+const BarberProfessionalApp = ({ user, darkMode = false, t = {} }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [workStatus, setWorkStatus] = useState('ready');
   const [currentClient, setCurrentClient] = useState(null);
