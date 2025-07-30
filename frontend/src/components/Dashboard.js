@@ -10,7 +10,8 @@ const Dashboard = ({
   connectionStatus = { checkcall: true, masterpbx: true }, 
   loadRealData = () => {}, 
   darkMode = false, 
-  t = { dashboard: 'דשבורד' }
+  t = { dashboard: 'דשבורד' },
+  setActiveTab = () => {}
 }) => {
   const getStatusIcon = (status) => {
     switch (status) {
