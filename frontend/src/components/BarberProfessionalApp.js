@@ -55,6 +55,58 @@ const BarberProfessionalApp = ({ user }) => {
     isActive: false
   });
 
+  // מאגר צבעים מתקדם
+  const colorDatabase = {
+    schwarzkopf: {
+      name: "Schwarzkopf Professional",
+      series: {
+        igora: {
+          name: "Igora Royal",
+          colors: [
+            { code: "7.0", name: "בלונד בינוני", hex: "#B8860B", price: 85 },
+            { code: "6.66", name: "בלונד כהה אדום", hex: "#B22222", price: 90 },
+            { code: "5.1", name: "חום בהיר אפור", hex: "#8B7355", price: 85 },
+            { code: "4.0", name: "חום בינוני", hex: "#654321", price: 85 },
+            { code: "3.0", name: "חום כהה", hex: "#4A4A4A", price: 85 },
+            { code: "2.0", name: "חום כהה מאוד", hex: "#333333", price: 85 }
+          ]
+        }
+      }
+    },
+    wella: {
+      name: "Wella Professionals",
+      series: {
+        koleston: {
+          name: "Koleston Perfect",
+          colors: [
+            { code: "8.0", name: "בלונד בהיר", hex: "#DAA520", price: 88 },
+            { code: "7.44", name: "בלונד בינוני נחושת", hex: "#CD853F", price: 92 },
+            { code: "6.3", name: "בלונד כהה זהב", hex: "#B8860B", price: 88 },
+            { code: "5.4", name: "חום בהיר אדום", hex: "#A0522D", price: 88 },
+            { code: "4.77", name: "חום בינוני חום", hex: "#8B4513", price: 88 },
+            { code: "3.4", name: "חום כהה אדום", hex: "#800000", price: 88 }
+          ]
+        }
+      }
+    },
+    loreal: {
+      name: "L'Oréal Professionnel",
+      series: {
+        majirel: {
+          name: "Majirel",
+          colors: [
+            { code: "9.0", name: "בלונד בהיר מאוד", hex: "#F0E68C", price: 82 },
+            { code: "8.31", name: "בלונד בהיר זהב", hex: "#DAA520", price: 86 },
+            { code: "7.1", name: "בלונד בינוני אפור", hex: "#BC9A6A", price: 82 },
+            { code: "6.35", name: "בלונד כהה זהב", hex: "#B8860B", price: 82 },
+            { code: "5.3", name: "חום בהיר זהב", hex: "#CD853F", price: 82 },
+            { code: "4.45", name: "חום בינוני נחושת", hex: "#A0522D", price: 82 }
+          ]
+        }
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50" dir="rtl">
       <div className="sticky top-0 bg-white shadow-sm border-b px-4 py-3 z-30">
